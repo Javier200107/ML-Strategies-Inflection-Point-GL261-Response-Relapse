@@ -1,15 +1,14 @@
 import tensorflow as tf
-import numpy as np
 import os
 import random
+import config
 
 # Path to data
-SRC = 'dataset/'
-print('SRC:', SRC)
+
 
 # Definir las proporciones de train y validation
-train_ratio = 0.7
-val_ratio = 0.3
+train_ratio = 1
+val_ratio = 0
 
 def _bytes_feature(value):
     """Returns a bytes_list from a string / byte."""
@@ -34,17 +33,17 @@ def serialize_example(image_path, mask_path):
 
     # Extraer las partes relevantes
     # 0 for Cured Mice, 1 for Control Mice, 2 for Relapse Mice
-    if path_parts[1] == 'Cured mice':
+    if path_parts[2] == 'Cured mice':
         group_name = 0
-    elif path_parts[1] == 'Control':
+    elif path_parts[2] == 'Control':
         group_name = 1
-    elif path_parts[1] == 'IMS-TMS-TREATED-RELAPSING':
-        group_name = 2
+    elif path_parts[2] == 'IMS-TMS-TREATED-RELAPSING':
+        group_name = 1
     else:
         print(path_parts)
         raise ValueError('Invalid group')
-    mouse_id = path_parts[2]       # 'C1281'
-    day_of_study = path_parts[3]   # 'day10'
+    mouse_id = path_parts[3]       # 'C1281'
+    day_of_study = path_parts[4]   # 'day10'
 
     # Get only the integers in ids
     mouse_id = mouse_id[1:]
@@ -111,11 +110,11 @@ def split_dataset(root_dir, train_ratio):
 
 if __name__ == '__main__':
     # Dividir el dataset en 70% train y 30% validation
-    train_data, val_data = split_dataset(SRC, train_ratio)
+    train_data, val_data = split_dataset(config.DATASET_DIR, train_ratio)
 
     # Crear TFRecords para entrenamiento y validación
-    create_tfrecord(train_data, 'train.tfrecords')
-    create_tfrecord(val_data, 'val.tfrecords')
+    create_tfrecord(train_data, 'full_ds.tfrecord')
+    #create_tfrecord(val_data, 'val.tfrecords')
 
     print(f"Train set: {len(train_data)} samples")
     print(f"Validation set: {len(val_data)} samples")
