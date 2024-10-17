@@ -10,6 +10,9 @@ FEATURES_FILE_PATH = os.path.join(FEATURES_DIR, "radiomics_features.csv")
 # Dataset-related paths
 DATASET_DIR = os.path.join(BASE_INPUT_DIR, "dataset")
 
+# TFrecord-related paths
+TFRECORD_DIR = os.path.join(BASE_INPUT_DIR, "full_ds.tfrecord")
+
 RADIOMICS_FEATURES = {
     "group_name", "day_of_study", "10Percentile", "90Percentile",
     "Energy", "Entropy", "InterquartileRange", "Kurtosis", "Maximum",
