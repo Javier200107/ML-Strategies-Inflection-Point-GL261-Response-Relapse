@@ -12,7 +12,7 @@ class Processing:
     """
 
     def __init__(self, 
-                 source_path=config.FEATURES_FILE_PATH,
+                 source_path=config.ORIG_FEATURES_FILE_PATH,
                  df=None):
         
         self.source_path = source_path

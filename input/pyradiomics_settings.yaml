@@ -1,0 +1,24 @@
+imageType:
+  Original: {}  # Use original image
+  LoG:  # Apply Laplacian of Gaussian filter with multiple sigma values
+    sigma: [1, 3, 5]
+  Wavelet: {}  # Apply Wavelet filter
+  Square: {}  # Apply Square filter
+  SquareRoot: {}  # Apply Square Root filter
+  Logarithm: {}  # Apply Logarithm filter
+  Exponential: {}  # Apply Exponential filter
+
+featureClass:
+  firstorder: {}  # Extract first-order statistics
+  shape2D: {}  # Extract shape-based 2D features (no 3D features)
+  glcm: {}  # Extract Gray Level Co-occurrence Matrix features
+  glrlm: {}  # Extract Gray Level Run Length Matrix features
+  glszm: {}  # Extract Gray Level Size Zone Matrix features
+  ngtdm: {}  # Extract Neighboring Gray Tone Difference Matrix features
+  gldm: {}  # Extract Gray Level Dependence Matrix features
+
+setting:
+  force2D: true  # Ensure only 2D features are extracted
+  binWidth: 25  # Bin width for image discretization
+  interpolator: 'sitkBSpline'  # Interpolation method for resampling
+  resampledPixelSpacing: null  # No resampling unless specified
