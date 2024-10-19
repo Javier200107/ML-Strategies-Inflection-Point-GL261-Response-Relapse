@@ -5,13 +5,18 @@ BASE_INPUT_DIR = "input"
 
 # Feature-related paths
 FEATURES_DIR = os.path.join(BASE_INPUT_DIR, "features")
-FEATURES_FILE_PATH = os.path.join(FEATURES_DIR, "radiomics_features.csv")
+ORIG_FEATURES_FILE_PATH = os.path.join(FEATURES_DIR, "radiomics_features.csv")
+ALL_FEATURES_FILE_PATH = os.path.join(FEATURES_DIR, "features_pyradiomics.csv")
+OLD_FEATURES_FILE_PATH = os.path.join(FEATURES_DIR, "radiomics_features_old.csv")
 
 # Dataset-related paths
 DATASET_DIR = os.path.join(BASE_INPUT_DIR, "dataset")
 
 # TFrecord-related paths
 TFRECORD_DIR = os.path.join(BASE_INPUT_DIR, "full_ds.tfrecord")
+
+# PyRadiomics-related paths
+PYRADIOMICS_PARAMS_FILE = os.path.join(BASE_INPUT_DIR, "pyradiomics_settings.yaml")
 
 RADIOMICS_FEATURES = {
     "group_name", "day_of_study", "10Percentile", "90Percentile",
