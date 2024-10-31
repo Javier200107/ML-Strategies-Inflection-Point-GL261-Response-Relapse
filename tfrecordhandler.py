@@ -38,7 +38,7 @@ class TFRecordDataHandler:
         # Redimensionar la máscara a un tamaño uniforme (por ejemplo, 256x256)
         mask = tf.image.resize(mask, [256, 256])
 
-        self._normalize(image, mask)
+        image, mask = self._normalize(image, mask)
         
         return image, mask, parsed_features['group_name'], parsed_features['mouse_id'], parsed_features['day_of_study']
 

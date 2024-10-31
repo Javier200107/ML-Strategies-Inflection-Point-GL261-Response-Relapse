@@ -32,13 +32,13 @@ def serialize_example(image_path, mask_path):
     path_parts = path.split(os.sep)
 
     # Extraer las partes relevantes
-    # 0 for Cured Mice, 1 for Control Mice, 2 for Relapse Mice
+    # 0 for Cured Mice, 1 for Relapsing Mice, 2 for Control Mice
     if path_parts[2] == 'Cured mice':
         group_name = 0
-    elif path_parts[2] == 'Control':
-        group_name = 1
     elif path_parts[2] == 'IMS-TMS-TREATED-RELAPSING':
         group_name = 1
+    elif path_parts[2] == 'Control':
+        group_name = 2
     else:
         print(path_parts)
         raise ValueError('Invalid group')
@@ -113,7 +113,7 @@ if __name__ == '__main__':
     train_data, val_data = split_dataset(config.DATASET_DIR, train_ratio)
 
     # Crear TFRecords para entrenamiento y validación
-    create_tfrecord(train_data, 'full_ds.tfrecord')
+    create_tfrecord(train_data, 'full_ds_with_all_mice_groups.tfrecord')
     #create_tfrecord(val_data, 'val.tfrecords')
 
     print(f"Train set: {len(train_data)} samples")

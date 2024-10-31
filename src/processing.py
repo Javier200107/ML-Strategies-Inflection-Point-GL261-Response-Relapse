@@ -58,7 +58,7 @@ class Processing:
         if remove_mice_id:
             # Drop mice id from the dataset
             prep_df.drop(columns=["m_id"], inplace=True)
-
+        
         columns = prep_df.columns[start_col:] 
 
         # Ensure the values are Real numbers
@@ -72,6 +72,26 @@ class Processing:
 
         self.df = prep_df
         return prep_df
+    
+    def drop_late_days(self, days):
+        '''
+        Drop the rows with day_of_study greater than the specified days
+
+        Args:
+            days: Maximum day_of_study to keep in the dataset
+        '''
+        self.df = self.df[self.df["day_of_study"] <= days]
+        return self.df
+    
+    def drop_mice_group(self, m_group):
+        '''
+        Drop the rows with the specified mice group
+
+        Args:
+            m_group: Mice group to drop from the dataset
+        '''
+        self.df = self.df[self.df["group_name"] != m_group]
+        return self.df
     
     @staticmethod
     def check_features_in_df(df, cols):
@@ -89,19 +109,19 @@ class Processing:
     
 
 if __name__ == "__main__":
-     import numpy as np
+    import numpy as np
 
-     dataclass = Processing(source_path=config.FEATURES_PATH)
-     df = dataclass.read()
-     df = df.iloc[:, 1:]
-     print(df.head())
+    dataclass = Processing()
+    df = dataclass.read()
+    df = df.iloc[:, 1:]
+    print(df.head())
 
-     print(df.loc[0, "10Percentile"])
-     df.loc[0, "10Percentile"] = np.nan
-     print(df.loc[0, "10Percentile"])
-     df = dataclass.preprocess()
-     print(df.loc[0, "10Percentile"])
+    print(df.loc[0, "10Percentile"])
+    df.loc[0, "10Percentile"] = np.nan
+    print(df.loc[0, "10Percentile"])
+    df = dataclass.preprocess()
+    print(df.loc[0, "10Percentile"])
 
-     print(df["90Percentile"].mean(), df["10Percentile"].mean())
+    print(df["90Percentile"].mean(), df["10Percentile"].mean())
 
-     print(df.head())
+    print(df.head())

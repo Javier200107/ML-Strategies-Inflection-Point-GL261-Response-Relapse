@@ -97,7 +97,7 @@ class FeatureExtractorRadiomics:
             raise ValueError(f"Filter type '{filter_type}' is not supported.")
 
     # Function to extract all radiomic features (without 3D features)
-    def extract_all_radiomic_features(self):
+    def extract_all_radiomic_features(self, apply_filters=False):
         # Extract and combine features from the original image
         feature_dicts = []
         feature_dicts.append(self.extract_first_order_features())
@@ -108,11 +108,12 @@ class FeatureExtractorRadiomics:
         feature_dicts.append(self.extract_ngtdm_features())
         feature_dicts.append(self.extract_gldm_features())
 
-        # Apply filters and extract features from filtered images
-        filters = ['wavelet', 'logarithm', 'square', 'squareroot', 'exponential', 'gradient', 'lbp2D']
-        for filter_type in filters:
-            filtered_features = self.extract_filtered_features(filter_type)
-            feature_dicts.append(filtered_features)
+        if apply_filters:
+            # Apply filters and extract features from filtered images
+            filters = ['wavelet', 'logarithm', 'square', 'squareroot', 'exponential', 'gradient', 'lbp2D']
+            for filter_type in filters:
+                filtered_features = self.extract_filtered_features(filter_type)
+                feature_dicts.append(filtered_features)
 
         # Combine all feature dictionaries into a single one
         combined_features = {}

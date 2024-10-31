@@ -6,8 +6,10 @@ BASE_INPUT_DIR = "input"
 # Feature-related paths
 FEATURES_DIR = os.path.join(BASE_INPUT_DIR, "features")
 ORIG_FEATURES_FILE_PATH = os.path.join(FEATURES_DIR, "radiomics_features.csv")
-ALL_FEATURES_FILE_PATH = os.path.join(FEATURES_DIR, "features_pyradiomics.csv")
+ALL_FEATURES_FILE_PATH = os.path.join(FEATURES_DIR, "radiomics_features_all.csv")
+ALL_FEATURES_FILE_PATH_3_GROUPS = os.path.join(FEATURES_DIR, "radiomics_features_all_3_groups.csv")
 OLD_FEATURES_FILE_PATH = os.path.join(FEATURES_DIR, "radiomics_features_old.csv")
+RADIOMICS_FEATURES_3_GROUPS = os.path.join(FEATURES_DIR, "radiomics_features_no_filters_3_groups.csv")
 
 # Dataset-related paths
 DATASET_DIR = os.path.join(BASE_INPUT_DIR, "dataset")
