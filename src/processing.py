@@ -12,11 +12,13 @@ class Processing:
     """
 
     def __init__(self, 
-                 source_path=config.ORIG_FEATURES_FILE_PATH,
-                 df=None):
+                 source_path=config.RADIOMICS_FINAL_FEATURES_NO_FILTERS,
+                 df=None,
+                 all_features=False):
         
         self.source_path = source_path
         self.df = df
+        self.all_features = all_features
 
     def read(self):
         """
@@ -29,7 +31,11 @@ class Processing:
         df_features = pd.read_csv(self.source_path)
 
         logging.info(f"\nData read successfully ({df_features.shape[0]} rows, {df_features.shape[1]} columns)")
-        self.check_features_in_df(df_features, config.RADIOMICS_FEATURES)
+        
+        if self.all_features:
+            self.check_features_in_df(df_features, config.RADIOMICS_ALL_FEATURES)
+        else:
+            self.check_features_in_df(df_features, config.RADIOMICS_FEATURES_NO_FILTERS)
 
         self.df = df_features
         return df_features

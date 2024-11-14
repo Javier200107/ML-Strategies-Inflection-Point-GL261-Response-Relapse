@@ -3,7 +3,7 @@ import SimpleITK as sitk
 import radiomics
 
 class FeatureExtractorRadiomics:
-    def __init__(self, image=None, mask=None):
+    def __init__(self, image=None, mask=None, params=None):
         self.image = None
         self.mask = None
         if image is not None and mask is not None:
@@ -16,7 +16,9 @@ class FeatureExtractorRadiomics:
 
     # Function to extract first-order features
     def extract_first_order_features(self):
-        extractor = radiomics.firstorder.RadiomicsFirstOrder(self.image, self.mask)
+        params = {}
+        #params['binWidth'] = 1
+        extractor = radiomics.firstorder.RadiomicsFirstOrder(self.image, self.mask, **params)
         return extractor.execute()
 
     # Function to extract 2D shape-based features

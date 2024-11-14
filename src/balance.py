@@ -26,6 +26,72 @@ def split_data(df, test_size=0.2):
 
     return X_train, X_test, y_train, y_test
 
+from sklearn.model_selection import TimeSeriesSplit
+
+def split_data_nested_cv_ts(df, n_splits=3, test_size=0.2):
+    '''
+    Splits data into training, validation (cross-validation), and testing sets for each mouse (m_id) in temporal order.
+
+    Args:
+        df: DataFrame containing the data.
+        n_splits: Number of train/validation folds for TimeSeriesSplit.
+        test_size: Fraction of data to be used for the testing set.
+
+    Returns:
+        splits: A list of dictionaries with train, validation, and test splits for each mouse.
+    '''
+    # Initialize a list to store training, validation, and test sets for each mouse
+    splits = []
+    
+    # Iterate over each mouse group based on `m_id`
+    for mouse_id, group in df.groupby('m_id'):
+        # Sort each mouse's data by `day_of_study` to ensure temporal order
+        group = group.sort_values(by='day_of_study').reset_index(drop=True)
+        
+        # Define the size of the test set
+        test_len = int(len(group) * test_size)
+        
+        # Initialize TimeSeriesSplit to create indices for training and validation
+        tscv = TimeSeriesSplit(n_splits=n_splits + 1)  # Adding 1 split since we'll skip the first
+
+        # Skip the first split. This is done to ensure the first split isn’t too small, which can lead to unstable training
+        train_cv_splits = list(tscv.split(group.iloc[:-test_len])) 
+        train_cv_splits = train_cv_splits[1:]  # Remove the first split to avoid very small train set
+
+        # Define the test set as the last `test_len` samples
+        X_test, y_test = group.iloc[-test_len:].drop(columns=['m_id', 'group_name']), group.iloc[-test_len:]['group_name']
+
+        # Save the splits in the final list for each mouse
+        for train_indices, cv_indices in train_cv_splits:
+            # Create training and validation sets based on the indices from TimeSeriesSplit
+            X_train, y_train = group.iloc[train_indices].drop(columns=['m_id', 'group_name']), group.iloc[train_indices]['group_name']
+            X_cv, y_cv = group.iloc[cv_indices].drop(columns=['m_id', 'group_name']), group.iloc[cv_indices]['group_name']
+            
+            # Store the split as a dictionary for this mouse
+            splits.append({
+                'mouse_id': mouse_id,
+                'X_train': X_train,
+                'y_train': y_train,
+                'X_cv': X_cv,
+                'y_cv': y_cv,
+                'X_test': X_test,
+                'y_test': y_test
+            })
+
+            # Print date ranges for each split as a verification step
+            print(f"Mouse {mouse_id}:")
+            print(f"  Train: {X_train['day_of_study'].min()} -- {X_train['day_of_study'].max()}")
+            print(f"Train number of samples: {len(X_train)}")
+            print(f"  CV: {X_cv['day_of_study'].min()} -- {X_cv['day_of_study'].max()}")
+            print(f"CV number of samples: {len(X_cv)}")
+            print(f"  Test: {X_test['day_of_study'].min()} -- {X_test['day_of_study'].max()}")
+            print(f"Test number of samples: {len(X_test)}")
+            print("=" * 50)
+
+    return splits
+
+
+
 def drop_mice_group(df, m_group):
     '''
     Drop the rows with the specified mice group
