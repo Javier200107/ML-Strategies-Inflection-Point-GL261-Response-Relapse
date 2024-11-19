@@ -91,7 +91,6 @@ def split_data_nested_cv_ts(df, n_splits=3, test_size=0.2):
     return splits
 
 
-
 def drop_mice_group(df, m_group):
     '''
     Drop the rows with the specified mice group
