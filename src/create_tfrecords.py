@@ -36,11 +36,11 @@ def serialize_example(image_path, mask_path):
     # Extraer las partes relevantes
     # 0 for Cured Mice, 1 for Relapsing Mice, 2 for Control Mice
     if path_parts[2] == 'Cured mice':
-        group_name = 0
+        group_name = 1
     elif path_parts[2] == 'IMS-TMS-TREATED-RELAPSING':
-        group_name = 1
+        group_name = 0
     elif path_parts[2] == 'Control':
-        group_name = 1
+        group_name = 0
     else:
         print(path_parts)
         raise ValueError('Invalid group')
