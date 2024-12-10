@@ -112,7 +112,6 @@ class Processing:
         if len(out_cols) > 0:
 
             logging.warning(f"Columns {out_cols} are not in the dataset")
-    
 
 if __name__ == "__main__":
     import numpy as np
