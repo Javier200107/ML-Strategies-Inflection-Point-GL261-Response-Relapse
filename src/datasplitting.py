@@ -48,7 +48,7 @@ class DataSplitting:
                 'y_test': y_test
             }
         
-        return splits
+        return 'expanding_window_split', splits
     
     @staticmethod
     def split_data_population_informed(df: pd.DataFrame, n_splits=N_SPLITS, test_size=TEST_SIZE, seed=SEED):
@@ -100,7 +100,7 @@ class DataSplitting:
                 'y_test': y_test
             }
 
-        return splits
+        return 'split_data_population_informed', splits
     
     @staticmethod
     def expanding_window_split_by_mice_group(df: pd.DataFrame, n_splits: int = N_SPLITS) -> dict:
@@ -159,7 +159,7 @@ class DataSplitting:
                     splits[split_idx]['X_test'] = pd.concat([splits[split_idx]['X_test'], X_test], axis=0, ignore_index=True)
                     splits[split_idx]['y_test'] = pd.concat([splits[split_idx]['y_test'], y_test], axis=0, ignore_index=True)
 
-        return splits
+        return 'expanding_window_split_by_mice_group', splits
     
     @staticmethod
     def grouped_combinations_split_with_sampling(df, n_splits=N_SPLITS, sample_size=SAMPLE_SIZE, seed=SEED):
@@ -218,4 +218,6 @@ class DataSplitting:
                 'y_test': y_test
             }
 
-        return splits
+        # Return split method name, and the splits
+        return 'grouped_combinations_split_with_sampling', splits
+        

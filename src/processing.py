@@ -33,9 +33,9 @@ class Processing:
         logging.info(f"\nData read successfully ({df_features.shape[0]} rows, {df_features.shape[1]} columns)")
         
         if self.all_features:
-            self.check_features_in_df(df_features, config.RADIOMICS_ALL_FEATURES)
+            self.check_features_in_df(df_features, config.RADIOMICS_FINAL_FEATURES)
         else:
-            self.check_features_in_df(df_features, config.RADIOMICS_FEATURES_NO_FILTERS)
+            self.check_features_in_df(df_features, config.RADIOMICS_FINAL_FEATURES_NO_FILTERS)
 
         self.df = df_features
         return df_features
