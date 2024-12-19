@@ -240,12 +240,15 @@ class DataSplitting:
 
         # If sample_size is specified, randomly sample combinations; otherwise, use all
         if sample_size is not None:
-            sampled_combinations = random.sample(test_combinations, k=min(sample_size, len(test_combinations)))
+            sampled_combinations = random.sample(test_combinations, k=min(sample_size + 30, len(test_combinations)))
         else:
             sampled_combinations = test_combinations
 
         # Remove combinations without at least one cured group
         sampled_combinations = [comb for comb in sampled_combinations if any([group in comb for group in CURED_GROUPS])]
+
+        # Keep only sample_size combinations
+        sampled_combinations = sampled_combinations[:sample_size]
 
         print(f"Number of sampled combinations: {len(sampled_combinations)}")
 
@@ -364,22 +367,26 @@ class DataSplitting:
 
         # Generate all possible combinations of 'm_id' for the test set
         test_combinations = list(combinations(unique_mice, test_size))
-        print(f"Total possible combinations: {len(test_combinations)}")
+        print(f"Total possible combinations: {len(test_combinations)} of size {test_size}")
 
         if sample_size is not None:
             # Randomly sample a subset of the combinations
-            sampled_combinations = random.sample(test_combinations, k=min(sample_size, len(test_combinations)))
+            sampled_combinations = random.sample(test_combinations, k=min(sample_size + 30, len(test_combinations)))
         else:
             sampled_combinations = test_combinations
         
         # Remove combinations without at least one cured group
         sampled_combinations = [comb for comb in sampled_combinations if any([group in comb for group in CURED_GROUPS])]
 
+        # Keep only sample_size combinations
+        sampled_combinations = sampled_combinations[:sample_size]
+
+        print(f"Number of sampled combinations: {len(sampled_combinations)}")
+
         # Create splits for the sampled combinations
         for i, test_group in enumerate(sampled_combinations):
             # Test mice are those in the current combination
             test_mice = set(test_group)
-            print(test_mice)
             
             # Train mice are the remaining mice
             train_mice = set(unique_mice) - test_mice
