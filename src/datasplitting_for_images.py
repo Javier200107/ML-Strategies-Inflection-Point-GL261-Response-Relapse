@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 from itertools import combinations
 import tensorflow as tf
+import os
 
 N_SPLITS = 4
 TEST_SIZE = 0.6
@@ -12,6 +13,34 @@ CURED_GROUPS = [1276, 1285, 1281, 1284, 1382]
 
 class DataSplittingForImages:
     """Class to split data into training and testing sets."""
+
+    @staticmethod
+    def split_dataset(root_dir, train_ratio):
+        all_data = []
+        
+        # Recorrer todas las imágenes y máscaras
+        for data_group in os.listdir(root_dir):
+            data_group_path = os.path.join(root_dir, data_group)
+            if not os.path.isdir(data_group_path):
+                continue
+            for mice_group in os.listdir(data_group_path):
+                mice_group_path = os.path.join(data_group_path, mice_group)
+                if not os.path.isdir(mice_group_path):
+                    continue  # Saltar si no es un directorio
+                for dayofstudy in os.listdir(mice_group_path):
+                    dayofstudy_path = os.path.join(mice_group_path, dayofstudy)
+                    if not os.path.isdir(dayofstudy_path):
+                        continue  # Saltar si no es un directorio
+                    mri_imgs = os.path.join(dayofstudy_path, 'MRI images')
+                    if not os.path.exists(mri_imgs):
+                        print(f"No se encontró la carpeta {mri_imgs}")
+                        continue
+                    # Número de imágenes
+                    n_imgs = len(os.listdir(mri_imgs))
+                    for i in range(n_imgs):
+                        img_path = os.path.join(mri_imgs, f'image_s{i + 1}.jpg')
+                        mask_path = os.path.join(dayofstudy_path, f'Mask s{i + 1}.jpg')
+                        all_data.append((img_path, mask_path))
 
     @staticmethod
     def expanding_window_split(ds: tf.data.TFRecordDataset, n_splits: int = 5) -> dict:

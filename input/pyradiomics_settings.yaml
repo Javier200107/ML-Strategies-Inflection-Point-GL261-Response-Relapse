@@ -1,11 +1,15 @@
 setting:
   binWidth: 1  # Optimal bin width for MRI intensities; helps normalize intensity ranges
-  resampledPixelSpacing: [0.2, 0.2]  # Adjust this to match voxel spacing in your dataset
-  interpolator: 'sitkBSpline'  # Ensures smooth interpolation
+  resampledPixelSpacing: [0.2, 0.2]  # Ensures isotropic resampling
+  interpolator: 'sitkBSpline'  # IBSI-compatible interpolator
   normalize: true  # Ensures intensity standardization
   removeOutliers: 3
   preCrop: true
   padDistance: 5
+  force2D: false  # Set to true if working with 2D slices
+  voxelArrayShift: 1000  # Ensures non-negative intensities for IBSI compliance
+  correctMask: true  # Ensure mask consistency
+  distances: [1]  # IBSI standard for texture matrices
 
 imageType:
   Original: {}
@@ -17,10 +21,3 @@ imageType:
   Exponential: {}
   Gradient: {}
 
-featureClass:
-  firstorder: 
-  glcm: 
-  glrlm: 
-  glszm: 
-  gldm: 
-  ngtdm: 

@@ -27,7 +27,7 @@ def serialize_example(image_path, mask_path):
 
     # Get Study, Mice group and Day of study from the path
     path = os.path.normpath(mask_path)
-
+    
     # Divide el path en partes
     path_parts = path.split(os.sep)
 
@@ -110,13 +110,54 @@ def split_dataset(root_dir, train_ratio):
 
     return train_data, val_data
 
+def count_images_by_group(root_dir):
+    counts = {"Control": 0, "Relapse": 0, "Cured": 0}
+
+    for data_group in os.listdir(root_dir):
+        data_group_path = os.path.join(root_dir, data_group)
+        if not os.path.isdir(data_group_path):
+            continue
+        for mice_group in os.listdir(data_group_path):
+            mice_group_path = os.path.join(data_group_path, mice_group)
+            if not os.path.isdir(mice_group_path):
+                continue  # Saltar si no es un directorio
+            for dayofstudy in os.listdir(mice_group_path):
+                dayofstudy_path = os.path.join(mice_group_path, dayofstudy)
+                if not os.path.isdir(dayofstudy_path):
+                    continue  # Saltar si no es un directorio
+                mri_imgs = os.path.join(dayofstudy_path, 'MRI images')
+                if not os.path.exists(mri_imgs):
+                    continue
+
+                num_imgs = len([f for f in os.listdir(mri_imgs) if f.endswith('.jpg')])
+
+                print(f"Grupo: {data_group}, Día de estudio: {dayofstudy}, Número de imágenes: {num_imgs}")
+
+                # Clasificar en el grupo correcto
+                if data_group == 'Cured mice':
+                    counts["Cured"] += num_imgs
+                elif data_group in ['IMS-TMS-TREATED-RELAPSING', 'Relapse']:
+                    counts["Relapse"] += num_imgs
+                elif data_group == 'Control':
+                    counts["Control"] += num_imgs
+                else:
+                    print(f"Grupo desconocido: {data_group}")
+
+    return counts
+
+
+
+
 if __name__ == '__main__':
     # Dividir el dataset en 70% train y 30% validation
-    train_data, val_data = split_dataset(config.DATASET_DIR, train_ratio)
+    # train_data, val_data = split_dataset(config.DATASET_DIR, train_ratio)
 
-    # Crear TFRecords para entrenamiento y validación
-    create_tfrecord(train_data, 'full_ds.tfrecord')
-    #create_tfrecord(val_data, 'val.tfrecords')
+    # # Crear TFRecords para entrenamiento y validación
+    # create_tfrecord(train_data, 'full_ds.tfrecord')
+    # #create_tfrecord(val_data, 'val.tfrecords')
 
-    print(f"Train set: {len(train_data)} samples")
-    print(f"Validation set: {len(val_data)} samples")
+    # print(f"Train set: {len(train_data)} samples")
+    # print(f"Validation set: {len(val_data)} samples")
+    # Llamar a la función y mostrar los resultados
+    image_counts = count_images_by_group(config.DATASET_DIR)
+    print(f"Cantidad de imágenes por grupo: {image_counts}")
