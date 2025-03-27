@@ -1,7 +1,6 @@
 import tensorflow as tf
-import numpy as np
 
-class TFRecordImageHandler:
+class  TFRecordImageHandler:
     def __init__(self, tfrecord_file, batch_size=32, shuffle=False, augment=False):
         self.tfrecord_file = tfrecord_file
         self.batch_size = batch_size
@@ -20,8 +19,6 @@ class TFRecordImageHandler:
             'mask_height': tf.io.FixedLenFeature([], tf.int64),
             'mask_width': tf.io.FixedLenFeature([], tf.int64),
             'group_name': tf.io.FixedLenFeature([], tf.int64),
-            'mouse_id': tf.io.FixedLenFeature([], tf.int64),
-            'day_of_study': tf.io.FixedLenFeature([], tf.int64),
         }
         parsed_features = tf.io.parse_single_example(proto, feature_description)
 
@@ -36,33 +33,27 @@ class TFRecordImageHandler:
         mask = tf.reshape(mask, [parsed_features['mask_height'], parsed_features['mask_width'], 1])
         mask = tf.image.resize(mask, [256, 256])
 
-        # Combine image and mask into a 2-channel image
-        image = tf.concat([image, mask], axis=-1)
+        # Combine image and the new 3-channel mask
+        image = tf.concat([image, mask, mask], axis=-1)  # Final image will have 5 channels (3 original + 2 from mask)
 
         # Cast group_name to float
         group_name = tf.cast(parsed_features['group_name'], tf.float32)
 
-        # Cast mouse_id to float
-        mouse_id = tf.cast(parsed_features['mouse_id'], tf.float32)
-
-        # Cast day_of_study to float
-        day_of_study = tf.cast(parsed_features['day_of_study'], tf.float32)
-        
-        return image, group_name, mouse_id, day_of_study
+        return image, group_name
 
     def _normalize(self, image):
         # Normalize image to [0, 1] range
         image = tf.cast(image, tf.float32) / 255.0
         return image
 
-    def _augment(self, image, group_name, mouse_id, day_of_study):
+    def _augment(self, image, group_name):
         # Apply augmentation only to the image
         if tf.random.uniform(()) > 0.5:
             image = tf.image.flip_left_right(image)
         image = tf.image.random_brightness(image, max_delta=0.1)
 
-        # Return the augmented image along with unchanged group_name, mouse_id, and day_of_study
-        return image, group_name, mouse_id, day_of_study
+        # Return the augmented image along with unchanged group_name
+        return image, group_name
 
     def _load_dataset(self):
         # Load the TFRecord file and apply mappings
@@ -70,12 +61,11 @@ class TFRecordImageHandler:
         dataset = dataset.map(self._parse_function, num_parallel_calls=tf.data.AUTOTUNE)
 
         # Normalize before augmenting
-        dataset = dataset.map(lambda img, grp, mid, day: (self._normalize(img), grp, mid, day), 
+        dataset = dataset.map(lambda img, grp: (self._normalize(img), grp), 
                             num_parallel_calls=tf.data.AUTOTUNE)
 
         if self.augment:
-            dataset = dataset.map(lambda img, grp, mid, day: (*self._augment(img, grp), mid, day),
-                                num_parallel_calls=tf.data.AUTOTUNE)
+            dataset = dataset.map(self._augment, num_parallel_calls=tf.data.AUTOTUNE)
 
         if self.shuffle:
             dataset = dataset.shuffle(buffer_size=1000)
@@ -87,6 +77,5 @@ class TFRecordImageHandler:
         return dataset
 
     def __len__(self):
-        # Contar los ejemplos directamente en el archivo TFRecord
+        # Count the examples directly in the TFRecord file
         return sum(1 for _ in tf.data.TFRecordDataset(self.tfrecord_file))
-

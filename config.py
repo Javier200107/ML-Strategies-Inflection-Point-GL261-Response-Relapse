@@ -12,6 +12,7 @@ FEATURES_DIR = os.path.join(BASE_INPUT_DIR, "features")
 # RADIOMICS_FEATURES_3_GROUPS = os.path.join(FEATURES_DIR, "radiomics_features_no_filters_3_groups.csv")
 
 RADIOMICS_FINAL_FEATURES = os.path.join(FEATURES_DIR, "radiomics_final_features.csv")
+RADIOMICS_FINAL_FEATURES_NEW = os.path.join(FEATURES_DIR, "radiomics_final_features__new.csv")
 RADIOMICS_FINAL_FEATURES_NO_FILTERS = os.path.join(FEATURES_DIR, "radiomics_final_features_no_filters.csv")
 
 # Dataset-related paths
