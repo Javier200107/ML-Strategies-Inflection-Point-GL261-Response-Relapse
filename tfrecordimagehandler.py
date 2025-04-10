@@ -34,7 +34,8 @@ class  TFRecordImageHandler:
         mask = tf.image.resize(mask, [256, 256])
 
         # Combine image and the new 3-channel mask
-        image = tf.concat([image, mask, mask], axis=-1)  # Final image will have 5 channels (3 original + 2 from mask)
+        # image = tf.concat([image, mask, mask], axis=-1)  # Final image will have 5 channels (3 original + 2 from mask)
+        image = tf.concat([image, mask], axis=-1)  # Now image has 2 channels: grayscale + mask
 
         # Cast group_name to float
         group_name = tf.cast(parsed_features['group_name'], tf.float32)
