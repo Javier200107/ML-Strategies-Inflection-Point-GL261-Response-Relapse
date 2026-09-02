@@ -1,0 +1,12 @@
+##TITLE=Parameter List
+##JCAMPDX=4.24
+##DATATYPE=Parameter Values
+##ORIGIN=Bruker BioSpin MRI GmbH
+##OWNER=mri
+$$ Tue Mar 26 12:08:24 2019 CET (UT+1h)  mri
+$$ /BiospecData/data/mri/nmr/sp190326.Su1/4/pdata/1/procs
+##$OFFSET=0
+##$SF=300.331460151427
+##$YMAX_p=32766
+##$YMIN_p=128
+##END=

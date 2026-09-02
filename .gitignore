@@ -1,10 +1,7 @@
 .vscode
 /old
 /output
-/input
-dataset
 __pycache__
 *.pkl
 *.dcm
-*.jpg
 logs

@@ -1,0 +1,20 @@
+##TITLE=Parameter List
+##JCAMPDX=4.24
+##DATATYPE=Parameter Values
+##ORIGIN=Bruker BioSpin MRI GmbH
+##OWNER=mri
+$$ Thu Apr 18 10:47:37 2019 CEST (UT+2h)  mri
+$$ /BiospecData/data/mri/nmr/sp190418.SR1/24/pdata/1/fun/default.stm
+##$FUN_numOfProfiles=1
+##$FUN_profileName=( 1, 64 )
+<0.>
+##$FUN_numOfXPoints=2
+##$FUN_numOfYPoints=2
+##$FUN_xPoints=( 1, 2 )
+0 1
+##$FUN_yPoints=( 1, 2 )
+0 0
+##$FUN_numOfProperties=3
+##$FUN_packageProperties=( 3 )
+2 2 0
+##END=

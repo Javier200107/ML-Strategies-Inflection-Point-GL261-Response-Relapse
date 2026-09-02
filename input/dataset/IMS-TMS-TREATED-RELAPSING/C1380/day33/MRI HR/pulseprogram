@@ -1,0 +1,2623 @@
+# 1 "/opt/Pv5.1/exp/stan/nmr/lists/pp/CSI.ppg"
+;****************************************************************
+;  
+; pulseprogram for CSI  
+;  
+; written by Rolf Pohmann  
+;  
+; created on Aug 16, 2002  
+;  
+; Last modification: May 26, 2003  
+;  
+;****************************************************************  
+;  
+; d0: TR padding  
+; d1: first half of echo time 
+; d3: last half of echo time
+; d2: central part of echo time (PRESS only)
+; d4: PVM_RiseTime 
+; d5: phase encoding time
+; d8: gradient stabilisation delay  (new!)
+; d20: spoiler duration
+;
+; t0: slice gradient (excitation pulse)
+; t1: slice refocusing gradient (for 2D spin echo: also contains second spoiler)
+; t2, t3, t4: scaling for phase encode gradients, always 100
+; t5: slice gradient (refocusing pulse)
+; t6: slice gradient (third pulse, PRESS only)
+; t7: spoiler strength (for spin echo)
+; t8: spoiler strength
+;
+; 
+; PVM_ppgMode1 = 0: FID
+;                1: spin echo 
+;                2: PRESS
+  
+# 1 "/opt/Pv5.1/exp/stan/nmr/lists/pp/MRI.include" 1
+;****************************************************************
+;
+; $Source: /pv/CvsTree/pv/gen/src/prg/methManag/PPG/MRI.include,v $
+;
+; Copyright (c) 2006
+; Bruker BioSpin MRI GmbH
+; D-76275 Ettlingen, Germany
+;
+; All Rights Reserved
+;
+;;****************************************************************
+;MRI.include
+
+# 1 "/opt/Pv5.1/exp/stan/nmr/lists/pp/Avance.incl" 1
+;Avance2.incl
+;   for 1
+;
+;avance-version (07/01/22)
+;
+;$CLASS=HighRes Incl
+;$COMMENT=
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+;$Id: Avance2.incl,v 1.14.2.6 2008/04/03 08:54:39 mah Exp $
+# 14 "/opt/Pv5.1/exp/stan/nmr/lists/pp/MRI.include" 2
+
+
+define delay aqq
+define delay deparx
+define delay derxadc
+define delay rdepa
+
+"aqq=dw*td"
+"rdepa=de-depa"
+"deparx=depa-derx"
+"derxadc=derx-deadc"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 86 "/opt/Pv5.1/exp/stan/nmr/lists/pp/MRI.include"
+
+
+
+
+
+
+# 35 "/opt/Pv5.1/exp/stan/nmr/lists/pp/CSI.ppg" 2
+
+preset off  
+define delay decodur
+"decodur=  d3 - de"
+# 1 "/opt/Pv5.1/exp/stan/nmr/lists/pp/PrepModulesHead.mod" 1
+;****************************************************************
+;
+; Copyright (c) 2003-2007
+; Bruker BioSpin MRI GmbH
+; D-76275 Ettlingen, Germany
+;
+; $Id: PrepModulesHead.mod,v 1.14.2.1 2007/07/02 13:05:36 mawi Exp $
+;
+; All Rights Reserved
+;
+; Declaration of pulseprogram parameters and subroutines for 
+; preparation  modules
+;
+;****************************************************************
+
+;**** Fat Suppression Module ****
+
+# 1 "/opt/Pv5.1/exp/stan/nmr/lists/pp/FatSupDef.mod" 1
+;****************************************************************
+;
+; Copyright (c) 2002-2007
+; Bruker BioSpin MRI GmbH
+; D-76275 Ettlingen, Germany
+;
+; $Id: FatSupDef.mod,v 1.1.2.2 2007/07/02 14:26:25 mawi Exp $
+;
+; All Rights Reserved
+;
+; FatSupDef.mod : Declaration of Fat Suppression Subroutine
+;
+;****************************************************************
+
+if(PVM_FatSupOnOff)
+{
+define list<frequency> modlis6 = {$PVM_FatSupFL}
+define delay FsD0 = {$PVM_FsD0}
+define delay FsD1 = {$PVM_FsD1}
+define delay FsD2 = {$PVM_FsD2}
+
+define pulse FsP0 = {$PVM_FsP0}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 18 "/opt/Pv5.1/exp/stan/nmr/lists/pp/PrepModulesHead.mod" 2
+
+
+;**** Flow Saturation Module ****
+
+# 1 "/opt/Pv5.1/exp/stan/nmr/lists/pp/FlowSatDef.mod" 1
+;****************************************************************
+;
+; Copyright (c) 2005-2007
+; Bruker BioSpin MRI GmbH
+; D-76275 Ettlingen, Germany
+;
+; $Id: FlowSatDef.mod,v 1.1.4.2 2007/07/02 13:26:58 mawi Exp $
+;
+; All Rights Reserved
+;
+; FlowSatDef.mod: Declaration of subroutines for Flow Saturation 
+; call
+; subr FlowSat()
+; subr FlowSatInit()
+; subr FlowSatInc()
+; 
+;****************************************************************
+
+if(PVM_InFlowSatOnOff == 1)
+   {
+define list<frequency> modlis4 = {$PVM_InFlowSatFL}
+define delay SfD0 = {$PVM_SfD0}
+define delay SfD1 = {$PVM_SfD1}
+define delay SfD2 = {$PVM_SfD2}
+
+define pulse SfP0 = {$PVM_SfP0}
+
+define loopcounter SfLp0 = {$PVM_SfLp0}
+   }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 22 "/opt/Pv5.1/exp/stan/nmr/lists/pp/PrepModulesHead.mod" 2
+
+
+;**** Inversion Pulse Module ****
+# 1 "/opt/Pv5.1/exp/stan/nmr/lists/pp/InvPulseDef.mod" 1
+;****************************************************************
+;
+; Copyright (c) 2002-2007
+; Bruker BioSpin MRI GmbH
+; D-76275 Ettlingen, Germany
+;
+; $Id: InvPulseDef.mod,v 1.1.2.2 2007/07/02 14:26:25 mawi Exp $
+;
+; All Rights Reserved
+;
+; InvPulseDef.mod : Declaration of Inversion Pulse subroutine
+;
+; call
+; subr InvPulse()
+;
+;****************************************************************
+;   
+;       PVM_InvRFPulseArr      :  
+;     
+;       sp22            TPQQ[14].name : PVM_InvRFPulsePropertyArr[0].Filename
+;
+;       PVM_IpP0                      :  PVM_InvRFPulseArr[0].PulseLength
+;
+;       PVM_IpD2                      :  PVM_InvPulseDelay[0]
+;       PVM_IpD3                      :  PVM_InvPulseSpoilTime[0]
+;       PVM_IpD1                      :  CONFIG_amplifier _enable
+;       PVM_IpD0                      :  PVM_RampTime
+;
+
+if(PVM_InvPulseOnOff == 1)
+{
+define list<frequency>  modlis2= {$PVM_InvPulseOffsetHz}
+define delay IpD0 = {$PVM_IpD0}
+define delay IpD1 = {$PVM_IpD1}
+define delay IpD2 = {$PVM_IpD2}
+define delay IpD3 = {$PVM_IpD3}
+
+define pulse IpP0 = {$PVM_IpP0}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 25 "/opt/Pv5.1/exp/stan/nmr/lists/pp/PrepModulesHead.mod" 2
+
+
+;**** Magnetisation Transfer Module ****
+
+# 1 "/opt/Pv5.1/exp/stan/nmr/lists/pp/MagTransDef.mod" 1
+;****************************************************************
+; $Source: /pv/CvsTree/pv/gen/src/prg/methManag/PPG/MagTransDef.mod,v $
+;
+; Copyright (c) 2005-2007
+; Bruker BioSpin MRI GmbH
+; D-76275 Ettlingen, Germany
+;
+; All Rights Reserved
+;
+; MagTransDef.mod: Declaration of subroutine for Magnetization 
+;                  transfer 
+; call
+; subr MagTrans()
+;
+; $Id: MagTransDef.mod,v 1.1.2.3 2008/06/05 17:10:28 mawi Exp $
+;****************************************************************
+;**** Magnetisation Transfer Module ****
+
+
+if(PVM_MagTransOnOff)
+{
+define list<frequency> modlis3 = {$PVM_MagTransFL} 
+define delay MtD0 = {$PVM_MtD0}
+define delay MtD1 = {$PVM_MtD1}
+define delay MtD2 = {$PVM_MtD2}
+define delay MtD3 = {$PVM_MtD3}
+
+define pulse MtP0 = {$PVM_MtP0}
+
+define loopcounter MtLp0 = {$PVM_MtLp0}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 29 "/opt/Pv5.1/exp/stan/nmr/lists/pp/PrepModulesHead.mod" 2
+
+
+
+;**** Saturation Pulse Module ****
+
+# 1 "/opt/Pv5.1/exp/stan/nmr/lists/pp/SatPulseDef.mod" 1
+;****************************************************************
+;
+; Copyright (c) 2002-2003
+; Bruker BioSpin MRI GmbH
+; D-76275 Ettlingen, Germany
+;
+; $Id: SatPulseDef.mod,v 1.1.2.3 2009/02/25 09:35:00 fhen Exp $
+;
+; All Rights Reserved
+;
+; SatPulseDef.mod : Declaration of Saturation Pulse subroutines
+; call 
+; subr SatPulse()
+;
+;****************************************************************
+;   
+;    PVM_SatRFPulseArr      :  
+;     
+;       sp28            DPQQ[12].name : PVM_SatRFPulsePropertyArr[0].Filename
+;       sp29            DPQQ[13].name : PVM_SatRFPulsePropertyArr[1].Filename
+;       sp30            DPQQ[14].name : PVM_SatRFPulsePropertyArr[2].Filename
+;       sp31            DPQQ[15].name : PVM_SatRFPulsePropertyArr[3].Filename
+;
+;       PVM_SpP0                     :  PVM_SatRFPulseArr[0].PulseLength
+;       PVM_SpP1                     :  PVM_SatRFPulseArr[1].PulseLength
+;       PVM_SpP2                     :  PVM_SatRFPulseArr[2].PulseLength
+;       PVM_SpP3                     :  PVM_SatRFPulseArr[3].PulseLength
+;
+;       PVM_SpD2                     :  PVM_SatPulseDelay1[0]
+;       PVM_SpD6                     :  PVM_SatPulseSpoilTime[0]
+;       PVM_SpD10                    :  PVM_SatPulseDelay2[0]
+;       PVM_SpD3                     :  PVM_SatPulseSpoilTime[1]
+;       PVM_SpD7                     :  PVM_SatPulseDelay1[1]
+;       PVM_SpD11                    :  PVM_SatPulseDelay2[1]
+;       PVM_SpD4                     :  PVM_SatPulseDelay1[2]
+;       PVM_SpD8                     :  PVM_SatPulseSpoilTime[2]
+;       PVM_SpD12                    :  PVM_SatPulseDelay2[2]
+;       PVM_SpD5                     :  PVM_SatPulseDelay1[3]
+;       PVM_SpD9                     :  PVM_SatPulseSpoilTime[3]
+;       PVM_SpD13                    :  PVM_SatPulseDelay2[3]
+;
+
+if(PVM_SatPulseOnOff == 1)
+   {
+define list<frequency> modlis7 = {$PVM_SatPulseOffsetHz}
+
+define delay SpD0 = {$PVM_SpD0}
+define delay SpD1 = {$PVM_SpD1}
+define delay SpD2 = {$PVM_SpD2}
+define delay SpD3 = {$PVM_SpD3}
+define delay SpD4 = {$PVM_SpD4}
+define delay SpD5 = {$PVM_SpD5}
+define delay SpD6 = {$PVM_SpD6}
+define delay SpD7 = {$PVM_SpD7}
+define delay SpD8 = {$PVM_SpD8}
+define delay SpD9 = {$PVM_SpD9}
+define delay SpD10 = {$PVM_SpD10}
+define delay SpD11 = {$PVM_SpD11}
+define delay SpD12 = {$PVM_SpD12}
+define delay SpD13 = {$PVM_SpD13}
+define pulse SpP0 = {$PVM_SpP0}
+define pulse SpP1 = {$PVM_SpP1}
+define pulse SpP2 = {$PVM_SpP2}
+define pulse SpP3 = {$PVM_SpP3}
+
+   }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 34 "/opt/Pv5.1/exp/stan/nmr/lists/pp/PrepModulesHead.mod" 2
+
+
+
+;*** Saturation Slices Module ***
+
+# 1 "/opt/Pv5.1/exp/stan/nmr/lists/pp/SatSliceDef.mod" 1
+;****************************************************************
+;
+; Copyright (c) 2002-2007
+; Bruker BioSpin MRI GmbH
+; D-76275 Ettlingen, Germany
+;
+; $Id: SatSliceDef.mod,v 1.2.2.1 2007/07/02 13:01:13 mawi Exp $
+;
+; All Rights Reserved
+;
+; SatSlices.mod : Declaration of Saturation Slice subroutine
+; call
+; subr SatSlices()
+;
+;****************************************************************
+;
+; SaturationSlicesPulse :
+;
+;        sp25              DPQQ[9].name : PVM_SatSlicesPulse.Filename
+;        PVM_SatP0                     : PVM_SatSlicesPulse.Length
+;
+;        
+;        PVM_SatD1                     : CONFIG_amplifier_enable
+;        PVM_SatD0                     : PVM_RampTime
+;        PVM_SatD2                     : PVM_FovSatSpoilTime
+;        PVM_SatLp0                    : PVM_FovSatNSlices 
+;
+;**** Saturation Slice Module ****
+if(PVM_FovSatOnOff == 1)
+{
+define list<frequency> modlis5 = {$PVM_FovSatFL}
+define delay SatD0 = {$PVM_SatD0}
+define delay SatD1 = {$PVM_SatD1}
+define delay SatD2 = {$PVM_SatD2}
+
+define pulse SatP0 = {$PVM_SatP0}
+
+define loopcounter SatLp0 = {$PVM_SatLp0}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+# 39 "/opt/Pv5.1/exp/stan/nmr/lists/pp/PrepModulesHead.mod" 2
+
+
+
+;**** Black Blood Module ****
+# 1 "/opt/Pv5.1/exp/stan/nmr/lists/pp/BlBloodDef.mod" 1
+;****************************************************************
+;
+; Copyright (c) 2007
+; Bruker BioSpin MRI GmbH
+; D-76275 Ettlingen, Germany
+;
+; $Id: BlBloodDef.mod,v 1.1.2.2 2007/07/02 14:26:25 mawi Exp $
+;
+; All Rights Reserved
+;
+; BlBloodDef.mod : Declaration of Black blood  subroutine
+;
+; call
+; subr BlBlood(ph0) : Black blood preparation with RF phaselist
+;                     ph0
+;
+;****************************************************************
+
+if(PVM_BlBloodOnOff)
+  {
+define list<frequency> modlis8 = {$PVM_BlBloodFL}
+define delay BlbD0 = {$PVM_BlbD0}
+define delay BlbD1 = {$PVM_BlbD1}
+define delay BlbD2 = {$PVM_BlbD2}
+define delay BlbD3 = {$PVM_BlbD3}
+
+define pulse BlbP0 = {$PVM_BlbP0}
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 43 "/opt/Pv5.1/exp/stan/nmr/lists/pp/PrepModulesHead.mod" 2
+
+
+
+;**** Trigger Module ****
+define delay TrigD0 = {$PVM_TrigD0}
+;**** Trigger Out Module ****
+define delay TrigOutD0 = {$PVM_TrigOutD0}
+
+;**** OuterVolumeSuppression **** Solvent Suppression Module ****
+
+# 1 "/opt/Pv5.1/exp/stan/nmr/lists/pp/WsOvsDef.mod" 1
+;****************************************************************
+;
+; Copyright (c) 2005-2007
+; Bruker BioSpin MRI GmbH
+; D-76275 Ettlingen, Germany
+;
+; $Id: WsOvsDef.mod,v 1.1.2.3 2008/03/19 14:25:28 sako Exp $
+;
+; All Rights Reserved
+;
+; WsOvsDef.mod: Declaration of water suppression and Outer 
+;               volume suppression subroutines
+;
+; call 
+; subr Ovs(ph0) ;  execution of OVS with ph0 phaselist
+;
+; subr WsOvs(ph0,ph1) : execution of OVS with ph0 and WS with ph1
+;                       phaselist
+;****************************************************************
+
+;**** OuterVolumeSuppression ****
+
+if(PVM_OvsOnOff == 1)
+{
+define list<frequency> Ovslist={$PVM_OvsFrequencyList}
+define delay OvsD0 = {$PVM_OvsD0}
+define delay OvsD1 = {$PVM_OvsD1}
+define pulse OvsP0 = {$PVM_OvsP0}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+;*** WaterSuppression Module with OVS ****
+
+if (PVM_WsMode)
+{
+
+define list<frequency> Wslist={$PVM_WsOffsetHz}
+define pulse WsP0 = {$PVM_WsP0}
+define pulse WsP1 = {$PVM_WsP1}
+define pulse WsP2 = {$PVM_WsP2}
+define delay WsNp0 
+"WsNp0 = WsP0"
+define delay WsNp1 
+"WsNp1 = WsP1"
+define delay WsNp2 
+"WsNp2 = WsP2"
+define list<delay> ChD1={$PVM_ChppgD1}
+define list<delay> ChD2={$PVM_ChppgD2}
+define list<delay> VpD1={$PVM_VpppgD1}
+define list<delay> VpD2={$PVM_VpppgD2}
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 53 "/opt/Pv5.1/exp/stan/nmr/lists/pp/PrepModulesHead.mod" 2
+
+
+;**** Solvent Suppression module and FOV Saturation module ******
+
+# 1 "/opt/Pv5.1/exp/stan/nmr/lists/pp/WsSatDef.mod" 1
+;******************************************************************
+;
+; Copyright (c) 2002-2007
+; Bruker BioSpin MRI GmbH
+; D-76275 Ettlingen, Germany
+;
+; $Id: WsSatDef.mod,v 1.1.2.2 2007/07/02 14:26:26 mawi Exp $ 
+;
+; All Rights Reserved
+;
+; WsSatDef.mod - Declaration of water suppression and FOV saturation 
+;                subroutines
+; call
+; subr WsSat(ph0) : execution of WS with ph0 phaselist and 
+;                   FOV saturation (as passed as argument)    
+;      
+;*******************************************************************
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 57 "/opt/Pv5.1/exp/stan/nmr/lists/pp/PrepModulesHead.mod" 2
+
+
+;*********** selective inversion recovery **********
+
+# 1 "/opt/Pv5.1/exp/stan/nmr/lists/pp/SelSliceIrDef.mod" 1
+;****************************************************************
+;
+; Copyright (c) 2007
+; Bruker BioSpin MRI GmbH
+; D-76275 Ettlingen, Germany
+;
+; $Id: SelSliceIrDef.mod,v 1.1.2.2 2007/07/02 14:26:25 mawi Exp $
+;
+; All Rights Reserved
+;
+; SelSliceIrDef.mod : declaration of slice Selective Inversion 
+;                     Recovery subroutine
+; call SliceSelIr()
+; 
+;
+;****************************************************************
+
+
+if(PVM_SelIrOnOff)
+  {
+define list<frequency> IrFL = {$PVM_SelIrFL} 
+define delay IrD0 = {$PVM_SelIrD0}
+define delay IrD1 = {$PVM_SelIrD1}
+define delay IrD2 = {$PVM_SelIrD2}
+define delay IrD3 = {$PVM_SelIrD3}
+define delay IrD4 = {$PVM_SelIrD4}
+
+define pulse IrP0 = {$PVM_SelIrP0}
+
+define loopcounter IrL0 = {$PVM_SelIrL0}
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 61 "/opt/Pv5.1/exp/stan/nmr/lists/pp/PrepModulesHead.mod" 2
+
+
+;***********Tagging*****************
+
+# 1 "/opt/Pv5.1/exp/stan/nmr/lists/pp/TagDef.mod" 1
+;****************************************************************
+;
+; Copyright (c) 2007
+; Bruker BioSpin MRI GmbH
+; D-76275 Ettlingen, Germany
+;
+; $Id: TagDef.mod,v 1.1.2.4 2008/06/05 17:09:32 mawi Exp $
+;
+; All Rights Reserved
+;
+; TagDef.mod : Declaration of tagging subroutine
+; call
+; subr Tagging()
+;
+;****************************************************************
+
+if(PVM_TaggingOnOff)
+{
+define list<frequency> taggfreq={$PVM_TaggingFL}
+
+define delay TaggD0 = {$PVM_TaggingD0}
+define delay TaggD1 = {$PVM_TaggingD1}
+define delay TaggD2 = {$PVM_TaggingD2}
+define delay TaggD3 = {$PVM_TaggingD3}
+define delay TaggD4 = {$PVM_TaggingD4}
+define delay TaggD5 = {$PVM_TaggingD5}
+
+define pulse TaggP0 = {$PVM_TaggingP0}
+define loopcounter TaggL0 = {$PVM_TaggingLp0}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 65 "/opt/Pv5.1/exp/stan/nmr/lists/pp/PrepModulesHead.mod" 2
+
+
+;*********** Noe *******************
+
+# 1 "/opt/Pv5.1/exp/stan/nmr/lists/pp/NoeDef.mod" 1
+;****************************************************************
+;
+; Copyright (c) 2007
+; Bruker BioSpin MRI GmbH
+; D-76275 Ettlingen, Germany
+;
+; $Id: NoeDef.mod,v 1.1.2.2 2007/07/02 14:26:26 mawi Exp $
+;
+; All Rights Reserved
+;
+; NoeDef.mod: Declaration of Nuclear Overhouser Enhancement 
+;             subroutine
+; call
+; subr Noe()
+;
+;****************************************************************
+
+if(PVM_NoeOnOff == On)
+{
+define delay NoeD0 = {$PVM_NoeD0}
+define delay NoeD1 = {$PVM_NoeD1}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 69 "/opt/Pv5.1/exp/stan/nmr/lists/pp/PrepModulesHead.mod" 2
+
+
+
+
+define loopcounter EvolLp0 = {$PVM_EvolLp0}
+define list<delay> EvolD0 = {$PVM_EvolD0}
+
+
+# 39 "/opt/Pv5.1/exp/stan/nmr/lists/pp/CSI.ppg" 2
+
+# 1 "/opt/Pv5.1/exp/stan/nmr/lists/pp/decoacq.mod" 1
+;****************************************************************
+;
+; Copyright (c) 2005
+; Bruker BioSpin MRI GmbH 
+; D-76275 Ettlingen, Germany
+;
+; All Rights Reserved
+; 
+; $Id: decoacq.mod,v 1.3.2.2 2007/07/02 12:51:40 mawi Exp $
+; 
+; All Rights Reserved
+; 
+; Declaration of subroutine for decoupling
+;
+;****************************************************************
+
+
+if(PVM_DecOnOff == On)
+{
+define delay DecD0 = {$PVM_DecD0}
+define delay DecD1 = {$PVM_DecD1}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 40 "/opt/Pv5.1/exp/stan/nmr/lists/pp/CSI.ppg" 2
+
+
+
+;definitions for the acquisition filter  
+;****************************************************************  
+define list<power> ns_list = {$PVM_ppgDoubleArray1}  
+define loopcounter ns_loop  
+
+;definitions for the water suppression scheme
+;****************************************************************
+define delay NP4
+define delay NP5
+define delay NP6
+define delay de4  
+
+fq1b receive				     	     \n if (CONFIG_instrument_type != Avance_I)           \n {                                                 \n dccorr                                         \n }                         \n if (CONFIG_preemp_type == GREAT_60)               \n {                                                 \n if (CONFIG_instrument_type != Avance_III)      \n {                                              \n 500m setnmr0|34|33|32                          \n }                                              \n else                                           \n {                                              \n 200u setnmr0|34|33|32                          \n }                                              \n }                                                 \n if (CONFIG_preemp_type == DPP_with_SW_Blanking)   \n {                                                 \n 10u ctrlgrad 0                                 \n 10u grad{(0)|(0)|(0) }			     \n 200u setnmr0|34|33|32                          \n }
+
+;preparation of the gradient ramps  
+;****************************************************************  
+
+lgrad PVM_ppgGradAmpArray1 = ACQ_size[1]  
+zgrad PVM_ppgGradAmpArray1 
+
+if( ACQ_dim == 2)
+{
+  lgrad PVM_ppgGradAmpArray2 = ACQ_size[1]  
+  zgrad PVM_ppgGradAmpArray2
+  lgrad PVM_ppgGradAmpArray3 = ACQ_size[1] 
+  zgrad PVM_ppgGradAmpArray3 
+}
+
+if( ACQ_dim >= 3)  
+{  
+  lgrad PVM_ppgGradAmpArray2 = ACQ_size[2]  
+  zgrad PVM_ppgGradAmpArray2
+}
+  
+if( ACQ_dim >= 4)  
+{  
+  lgrad PVM_ppgGradAmpArray3 = ACQ_size[3] 
+  zgrad PVM_ppgGradAmpArray3 
+}
+ 
+  
+lgrad slice = NSLICES  
+zslice  
+
+;**********************************************************
+; dummy scans
+;***********************************************************
+if (DS > 0)
+{
+dsstart, 5u
+;EXEC_begin Noe line 1587 (93) Noe()
+ 
+if(PVM_NoeOnOff == On)
+{
+  if (PVM_NoeMode == Continuous_Wave_Noe)
+     {  
+        3u pl1:f2
+        NoeD0  cw:f2
+        1u do:f2
+        NoeD1
+     }
+  if (PVM_NoeMode == Composite_Pulse_Noe)
+     {  
+        3u pl1:f2
+        NoeD0 cpds1:f2
+        1u do:f2
+        NoeD1
+     }
+}
+ 
+;EXEC_end   Noe line 1587 (93) Noe()
+;EXEC_begin WsSat line 1588 (94) WsSat(phase ph0)
+ 
+;------------------------------------------------------------------------------
+; NO_SUPPRESSION
+;------------------------------------------------------------------------------
+
+;WS_Mode == NO_SUPPRESSION
+if ( PVM_WsMode == 0 ) {
+
+;EXEC_begin SatSlices line 1098 (0) SatSlices()
+ 
+if(PVM_FovSatOnOff == 1)  
+{
+lgrad PVM_FovSatGrad = PVM_FovSatNSlices
+lgrad PVM_FovSatSpoiler = 1
+zgrad PVM_FovSatGrad
+zgrad PVM_FovSatSpoiler
+
+        50u     modlis5.res
+
+fov817,    SatD0 	modlis5:f1   	grad{PVM_FovSatGrad(100,,direct_scale)|(0)|(0)}
+        SatD1   gatepulse 1
+        SatP0:sp25          
+        SatD2   modlis5.inc	grad{(0)|(0)|PVM_FovSatSpoiler(100,,no_scale)}
+        igrad PVM_FovSatGrad
+       lo to fov817 times SatLp0
+        SatD0	        	grad{(0)|(0)|(0)}
+        20u
+}
+   
+;EXEC_end   SatSlices line 1098 (0) SatSlices()
+ 	 
+;EXEC_begin SatSlices line 1100 (0) SatSlices()
+ 
+if(PVM_FovSatOnOff == 1)  
+{
+lgrad PVM_FovSatGrad = PVM_FovSatNSlices
+lgrad PVM_FovSatSpoiler = 1
+zgrad PVM_FovSatGrad
+zgrad PVM_FovSatSpoiler
+
+        50u     modlis5.res
+
+fov716,    SatD0 	modlis5:f1   	grad{PVM_FovSatGrad(100,,direct_scale)|(0)|(0)}
+        SatD1   gatepulse 1
+        SatP0:sp25          
+        SatD2   modlis5.inc	grad{(0)|(0)|PVM_FovSatSpoiler(100,,no_scale)}
+        igrad PVM_FovSatGrad
+       lo to fov716 times SatLp0
+        SatD0	        	grad{(0)|(0)|(0)}
+        20u
+}
+   
+;EXEC_end   SatSlices line 1100 (0) SatSlices()
+ 	 
+;EXEC_begin SatSlices line 1102 (0) SatSlices()
+ 
+if(PVM_FovSatOnOff == 1)  
+{
+lgrad PVM_FovSatGrad = PVM_FovSatNSlices
+lgrad PVM_FovSatSpoiler = 1
+zgrad PVM_FovSatGrad
+zgrad PVM_FovSatSpoiler
+
+        50u     modlis5.res
+
+fov615,    SatD0 	modlis5:f1   	grad{PVM_FovSatGrad(100,,direct_scale)|(0)|(0)}
+        SatD1   gatepulse 1
+        SatP0:sp25          
+        SatD2   modlis5.inc	grad{(0)|(0)|PVM_FovSatSpoiler(100,,no_scale)}
+        igrad PVM_FovSatGrad
+       lo to fov615 times SatLp0
+        SatD0	        	grad{(0)|(0)|(0)}
+        20u
+}
+   
+;EXEC_end   SatSlices line 1102 (0) SatSlices()
+
+}
+
+;if ( PVM_WsMode != 0 ) {
+;0.1u	Wslist.res
+;0.1u 	Wslist:f1
+;}
+
+;-------------------------------------------------------------------------------
+; CHESS scheme
+;-------------------------------------------------------------------------------
+if ( PVM_WsMode == 1 ) {
+0.1u 	Wslist[0]:f1
+;first pulse
+if ( PVM_WsOnOff == On ) {
+	(WsP0:sp4 ph0):f1
+}
+if ( PVM_WsOnOff == Off ) {
+	WsNp0
+}
+	ChD1[0] grad{ (PVM_ChTrim[0]) | (PVM_ChTrim[1]) | (PVM_ChTrim[2]) }
+	ChD2[0] groff
+;EXEC_begin SatSlices line 1125 (0) SatSlices()
+ 
+if(PVM_FovSatOnOff == 1)  
+{
+lgrad PVM_FovSatGrad = PVM_FovSatNSlices
+lgrad PVM_FovSatSpoiler = 1
+zgrad PVM_FovSatGrad
+zgrad PVM_FovSatSpoiler
+
+        50u     modlis5.res
+
+fov514,    SatD0 	modlis5:f1   	grad{PVM_FovSatGrad(100,,direct_scale)|(0)|(0)}
+        SatD1   gatepulse 1
+        SatP0:sp25          
+        SatD2   modlis5.inc	grad{(0)|(0)|PVM_FovSatSpoiler(100,,no_scale)}
+        igrad PVM_FovSatGrad
+       lo to fov514 times SatLp0
+        SatD0	        	grad{(0)|(0)|(0)}
+        20u
+}
+   
+;EXEC_end   SatSlices line 1125 (0) SatSlices()
+0.1u 	Wslist[0]:f1
+
+;second pulse
+if ( PVM_WsOnOff == On ) {
+	(WsP1:sp5 ph0):f1
+}
+if ( PVM_WsOnOff == Off ) {
+	WsNp1
+}
+	ChD1[1] grad{ (PVM_ChTrim[3]) | (PVM_ChTrim[4]) | (PVM_ChTrim[5]) }
+	ChD2[1] groff
+;EXEC_begin SatSlices line 1137 (0) SatSlices()
+ 
+if(PVM_FovSatOnOff == 1)  
+{
+lgrad PVM_FovSatGrad = PVM_FovSatNSlices
+lgrad PVM_FovSatSpoiler = 1
+zgrad PVM_FovSatGrad
+zgrad PVM_FovSatSpoiler
+
+        50u     modlis5.res
+
+fov413,    SatD0 	modlis5:f1   	grad{PVM_FovSatGrad(100,,direct_scale)|(0)|(0)}
+        SatD1   gatepulse 1
+        SatP0:sp25          
+        SatD2   modlis5.inc	grad{(0)|(0)|PVM_FovSatSpoiler(100,,no_scale)}
+        igrad PVM_FovSatGrad
+       lo to fov413 times SatLp0
+        SatD0	        	grad{(0)|(0)|(0)}
+        20u
+}
+   
+;EXEC_end   SatSlices line 1137 (0) SatSlices()
+0.1u 	Wslist[0]:f1
+
+;third pulse
+if ( PVM_WsOnOff == On ) {
+	(WsP2:sp6 ph0):f1
+}
+if ( PVM_WsOnOff == Off ) {
+        WsNp2	
+}
+	ChD1[2] grad{ (PVM_ChTrim[6]) | (PVM_ChTrim[7]) | (PVM_ChTrim[8]) }
+	ChD2[2] groff
+;EXEC_begin SatSlices line 1149 (0) SatSlices()
+ 
+if(PVM_FovSatOnOff == 1)  
+{
+lgrad PVM_FovSatGrad = PVM_FovSatNSlices
+lgrad PVM_FovSatSpoiler = 1
+zgrad PVM_FovSatGrad
+zgrad PVM_FovSatSpoiler
+
+        50u     modlis5.res
+
+fov312,    SatD0 	modlis5:f1   	grad{PVM_FovSatGrad(100,,direct_scale)|(0)|(0)}
+        SatD1   gatepulse 1
+        SatP0:sp25          
+        SatD2   modlis5.inc	grad{(0)|(0)|PVM_FovSatSpoiler(100,,no_scale)}
+        igrad PVM_FovSatGrad
+       lo to fov312 times SatLp0
+        SatD0	        	grad{(0)|(0)|(0)}
+        20u
+}
+   
+;EXEC_end   SatSlices line 1149 (0) SatSlices()
+
+};end of CHESS
+
+
+;-------------------------------------------------------------------------------
+; VAPOR scheme
+;-------------------------------------------------------------------------------
+if ( PVM_WsMode == 2 ) {
+0.1u 	Wslist[0]:f1
+;first pulse
+if ( PVM_WsOnOff == On ) {
+	(WsP0:sp4 ph0):f1
+}
+if ( PVM_WsOnOff == Off ) {
+	WsNp0
+}
+	VpD1[0] grad{ (PVM_VpTrim[0]) | (PVM_VpTrim[1]) | (PVM_VpTrim[2]) }
+	VpD2[0] groff
+
+
+;second pulse
+if ( PVM_WsOnOff == On ) {
+	(WsP0:sp4 ph0):f1
+}
+if ( PVM_WsOnOff == Off ) {
+        WsNp0	
+}
+	VpD1[1] grad{ (PVM_VpTrim[3]) | (PVM_VpTrim[4]) | (PVM_VpTrim[5]) }
+	VpD2[1] groff
+
+
+;third pulse
+if ( PVM_WsOnOff == On ) {
+	(WsP1:sp5 ph0):f1
+}
+if ( PVM_WsOnOff == Off ) {
+	WsNp1	
+}
+	VpD1[2] grad{ (PVM_VpTrim[6]) | (PVM_VpTrim[7]) | (PVM_VpTrim[8]) }
+	VpD2[2] groff
+
+;fourth pulse
+if ( PVM_WsOnOff == On ) {
+	(WsP0:sp4 ph0):f1
+}
+if ( PVM_WsOnOff == Off ) {
+	WsNp0
+}
+
+;EXEC_begin SatSlices line 1199 (0) SatSlices()
+ 
+if(PVM_FovSatOnOff == 1)  
+{
+lgrad PVM_FovSatGrad = PVM_FovSatNSlices
+lgrad PVM_FovSatSpoiler = 1
+zgrad PVM_FovSatGrad
+zgrad PVM_FovSatSpoiler
+
+        50u     modlis5.res
+
+fov211,    SatD0 	modlis5:f1   	grad{PVM_FovSatGrad(100,,direct_scale)|(0)|(0)}
+        SatD1   gatepulse 1
+        SatP0:sp25          
+        SatD2   modlis5.inc	grad{(0)|(0)|PVM_FovSatSpoiler(100,,no_scale)}
+        igrad PVM_FovSatGrad
+       lo to fov211 times SatLp0
+        SatD0	        	grad{(0)|(0)|(0)}
+        20u
+}
+   
+;EXEC_end   SatSlices line 1199 (0) SatSlices()
+	VpD1[3] grad{ (PVM_VpTrim[9]) | (PVM_VpTrim[10]) | (PVM_VpTrim[11]) }
+	VpD2[3] groff Wslist[0]:f1
+
+
+;5.th pulse
+if ( PVM_WsOnOff == On ) {
+(	WsP1:sp5 ph0):f1
+}
+if ( PVM_WsOnOff == Off ) {
+	WsNp1
+}
+	VpD1[4] grad{ (PVM_VpTrim[12]) | (PVM_VpTrim[13]) | (PVM_VpTrim[14]) }
+	VpD2[4] groff
+;EXEC_begin SatSlices line 1213 (0) SatSlices()
+ 
+if(PVM_FovSatOnOff == 1)  
+{
+lgrad PVM_FovSatGrad = PVM_FovSatNSlices
+lgrad PVM_FovSatSpoiler = 1
+zgrad PVM_FovSatGrad
+zgrad PVM_FovSatSpoiler
+
+        50u     modlis5.res
+
+fov110,    SatD0 	modlis5:f1   	grad{PVM_FovSatGrad(100,,direct_scale)|(0)|(0)}
+        SatD1   gatepulse 1
+        SatP0:sp25          
+        SatD2   modlis5.inc	grad{(0)|(0)|PVM_FovSatSpoiler(100,,no_scale)}
+        igrad PVM_FovSatGrad
+       lo to fov110 times SatLp0
+        SatD0	        	grad{(0)|(0)|(0)}
+        20u
+}
+   
+;EXEC_end   SatSlices line 1213 (0) SatSlices()
+0.1u 	Wslist[0]:f1
+
+
+;6.th pulse
+if ( PVM_WsOnOff == On ) {
+	(WsP0:sp4 ph0):f1
+}
+if ( PVM_WsOnOff == Off ) {
+	WsNp0	
+}
+	VpD1[5] grad{ (PVM_VpTrim[15]) | (PVM_VpTrim[16]) | (PVM_VpTrim[17]) }
+	VpD2[5] groff
+
+
+;7.th pulse
+if ( PVM_WsOnOff == On ) {
+	(WsP1:sp5 ph0):f1
+}
+if ( PVM_WsOnOff == Off ) {
+	WsNp1
+}
+	VpD1[6] grad{ (PVM_VpTrim[18]) | (PVM_VpTrim[19]) | (PVM_VpTrim[20]) }
+	VpD2[6] groff
+;EXEC_begin SatSlices line 1237 (0) SatSlices()
+ 
+if(PVM_FovSatOnOff == 1)  
+{
+lgrad PVM_FovSatGrad = PVM_FovSatNSlices
+lgrad PVM_FovSatSpoiler = 1
+zgrad PVM_FovSatGrad
+zgrad PVM_FovSatSpoiler
+
+        50u     modlis5.res
+
+fov09,    SatD0 	modlis5:f1   	grad{PVM_FovSatGrad(100,,direct_scale)|(0)|(0)}
+        SatD1   gatepulse 1
+        SatP0:sp25          
+        SatD2   modlis5.inc	grad{(0)|(0)|PVM_FovSatSpoiler(100,,no_scale)}
+        igrad PVM_FovSatGrad
+       lo to fov09 times SatLp0
+        SatD0	        	grad{(0)|(0)|(0)}
+        20u
+}
+   
+;EXEC_end   SatSlices line 1237 (0) SatSlices()
+
+};end vapor
+ ; end WsSat subroutine
+;EXEC_end   WsSat line 1588 (94) WsSat(phase ph0)
+       10u  fq1:f1                   
+       d4       grad{(0)|(0)|(t0)}                 ;slice gradient on 
+       d8 gatepulse 1
+       p0:sp0  ph0                                 ;excitation pulse 
+       d4  groff
+
+       if (PVM_ppgMode1 == 1)                      ;for spin echo only
+       {
+         d1     fq2:f1        
+	 d20    grad{(0)|(0)|(t7)}                 ;spoiler
+	 d4     grad{(0)|(0)|(t5)}   gatepulse 1   ;slice gradient
+         d8     gatepulse 1
+	 p1:sp1 ph1                                ;refocusing pulse
+
+         if  ( ACQ_dim != 3 )                      ;spoiler
+         {                                         ;(For 2D the spoiler is
+	   d20    grad{(0)|(0)|(t8)}               ;contained in slice refocus)
+         }
+       }
+       if (PVM_ppgMode1 != 2)                      ;not for PRESS  
+       {
+          d5      grad{(0)|(0)|(t1)}               ;slice refocus gradient
+       }
+       if (PVM_ppgMode1 == 2)                      ;PRESS
+       {
+         d5     groff  fq2:f1 
+         d1                                        ;first echo time
+         d20    grad{(0)|(t8)|(t8)+(t1)}           ;spoiler
+         d4     grad{(0)     |(t5)|(0)      }      ;second slice
+         d8 fq1:f1  gatepulse 1
+         p1:sp1  ph3
+	 d8
+         d20    grad{(0)|(t8)+(t11)|(t8)+(t12)}    ;spoiler 
+         d2     groff                              ;second echo time 
+         d20    grad{(t8)|(0)|(0)}                 ;spoiler 
+         d4     grad{(t6)|(0)|(0)}                 ;third slice
+         d8 fq1:f1  gatepulse 1  
+         p2:sp2  ph4
+         d8
+         d20    grad{(t8)+(t10)|(0)|(0)}           ;spoiler
+         d4     groff
+	 d5
+       }
+       d4      groff fq8b:f1
+;EXEC_begin decoup line 1633 (139) decoup(delay decodur, phase ph31, phase ph30)
+ 
+  if (PVM_DecOnOff == Off)
+     {
+     3u
+     decodur
+     rdepa						 \n deparx     adc ph31 setrtp1|2 syrec fqatofqb:f1 \n derxadc     ph30:r setrtp1|1 			 \n deadc      setrtp1|0|8
+     4u        cpdngs30:f1
+     aqq
+     }
+  if (PVM_DecOnOff == On)
+     {
+     if (PVM_DecMode == Continuous_Wave)
+     {
+     3u pl2:f2
+     decodur
+     rdepa						 \n deparx     adc ph31 setrtp1|2 syrec fqatofqb:f1 \n derxadc     ph30:r setrtp1|1 			 \n deadc      setrtp1|0|8
+     4u        cpdngs30:f1
+     DecD0 cw:f2
+     DecD1 do:f2
+     }
+     if (PVM_DecMode == Composite_Pulse)
+     {
+     3u  pl2:f2
+     decodur
+     rdepa						 \n deparx     adc ph31 setrtp1|2 syrec fqatofqb:f1 \n derxadc     ph30:r setrtp1|1 			 \n deadc      setrtp1|0|8
+     4u        cpdngs30:f1
+     DecD0 cpd2:f2
+     DecD1 do:f2
+     }
+     }
+ 
+;EXEC_end   decoup line 1633 (139) decoup(delay decodur, phase ph31, phase ph30)
+       d20     grad{(0)|(0)|(t8)}                  ; spoiler
+       d4      groff  
+       10u     eoscnp
+       islice                                      ;next slice
+       d0                                          ;wait for repetition time
+       5u
+       lo to dsstart times NSLICES                 ;slices loop
+       zslice
+       lo to dsstart times DS                      ;dummy scans loop
+}
+;***************************************************************
+; end of dummy scans
+;**************************************************************
+
+;*************************************************************
+; start of acquisition
+;*************************************************************
+
+start, 3u
+       2u
+
+;---------evaluation of the current NS parameter------------------  
+       if ( ACQ_scan_type == Scan_Experiment )
+       {
+         if "ns_list == 0" goto noscan        ; perform scans if ns_list > 0
+         1u
+         "ns_loop = ns_list"                  ; set ns_loop to ns_list[i]
+       }
+       if ( ACQ_scan_type == Setup_Experiment )
+       {
+         "ns_loop = 1"
+       }
+
+;---------ws & ovs module-----------------------------------------
+;EXEC_begin Noe line 1668 (174) Noe()
+ 
+if(PVM_NoeOnOff == On)
+{
+  if (PVM_NoeMode == Continuous_Wave_Noe)
+     {  
+        3u pl1:f2
+        NoeD0  cw:f2
+        1u do:f2
+        NoeD1
+     }
+  if (PVM_NoeMode == Composite_Pulse_Noe)
+     {  
+        3u pl1:f2
+        NoeD0 cpds1:f2
+        1u do:f2
+        NoeD1
+     }
+}
+ 
+;EXEC_end   Noe line 1668 (174) Noe()
+;EXEC_begin WsSat line 1669 (175) WsSat(phase ph0)
+ 
+;------------------------------------------------------------------------------
+; NO_SUPPRESSION
+;------------------------------------------------------------------------------
+
+;WS_Mode == NO_SUPPRESSION
+if ( PVM_WsMode == 0 ) {
+
+;EXEC_begin SatSlices line 1098 (0) SatSlices()
+ 
+if(PVM_FovSatOnOff == 1)  
+{
+lgrad PVM_FovSatGrad = PVM_FovSatNSlices
+lgrad PVM_FovSatSpoiler = 1
+zgrad PVM_FovSatGrad
+zgrad PVM_FovSatSpoiler
+
+        50u     modlis5.res
+
+fov826,    SatD0 	modlis5:f1   	grad{PVM_FovSatGrad(100,,direct_scale)|(0)|(0)}
+        SatD1   gatepulse 1
+        SatP0:sp25          
+        SatD2   modlis5.inc	grad{(0)|(0)|PVM_FovSatSpoiler(100,,no_scale)}
+        igrad PVM_FovSatGrad
+       lo to fov826 times SatLp0
+        SatD0	        	grad{(0)|(0)|(0)}
+        20u
+}
+   
+;EXEC_end   SatSlices line 1098 (0) SatSlices()
+ 	 
+;EXEC_begin SatSlices line 1100 (0) SatSlices()
+ 
+if(PVM_FovSatOnOff == 1)  
+{
+lgrad PVM_FovSatGrad = PVM_FovSatNSlices
+lgrad PVM_FovSatSpoiler = 1
+zgrad PVM_FovSatGrad
+zgrad PVM_FovSatSpoiler
+
+        50u     modlis5.res
+
+fov725,    SatD0 	modlis5:f1   	grad{PVM_FovSatGrad(100,,direct_scale)|(0)|(0)}
+        SatD1   gatepulse 1
+        SatP0:sp25          
+        SatD2   modlis5.inc	grad{(0)|(0)|PVM_FovSatSpoiler(100,,no_scale)}
+        igrad PVM_FovSatGrad
+       lo to fov725 times SatLp0
+        SatD0	        	grad{(0)|(0)|(0)}
+        20u
+}
+   
+;EXEC_end   SatSlices line 1100 (0) SatSlices()
+ 	 
+;EXEC_begin SatSlices line 1102 (0) SatSlices()
+ 
+if(PVM_FovSatOnOff == 1)  
+{
+lgrad PVM_FovSatGrad = PVM_FovSatNSlices
+lgrad PVM_FovSatSpoiler = 1
+zgrad PVM_FovSatGrad
+zgrad PVM_FovSatSpoiler
+
+        50u     modlis5.res
+
+fov624,    SatD0 	modlis5:f1   	grad{PVM_FovSatGrad(100,,direct_scale)|(0)|(0)}
+        SatD1   gatepulse 1
+        SatP0:sp25          
+        SatD2   modlis5.inc	grad{(0)|(0)|PVM_FovSatSpoiler(100,,no_scale)}
+        igrad PVM_FovSatGrad
+       lo to fov624 times SatLp0
+        SatD0	        	grad{(0)|(0)|(0)}
+        20u
+}
+   
+;EXEC_end   SatSlices line 1102 (0) SatSlices()
+
+}
+
+;if ( PVM_WsMode != 0 ) {
+;0.1u	Wslist.res
+;0.1u 	Wslist:f1
+;}
+
+;-------------------------------------------------------------------------------
+; CHESS scheme
+;-------------------------------------------------------------------------------
+if ( PVM_WsMode == 1 ) {
+0.1u 	Wslist[0]:f1
+;first pulse
+if ( PVM_WsOnOff == On ) {
+	(WsP0:sp4 ph0):f1
+}
+if ( PVM_WsOnOff == Off ) {
+	WsNp0
+}
+	ChD1[0] grad{ (PVM_ChTrim[0]) | (PVM_ChTrim[1]) | (PVM_ChTrim[2]) }
+	ChD2[0] groff
+;EXEC_begin SatSlices line 1125 (0) SatSlices()
+ 
+if(PVM_FovSatOnOff == 1)  
+{
+lgrad PVM_FovSatGrad = PVM_FovSatNSlices
+lgrad PVM_FovSatSpoiler = 1
+zgrad PVM_FovSatGrad
+zgrad PVM_FovSatSpoiler
+
+        50u     modlis5.res
+
+fov523,    SatD0 	modlis5:f1   	grad{PVM_FovSatGrad(100,,direct_scale)|(0)|(0)}
+        SatD1   gatepulse 1
+        SatP0:sp25          
+        SatD2   modlis5.inc	grad{(0)|(0)|PVM_FovSatSpoiler(100,,no_scale)}
+        igrad PVM_FovSatGrad
+       lo to fov523 times SatLp0
+        SatD0	        	grad{(0)|(0)|(0)}
+        20u
+}
+   
+;EXEC_end   SatSlices line 1125 (0) SatSlices()
+0.1u 	Wslist[0]:f1
+
+;second pulse
+if ( PVM_WsOnOff == On ) {
+	(WsP1:sp5 ph0):f1
+}
+if ( PVM_WsOnOff == Off ) {
+	WsNp1
+}
+	ChD1[1] grad{ (PVM_ChTrim[3]) | (PVM_ChTrim[4]) | (PVM_ChTrim[5]) }
+	ChD2[1] groff
+;EXEC_begin SatSlices line 1137 (0) SatSlices()
+ 
+if(PVM_FovSatOnOff == 1)  
+{
+lgrad PVM_FovSatGrad = PVM_FovSatNSlices
+lgrad PVM_FovSatSpoiler = 1
+zgrad PVM_FovSatGrad
+zgrad PVM_FovSatSpoiler
+
+        50u     modlis5.res
+
+fov422,    SatD0 	modlis5:f1   	grad{PVM_FovSatGrad(100,,direct_scale)|(0)|(0)}
+        SatD1   gatepulse 1
+        SatP0:sp25          
+        SatD2   modlis5.inc	grad{(0)|(0)|PVM_FovSatSpoiler(100,,no_scale)}
+        igrad PVM_FovSatGrad
+       lo to fov422 times SatLp0
+        SatD0	        	grad{(0)|(0)|(0)}
+        20u
+}
+   
+;EXEC_end   SatSlices line 1137 (0) SatSlices()
+0.1u 	Wslist[0]:f1
+
+;third pulse
+if ( PVM_WsOnOff == On ) {
+	(WsP2:sp6 ph0):f1
+}
+if ( PVM_WsOnOff == Off ) {
+        WsNp2	
+}
+	ChD1[2] grad{ (PVM_ChTrim[6]) | (PVM_ChTrim[7]) | (PVM_ChTrim[8]) }
+	ChD2[2] groff
+;EXEC_begin SatSlices line 1149 (0) SatSlices()
+ 
+if(PVM_FovSatOnOff == 1)  
+{
+lgrad PVM_FovSatGrad = PVM_FovSatNSlices
+lgrad PVM_FovSatSpoiler = 1
+zgrad PVM_FovSatGrad
+zgrad PVM_FovSatSpoiler
+
+        50u     modlis5.res
+
+fov321,    SatD0 	modlis5:f1   	grad{PVM_FovSatGrad(100,,direct_scale)|(0)|(0)}
+        SatD1   gatepulse 1
+        SatP0:sp25          
+        SatD2   modlis5.inc	grad{(0)|(0)|PVM_FovSatSpoiler(100,,no_scale)}
+        igrad PVM_FovSatGrad
+       lo to fov321 times SatLp0
+        SatD0	        	grad{(0)|(0)|(0)}
+        20u
+}
+   
+;EXEC_end   SatSlices line 1149 (0) SatSlices()
+
+};end of CHESS
+
+
+;-------------------------------------------------------------------------------
+; VAPOR scheme
+;-------------------------------------------------------------------------------
+if ( PVM_WsMode == 2 ) {
+0.1u 	Wslist[0]:f1
+;first pulse
+if ( PVM_WsOnOff == On ) {
+	(WsP0:sp4 ph0):f1
+}
+if ( PVM_WsOnOff == Off ) {
+	WsNp0
+}
+	VpD1[0] grad{ (PVM_VpTrim[0]) | (PVM_VpTrim[1]) | (PVM_VpTrim[2]) }
+	VpD2[0] groff
+
+
+;second pulse
+if ( PVM_WsOnOff == On ) {
+	(WsP0:sp4 ph0):f1
+}
+if ( PVM_WsOnOff == Off ) {
+        WsNp0	
+}
+	VpD1[1] grad{ (PVM_VpTrim[3]) | (PVM_VpTrim[4]) | (PVM_VpTrim[5]) }
+	VpD2[1] groff
+
+
+;third pulse
+if ( PVM_WsOnOff == On ) {
+	(WsP1:sp5 ph0):f1
+}
+if ( PVM_WsOnOff == Off ) {
+	WsNp1	
+}
+	VpD1[2] grad{ (PVM_VpTrim[6]) | (PVM_VpTrim[7]) | (PVM_VpTrim[8]) }
+	VpD2[2] groff
+
+;fourth pulse
+if ( PVM_WsOnOff == On ) {
+	(WsP0:sp4 ph0):f1
+}
+if ( PVM_WsOnOff == Off ) {
+	WsNp0
+}
+
+;EXEC_begin SatSlices line 1199 (0) SatSlices()
+ 
+if(PVM_FovSatOnOff == 1)  
+{
+lgrad PVM_FovSatGrad = PVM_FovSatNSlices
+lgrad PVM_FovSatSpoiler = 1
+zgrad PVM_FovSatGrad
+zgrad PVM_FovSatSpoiler
+
+        50u     modlis5.res
+
+fov220,    SatD0 	modlis5:f1   	grad{PVM_FovSatGrad(100,,direct_scale)|(0)|(0)}
+        SatD1   gatepulse 1
+        SatP0:sp25          
+        SatD2   modlis5.inc	grad{(0)|(0)|PVM_FovSatSpoiler(100,,no_scale)}
+        igrad PVM_FovSatGrad
+       lo to fov220 times SatLp0
+        SatD0	        	grad{(0)|(0)|(0)}
+        20u
+}
+   
+;EXEC_end   SatSlices line 1199 (0) SatSlices()
+	VpD1[3] grad{ (PVM_VpTrim[9]) | (PVM_VpTrim[10]) | (PVM_VpTrim[11]) }
+	VpD2[3] groff Wslist[0]:f1
+
+
+;5.th pulse
+if ( PVM_WsOnOff == On ) {
+(	WsP1:sp5 ph0):f1
+}
+if ( PVM_WsOnOff == Off ) {
+	WsNp1
+}
+	VpD1[4] grad{ (PVM_VpTrim[12]) | (PVM_VpTrim[13]) | (PVM_VpTrim[14]) }
+	VpD2[4] groff
+;EXEC_begin SatSlices line 1213 (0) SatSlices()
+ 
+if(PVM_FovSatOnOff == 1)  
+{
+lgrad PVM_FovSatGrad = PVM_FovSatNSlices
+lgrad PVM_FovSatSpoiler = 1
+zgrad PVM_FovSatGrad
+zgrad PVM_FovSatSpoiler
+
+        50u     modlis5.res
+
+fov119,    SatD0 	modlis5:f1   	grad{PVM_FovSatGrad(100,,direct_scale)|(0)|(0)}
+        SatD1   gatepulse 1
+        SatP0:sp25          
+        SatD2   modlis5.inc	grad{(0)|(0)|PVM_FovSatSpoiler(100,,no_scale)}
+        igrad PVM_FovSatGrad
+       lo to fov119 times SatLp0
+        SatD0	        	grad{(0)|(0)|(0)}
+        20u
+}
+   
+;EXEC_end   SatSlices line 1213 (0) SatSlices()
+0.1u 	Wslist[0]:f1
+
+
+;6.th pulse
+if ( PVM_WsOnOff == On ) {
+	(WsP0:sp4 ph0):f1
+}
+if ( PVM_WsOnOff == Off ) {
+	WsNp0	
+}
+	VpD1[5] grad{ (PVM_VpTrim[15]) | (PVM_VpTrim[16]) | (PVM_VpTrim[17]) }
+	VpD2[5] groff
+
+
+;7.th pulse
+if ( PVM_WsOnOff == On ) {
+	(WsP1:sp5 ph0):f1
+}
+if ( PVM_WsOnOff == Off ) {
+	WsNp1
+}
+	VpD1[6] grad{ (PVM_VpTrim[18]) | (PVM_VpTrim[19]) | (PVM_VpTrim[20]) }
+	VpD2[6] groff
+;EXEC_begin SatSlices line 1237 (0) SatSlices()
+ 
+if(PVM_FovSatOnOff == 1)  
+{
+lgrad PVM_FovSatGrad = PVM_FovSatNSlices
+lgrad PVM_FovSatSpoiler = 1
+zgrad PVM_FovSatGrad
+zgrad PVM_FovSatSpoiler
+
+        50u     modlis5.res
+
+fov018,    SatD0 	modlis5:f1   	grad{PVM_FovSatGrad(100,,direct_scale)|(0)|(0)}
+        SatD1   gatepulse 1
+        SatP0:sp25          
+        SatD2   modlis5.inc	grad{(0)|(0)|PVM_FovSatSpoiler(100,,no_scale)}
+        igrad PVM_FovSatGrad
+       lo to fov018 times SatLp0
+        SatD0	        	grad{(0)|(0)|(0)}
+        20u
+}
+   
+;EXEC_end   SatSlices line 1237 (0) SatSlices()
+
+};end vapor
+ ; end WsSat subroutine
+;EXEC_end   WsSat line 1669 (175) WsSat(phase ph0)
+       10u  fq1:f1 
+       d4        grad{(0)|(0)|(t0)}           ; slice gradient on
+       d8 gatepulse 1
+       p0:sp0  ph0                            ; excitation pulse
+       d4  groff
+
+       if (PVM_ppgMode1 == 1)                 ;only for spin echo
+       {
+         d1                                   ;echo time
+	 d20    grad{(0)|(0)|(t7)}            ;spoiler
+	 d4     grad{(0)|(0)|(t5)}            ;slice gradient
+         d8     fq2:f1   gatepulse 1  
+	 p1:sp1 ph1                           ;refocusing pulse
+         d8
+         if  ( ACQ_dim != 3 )
+         {
+	   d20    grad{(0)|(0)|(t8)}          ;second spoiler
+         }
+       }
+       if (PVM_ppgMode1 != 2)                       ;not for PRESS  
+       {     
+         if ( ACQ_scan_type != Setup_Experiment )     ;for scan experiment: with phase encoding
+         { 
+           d5   grad{PVM_ppgGradAmpArray1(t2)|PVM_ppgGradAmpArray2(t3)|(t1)+PVM_ppgGradAmpArray3(t4)}     
+         }
+         if ( ACQ_scan_type == Setup_Experiment )      ;for setup experiment: no phase encoding
+         {
+           d5     grad{(0)|(0)|(t1)}
+         }
+       }
+       if (PVM_ppgMode1 == 2)                       ;PRESS
+       {
+         d5     groff  fq2:f1 
+         d1                                           ;first echo time
+         d20     grad{(0)|(t8)|(t8)+(t1)}                ;spoiler
+         d4     grad{(0)|(t5)|(0)}                  ;second slice
+         d8 fq1:f1  gatepulse 1  
+         p1:sp1  ph3
+         d8
+         d20    grad{(0)|(t8)+(t11)|(t8)+(t12)}                   ;spoiler 
+         d2     groff                                ;second echo time 
+         d20    grad{(t8)|(0)|(0)}                 ;spoiler 
+         d4     grad{(t6)|(0)|(0)}                  ;third slice
+         d8 fq1:f1  gatepulse 1  
+         p2:sp2  ph4
+         d8
+         d20    grad{(t8)+(t10)|(0)|(0)}             ;spoiler
+         d4     groff
+	 if ( ACQ_scan_type != Setup_Experiment )
+	 {
+            d5     grad{PVM_ppgGradAmpArray1(t2)|PVM_ppgGradAmpArray2(t3)|PVM_ppgGradAmpArray3(t4)}
+         }
+	 if( ACQ_scan_type == Setup_Experiment )
+         {
+	    d5
+         }
+       }
+
+       d4     groff   fq8b:f1                             
+       if (PVM_ppgMode1 == 0)                       ;only for fid
+       {
+;EXEC_begin decoup line 1731 (237) decoup(delay decodur, phase ph31, phase ph30)
+ 
+  if (PVM_DecOnOff == Off)
+     {
+     3u
+     decodur
+     rdepa						 \n deparx     adc ph31 setrtp1|2 syrec fqatofqb:f1 \n derxadc     ph30:r setrtp1|1 			 \n deadc      setrtp1|0|8
+     4u        cpdngs30:f1
+     aqq
+     }
+  if (PVM_DecOnOff == On)
+     {
+     if (PVM_DecMode == Continuous_Wave)
+     {
+     3u pl2:f2
+     decodur
+     rdepa						 \n deparx     adc ph31 setrtp1|2 syrec fqatofqb:f1 \n derxadc     ph30:r setrtp1|1 			 \n deadc      setrtp1|0|8
+     4u        cpdngs30:f1
+     DecD0 cw:f2
+     DecD1 do:f2
+     }
+     if (PVM_DecMode == Composite_Pulse)
+     {
+     3u  pl2:f2
+     decodur
+     rdepa						 \n deparx     adc ph31 setrtp1|2 syrec fqatofqb:f1 \n derxadc     ph30:r setrtp1|1 			 \n deadc      setrtp1|0|8
+     4u        cpdngs30:f1
+     DecD0 cpd2:f2
+     DecD1 do:f2
+     }
+     }
+ 
+;EXEC_end   decoup line 1731 (237) decoup(delay decodur, phase ph31, phase ph30)
+       }
+       if (PVM_ppgMode1 >= 1)                       ;only for spin echo
+       {
+;EXEC_begin decoup line 1735 (241) decoup(delay decodur, phase ph31, phase ph30)
+ 
+  if (PVM_DecOnOff == Off)
+     {
+     3u
+     decodur
+     rdepa						 \n deparx     adc ph31 setrtp1|2 syrec fqatofqb:f1 \n derxadc     ph30:r setrtp1|1 			 \n deadc      setrtp1|0|8
+     4u        cpdngs30:f1
+     aqq
+     }
+  if (PVM_DecOnOff == On)
+     {
+     if (PVM_DecMode == Continuous_Wave)
+     {
+     3u pl2:f2
+     decodur
+     rdepa						 \n deparx     adc ph31 setrtp1|2 syrec fqatofqb:f1 \n derxadc     ph30:r setrtp1|1 			 \n deadc      setrtp1|0|8
+     4u        cpdngs30:f1
+     DecD0 cw:f2
+     DecD1 do:f2
+     }
+     if (PVM_DecMode == Composite_Pulse)
+     {
+     3u  pl2:f2
+     decodur
+     rdepa						 \n deparx     adc ph31 setrtp1|2 syrec fqatofqb:f1 \n derxadc     ph30:r setrtp1|1 			 \n deadc      setrtp1|0|8
+     4u        cpdngs30:f1
+     DecD0 cpd2:f2
+     DecD1 do:f2
+     }
+     }
+ 
+;EXEC_end   decoup line 1735 (241) decoup(delay decodur, phase ph31, phase ph30)
+       }
+       d20     grad{(0)|(0)|(t8)}                    ; spoiler
+       d4      groff 
+       10u     eoscnp
+       islice
+       d0                                            ;repetition time
+       lo to start times NSLICES
+       zslice
+       5u ipp0  ipp1  ipp3                        ;increase all phases
+       lo to start times NA
+       lo to start times ns_loop
+
+noscan, 5u   ns_list.inc                              ;increment the current NS pointer
+       ;5u   rpp0  rpp1  rpp2 
+
+; phase encoding loops
+if( ACQ_dim >= 3 )
+{
+;----------------------------------1d loop--------------------------
+       igrad PVM_ppgGradAmpArray1
+       lo to start times ACQ_size[1]  
+       zgrad PVM_ppgGradAmpArray1  
+  
+;----------------------------------2d loop--------------------------  
+       5u
+       igrad PVM_ppgGradAmpArray2
+       lo to start times ACQ_size[2]  
+       zgrad PVM_ppgGradAmpArray2  
+}  
+;----------------------------------3d loop--------------------------  
+if( ACQ_dim >= 4 )  
+{  
+       igrad PVM_ppgGradAmpArray3  
+       lo to start times ACQ_size[3]  
+       zgrad PVM_ppgGradAmpArray3  
+}  
+if(ACQ_dim == 2)
+{ 
+       ;for dim == 2 (expMode = file) all gradients are set for all steps         
+       igrad PVM_ppgGradAmpArray1 
+       igrad PVM_ppgGradAmpArray2 
+       igrad PVM_ppgGradAmpArray3  
+       lo to start times ACQ_size[1]  
+       zgrad PVM_ppgGradAmpArray3  
+       zgrad PVM_ppgGradAmpArray2 
+       zgrad PVM_ppgGradAmpArray3  
+}  
+
+       5u  
+       lo to start times NAE 
+       5u
+       lo to start times NR 
+       if (ACQ_scan_type != Scan_Experiment) \n{ \n goto start \n}
+       exit
+  
+
+
+
+;ph0 : phase pulse 1 (FID/SE/PRESS)
+ph0=0          ;2 1 3  
+;ph1 : phase pulse 2 (SE)
+ph1=1           ;
+;ph3 : phase pulse 2 (PRESS)
+ph3 = 1 ;2            ;second pulse (PRESS)
+;ph4 : phase pulse 3 (PRESS)
+ph4 = 1               ;third pulse (PRESS)
+;ph31: receiver phase (FID/SE/PRESS)
+ph31= 0        ;2 0   ;receiver phase
+;ph30: reference phase (FID/SE/PRESS)
+ph30=0

@@ -1,0 +1,120 @@
+##TITLE=Parameter List
+##JCAMPDX=4.24
+##DATATYPE=Parameter Values
+##ORIGIN=Bruker BioSpin MRI GmbH
+##OWNER=mri
+$$ Wed Mar  6 17:10:47 2019 CET (UT+1h)  mri
+$$ /BiospecData/data/mri/nmr/sp190306.Sa4/22/pdata/1/reco
+##$RECO_mode=FT_MODE
+##$RecoAutoDerive=Yes
+##$RECO_inp_order=NO_REORDERING
+##$RECO_inp_size=( 3 )
+2048 13 13
+##$RECO_ft_size=( 3 )
+2048 32 32
+##$RECO_fov=( 3 )
+1.76 1.76 1.76
+##$RECO_size=( 3 )
+2048 32 32
+$$ @vis= RECO_mode RecoAutoDerive RECO_inp_order RECO_ft_size RECO_fov
+##$RECO_offset=( 3, 1 )
+0 0 0
+##$RECO_regrid_mode=NO_REGRID
+##$RECO_regrid_offset=0
+##$RECO_ramp_gap=0
+##$RECO_ramp_time=0
+##$RECO_ne_mode=NO_NAV_DATA
+##$RECO_ne_dist=NeNoInterleave
+##$RECO_ne_dens=NeCorrPerScan
+##$RECO_ne_type=NAV_PHASE
+##$RECO_ne_vals=( 1, 2 )
+0 0
+##$RECO_bc_mode=( 3 )
+NO_BC NO_BC NO_BC
+##$RECO_bc_start=( 3 )
+1536 10 10
+##$RECO_bc_len=( 3 )
+512 3 3
+##$RECO_dc_offset=( 2 )
+0 0
+##$RECO_dc_divisor=1
+##$RECO_bc_coroff=( 3 )
+0 0 0
+##$RECO_qopts=( 3 )
+NO_QOPTS COMPLEX_CONJUGATE NO_QOPTS
+##$RECO_wdw_mode=( 3 )
+NO_WDW NO_WDW NO_WDW
+$$ @vis= RECO_size RECO_regrid_mode RECO_ne_mode RECO_bc_mode RECO_qopts
+##$RECO_lb=( 3 )
+-0.5 -0.5 -0.5
+##$RECO_sw=( 3 )
+4006.41025641026 1 1
+##$RECO_gb=( 3 )
+0.5 0.5 0.5
+##$RECO_sbs=( 3 )
+1 1 1
+##$RECO_tm1=( 3 )
+0.25 0.25 0.25
+##$RECO_tm2=( 3 )
+0.75 0.75 0.75
+##$RECO_ft_mode=( 3 )
+NO_FT COMPLEX_FT COMPLEX_FT
+##$RECO_pc_mode=( 3 )
+NO_PC FIRST_ORDER_PC FIRST_ORDER_PC
+##$RECO_pc_lin=( 3 )
+(0, 0) (0, 67.5) (0, 67.5)
+##$RECO_rotate=( 3, 1 )
+0 0.46875 0.46875
+##$RECO_ppc_mode=NO_PPC
+$$ @vis= RECO_wdw_mode RECO_ft_mode RECO_pc_mode RECO_pc_lin RECO_rotate
+##$RECO_ref_image=0
+##$RECO_nr_supports=0.4
+##$RECO_sig_threshold=0.15
+##$RECO_ppc_degree=1
+##$RECO_ppc_coeffs=( 1, 3, 2 )
+0 0 0 0 0 0
+##$RECO_dc_elim=Yes
+##$RECO_transposition=( 1 )
+0
+##$RECO_image_type=COMPLEX_IMAGE
+##$RECO_image_threshold=0.15
+##$RECO_ir_scale=10
+##$RECO_wordtype=_32BIT_SGN_INT
+$$ @vis= RECO_ppc_mode RECO_dc_elim RECO_transposition RECO_image_type
+##$RECO_map_mode=ABSOLUTE_MAPPING
+##$RECO_map_range=( 2 )
+-2147483647 2147483647
+##$RECO_map_percentile=( 2 )
+1 99.9999
+##$RECO_map_error=2.5e-05
+##$RECO_globex=( 1 )
+0
+##$RECO_minima=( 1 )
+-628125504
+##$RECO_maxima=( 1 )
+2147483392
+##$RECO_map_min=( 1 )
+-297726
+$$ @vis= RECO_wordtype RECO_map_mode RECO_globex RECO_minima RECO_maxima
+##$RECO_map_max=( 1 )
+297726
+##$RECO_map_offset=( 1 )
+0
+##$RECO_map_slope=( 1 )
+7212.9521484375
+##$RECO_byte_order=littleEndian
+$$ @vis= RECO_map_min RECO_map_max RECO_map_offset RECO_map_slope
+##$RECO_time=( 24 )
+<17:10:39  6 Mar 2019>
+##$RECO_abs_time=1551888639
+##$RECO_base_image_uid=( 65 )
+<2.16.756.5.5.100.1839078967.25015.1551888646.2>
+$$ @vis= RECO_byte_order RECO_time RECO_abs_time RECO_base_image_uid
+##$GS_reco_display=Yes
+##$GS_image_type=MAGNITUDE_IMAGE
+##$GO_reco_display=Yes
+$$ @vis= RecoRegridNGroup GS_reco_display GS_image_type RECO_GS
+##$GO_reco_each_nr=No
+##$GO_max_reco_mem=0
+$$ @vis= GO_reco_display GO_reco_each_nr GO_max_reco_mem RECO_GO RECO
+##END=

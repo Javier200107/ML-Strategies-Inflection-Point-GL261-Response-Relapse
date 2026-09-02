@@ -1,0 +1,45 @@
+##TITLE=Parameter List
+##JCAMPDX=4.24
+##DATATYPE=Parameter Values
+##ORIGIN=Bruker BioSpin MRI GmbH
+##OWNER=mri
+$$ Wed Apr 24 14:52:15 2019 CEST (UT+2h)  mri
+$$ /BiospecData/data/mri/nmr/luc180311.Ml1/4/pdata/1/roi
+##$ROI_version=( 20 )
+<Version 2.0>
+##$ROI_n=1
+##$ROI_par=( 1 )
+(RoiSquare, <>, 4, 0, 0, -1)
+##$ROI_dpar=( 4 )
+0.5 0.5 0.1 0.1
+##$ROI_cpar=( 1 )
+<>
+##$ROI_dpar_off=( 1 )
+0
+##$ROI_cpar_off=( 1 )
+0
+##$ROI_ndx=0
+##$ROI_dpar_ndx=( 4 )
+0.5 0.5 0.1 0.1
+##$ROI_cpar_ndx=( 1 )
+<>
+##$ROI_identifier=( 20 )
+<Roi_6>
+##$ROI_type=( 20 )
+<Circle>
+##$ROI_source_image_depth=32
+##$ROI_minimal_source_value=68.1897
+##$ROI_minimal_display_value=11
+##$ROI_maximal_source_value=76.2904
+##$ROI_maximal_display_value=12
+##$ROI_mean_source_value=73.934
+##$ROI_mean_display_value=11.9519
+##$ROI_source_standard_dev=1.38118
+##$ROI_display_standard_dev=0.214965
+##$ROI_area=0.228516
+##$ROI_area_pu=104
+##$ROI_integral_source_value=16.8951
+##$ROI_integral_display_value=2.7312
+##$ROI_integral_source_value_pu=7689.14
+##$ROI_integral_display_value_pu=1243
+##END=

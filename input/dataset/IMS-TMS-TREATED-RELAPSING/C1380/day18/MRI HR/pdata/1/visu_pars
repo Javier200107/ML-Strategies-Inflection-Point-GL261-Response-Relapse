@@ -1,0 +1,125 @@
+##TITLE=Parameter List
+##JCAMPDX=4.24
+##DATATYPE=Parameter Values
+##ORIGIN=Bruker BioSpin MRI GmbH
+##OWNER=mri
+$$ Sun Mar 24 09:47:35 2019 CET (UT+1h)  mri
+$$ /BiospecData/data/mri/nmr/sp190324.Ss1/4/pdata/1/visu_pars
+##$VisuVersion=1
+##$VisuUid=( 65 )
+<2.16.756.5.5.100.1839078967.19460.1553417255.1>
+##$VisuCreator=( 65 )
+<ParaVision>
+##$VisuCreatorVersion=( 65 )
+<5.1>
+##$VisuCreationDate=( 21 )
+<09:46:35 24 Mar 2019>
+$$ @vis= VisuVersion VisuUid VisuCreator VisuCreatorVersion VisuCreationDate
+##$VisuCoreFrameCount=5
+##$VisuCoreDim=2
+##$VisuCoreSize=( 2 )
+128 128
+##$VisuCoreDimDesc=( 2 )
+spatial spatial
+$$ @vis= VisuInstance VisuCoreFrameCount VisuCoreDim VisuCoreSize
+##$VisuCoreExtent=( 2 )
+19.2 19.2
+##$VisuCoreFrameThickness=( 1 )
+1
+##$VisuCoreUnits=( 2, 65 )
+<mm> <mm>
+##$VisuCoreOrientation=( 5, 9 )
+1 0 0 0 0 -1 0 1 0 1 0 0 0 0 -1 0 1 0 1 0 0 0 0 -1 0 1 0 1 0 0 0 0 -1 0 1 0 1 
+0 0 0 0 -1 0 1 0
+$$ @vis= VisuCoreDimDesc VisuCoreExtent VisuCoreFrameThickness VisuCoreUnits
+##$VisuCorePosition=( 5, 3 )
+-9.8 1.37988119705555 8.5 -9.8 0.279881197055551 8.5 -9.8 -0.820118802944449 
+8.5 -9.8 -1.92011880294445 8.5 -9.8 -3.02011880294445 8.5
+##$VisuCoreDataMin=( 5 )
+2 3 0 5 1
+##$VisuCoreDataMax=( 5 )
+11961 12977 17039 29097 32767
+##$VisuCoreDataOffs=( 5 )
+0 0 0 0 0
+$$ @vis= VisuCoreOrientation VisuCorePosition VisuCoreDataMin VisuCoreDataMax
+##$VisuCoreDataSlope=( 5 )
+72.7097703173129 72.7097703173129 72.7097703173129 72.7097703173129 
+72.7097703173129
+##$VisuCoreFrameType=MAGNITUDE_IMAGE
+##$VisuCoreWordType=_16BIT_SGN_INT
+$$ @vis= VisuCoreDataOffs VisuCoreDataSlope VisuCoreFrameType VisuCore
+##$VisuCoreByteOrder=littleEndian
+##$VisuFGOrderDescDim=1
+##$VisuFGOrderDesc=( 1 )
+(5, <FG_SLICE>, <>, 0, 2)
+$$ @vis= VisuCoreWordType VisuCoreByteOrder VisuPixel VisuFGOrderDescDim
+##$VisuGroupDepVals=( 2 )
+(<VisuCoreOrientation>, 0) (<VisuCorePosition>, 0)
+##$VisuSubjectName=( 65 )
+<ShuPi>
+##$VisuSubjectId=( 65 )
+<sp190324>
+$$ @vis= VisuFGOrderDesc VisuGroupDepVals VisuFrameOrderDesc VisuSubjectName
+##$VisuSubjectBirthDate=( 9 )
+<>
+##$VisuSubjectSex=FEMALE
+##$VisuSubjectComment=( 2048 )
+<>
+$$ @vis= VisuSubjectId VisuSubjectBirthDate VisuSubjectSex VisuSubjectComment
+##$VisuStudyUid=( 65 )
+<2.16.756.5.5.100.1839078967.18077.1553416853.7607>
+##$VisuStudyDate=( 21 )
+<09:40:53 24 Mar 2019>
+##$VisuStudyId=( 65 )
+<C1380_Day18>
+##$VisuStudyNumber=1
+##$VisuSubjectWeight=5
+$$ @vis= VisuSubject VisuStudyUid VisuStudyDate VisuStudyId VisuStudyNumber
+##$VisuStudyReferringPhysician=( 65 )
+<>
+##$VisuStudyDescription=( 65 )
+<>
+$$ @vis= VisuSubjectWeight VisuStudyReferringPhysician VisuStudyDescription
+##$VisuSeriesNumber=262145
+##$VisuSubjectPosition=Head_Supine
+##$VisuSeriesTypeId=( 65 )
+<ACQ_BRUKER_PVM>
+$$ @vis= VisuStudy VisuSeriesNumber VisuSubjectPosition VisuSeriesTypeId
+##$VisuAcqSoftwareVersion=( 65 )
+<5.1>
+##$VisuInstitution=( 65 )
+<UAB>
+##$VisuStation=( 65 )
+<BioSpec 70/30>
+$$ @vis= VisuSeries VisuAcqSoftwareVersion VisuInstitution VisuStation
+##$VisuAcqDate=( 21 )
+<09:46:35 24 Mar 2019>
+##$VisuAcqEchoTrainLength=8
+##$VisuAcqSequenceName=( 40 )
+<RARE (pvm)>
+##$VisuAcqNumberOfAverages=1
+$$ @vis= VisuEquipment VisuAcqDate VisuAcqEchoTrainLength VisuAcqSequenceName
+##$VisuAcqImagingFrequency=300.331483272894
+##$VisuAcqImagedNucleus=( 8 )
+<1H>
+##$VisuAcqRepetitionTime=( 1 )
+4200
+$$ @vis= VisuAcqNumberOfAverages VisuAcqImagingFrequency VisuAcqImagedNucleus
+##$VisuAcqPhaseEncSteps=96
+##$VisuAcqPixelBandwidth=366.2109375
+##$VisuAcqFlipAngle=180
+$$ @vis= VisuAcqRepetitionTime VisuAcqPhaseEncSteps VisuAcqPixelBandwidth
+##$VisuAcqSize=( 2 )
+96 128
+##$VisuAcqImageSizeAccellerated=Yes
+##$VisuAcqImagePhaseEncDir=( 5 )
+row_dir row_dir row_dir row_dir row_dir
+$$ @vis= VisuAcqFlipAngle VisuAcqSize VisuAcqImageSizeAccellerated
+##$VisuAcqEchoTime=( 1 )
+36
+##$VisuAcquisitionProtocol=( 65 )
+<000_PV51_03b_T2_Ref_ax_tRARE>
+##$VisuAcqScanTime=50400
+$$ @vis= VisuAcqImagePhaseEncDir VisuAcqEchoTime VisuAcquisitionProtocol
+$$ @vis= VisuAcqScanTime VisuAcquisition Visu
+##END=
