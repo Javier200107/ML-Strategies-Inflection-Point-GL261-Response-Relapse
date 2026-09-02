@@ -5,8 +5,6 @@
 dataset
 __pycache__
 *.pkl
-*.txt
-*.csv
 *.dcm
 *.jpg
 logs

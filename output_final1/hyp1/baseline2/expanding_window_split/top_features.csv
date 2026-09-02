@@ -1,0 +1,16 @@
+feature,importance
+squareroot_firstorder_90Percentile,0.031565886
+square_ngtdm_Coarseness,0.030315299
+original_glcm_Imc1,0.029032815
+log-sigma-3-0-mm-3D_ngtdm_Coarseness,0.025261749
+original_glszm_ZoneEntropy,0.023662468
+original_firstorder_90Percentile,0.01987285
+wavelet-HL_glszm_ZoneEntropy,0.019824225
+wavelet-LH_gldm_DependenceVariance,0.019068435
+log-sigma-2-0-mm-3D_glcm_ClusterShade,0.019061657
+logarithm_glszm_SmallAreaHighGrayLevelEmphasis,0.018159006
+day_of_study,0.017023755
+wavelet-HL_glszm_SizeZoneNonUniformity,0.01626008
+wavelet-LL_gldm_DependenceVariance,0.016114458
+log-sigma-1-0-mm-3D_glszm_ZoneEntropy,0.013560171
+wavelet-LL_glcm_ClusterShade,0.01301364
