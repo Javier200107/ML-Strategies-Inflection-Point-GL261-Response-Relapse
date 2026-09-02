@@ -23,7 +23,9 @@ def serialize_example(image_path, mask_path):
     img_bytes = img.numpy().tobytes()
 
     mask = tf.io.decode_image(tf.io.read_file(mask_path), channels=1)
-    mask_bytes = mask.numpy().tobytes()
+    mask_np = mask.numpy()  # Convertir a NumPy
+    mask_np = 255 - mask_np  # Invertir
+    mask_bytes = mask_np.tobytes()
 
     # Get Study, Mice group and Day of study from the path
     path = os.path.normpath(mask_path)
@@ -150,10 +152,10 @@ def count_images_by_group(root_dir):
 
 if __name__ == '__main__':
     # Dividir el dataset en 70% train y 30% validation
-    # train_data, val_data = split_dataset(config.DATASET_DIR, train_ratio)
+    train_data, val_data = split_dataset(config.DATASET_DIR, train_ratio)
 
     # # Crear TFRecords para entrenamiento y validación
-    # create_tfrecord(train_data, 'full_ds.tfrecord')
+    create_tfrecord(train_data, 'full_ds_fixed_no_control.tfrecord')
     # #create_tfrecord(val_data, 'val.tfrecords')
 
     # print(f"Train set: {len(train_data)} samples")

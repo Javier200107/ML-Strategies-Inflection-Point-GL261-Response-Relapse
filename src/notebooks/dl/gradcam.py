@@ -22,7 +22,8 @@ class GradCAM:
         with tf.GradientTape() as tape:
             image = tf.convert_to_tensor(image, dtype=tf.float32)
             convOutputs, predictions = gradModel(image)
-            loss = predictions[:, self.classIdx]
+            loss = predictions if len(predictions.shape) == 1 else predictions[:, 0]
+
         
         grads = tape.gradient(loss, convOutputs)
         castConvOutputs = tf.cast(convOutputs > 0, "float32")
@@ -41,10 +42,13 @@ class GradCAM:
         heatmap = np.maximum(heatmap, 0)
         heatmap = (heatmap - heatmap.min()) / (heatmap.max() - heatmap.min() + eps)
         heatmap = (heatmap * 255).astype("uint8")
+        # heatmap = 255 - heatmap  # Invertir: ahora 255 será lo menos importante y 0 lo más
         
         return heatmap
 
-    def overlay_heatmap(self, heatmap, image, alpha=0.5, colormap=cv2.COLORMAP_VIRIDIS):
+    def overlay_heatmap(self, heatmap, image, alpha=0.5, colormap=cv2.COLORMAP_JET):
+        heatmap = 255 - heatmap  # Invertir: ahora 255 será lo menos importante y 0 lo más
+
         heatmap = cv2.applyColorMap(heatmap, colormap)
         if len(image.shape) == 2 or image.shape[-1] == 1:
             image = cv2.cvtColor(image.squeeze().astype(np.uint8), cv2.COLOR_GRAY2RGB)
