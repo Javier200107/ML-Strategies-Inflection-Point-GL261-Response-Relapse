@@ -1,6 +1,8 @@
 import os
 
-# Base Input Directory
+# ---------------------------------------------------------------------------
+# Input paths
+# ---------------------------------------------------------------------------
 BASE_INPUT_DIR = "input"
 
 # Feature-related paths
@@ -16,14 +18,31 @@ RADIOMICS_FINAL_FEATURES_NEW = os.path.join(FEATURES_DIR, "radiomics_final_featu
 RADIOMICS_FINAL_FEATURES_NEW_FIXED = os.path.join(FEATURES_DIR, "radiomics_final_features__new_fixed.csv")
 RADIOMICS_FINAL_FEATURES_NO_FILTERS = os.path.join(FEATURES_DIR, "radiomics_final_features_no_filters.csv")
 
-# Dataset-related paths
+# Dataset-related paths (raw images)
 DATASET_DIR = os.path.join(BASE_INPUT_DIR, "dataset")
 
-# TFrecord-related paths
+# TFRecord paths (DL pipeline)
 TFRECORD_DIR = os.path.join(BASE_INPUT_DIR, "full_ds.tfrecord")
+TFRECORD_NO_CONTROL = os.path.join(BASE_INPUT_DIR, "deep_learning", "full_ds_fixed_no_control.tfrecord")
 
-# PyRadiomics-related paths
+# PyRadiomics config
 RADIOMICS_CONFIG_FILE = os.path.join(BASE_INPUT_DIR, "pyradiomics_settings.yaml")
+
+# ---------------------------------------------------------------------------
+# Output paths  (organised under outputs/)
+# ---------------------------------------------------------------------------
+BASE_OUTPUT_DIR = "outputs"
+
+# Radiomics GLOO experiments
+OUTPUTS_RADIOMICS = os.path.join(BASE_OUTPUT_DIR, "radiomics", "gloo")
+OUTPUT_EXP_09     = os.path.join(OUTPUTS_RADIOMICS, "09_final_pipeline_PAPER")   # paper result
+
+# Deep learning
+OUTPUTS_DL        = os.path.join(BASE_OUTPUT_DIR, "deep_learning")
+OUTPUTS_GRADCAM   = os.path.join(OUTPUTS_DL, "gradcam")
+
+# Figures
+OUTPUTS_FIGURES   = os.path.join(BASE_OUTPUT_DIR, "figures")
 
 RADIOMICS_FEATURES_NO_FILTERS = {
     'group_name', 'm_id', 'day_of_study',
