@@ -7,11 +7,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Done (paper revision — notebook `09_final_pipeline_PAPER.ipynb`)
+- **A1 DONE** — Feature selection (variance + Spearman + Mann-Whitney + original_ heuristic) moved inside GLOO folds, fitted on training subjects only (no data leakage)
+- **A2 DONE** — Animal-level majority-vote metrics added (AUC=0.92, Sens=0.60, Spec=1.00, PPV=1.00, Acc=0.80 across 10 mice)
+- **A3 DONE** — Stratified temporal analysis early/mid/late terciles by day_of_study (AUC: 0.576 / 0.803 / 0.962)
+- **A4 DONE** — Bootstrap 95% CIs (10,000 resamples) on exam-level AUC, Sensitivity, Specificity, PPV, Accuracy
+
 ### Pending (paper revision)
-- Move radiomics feature selection inside GLOO folds (fix data leakage — Action Item A1)
-- Add animal-level majority-vote metrics to Table 1 (Action Item A2)
-- Stratified temporal analysis early/mid/late timepoints (Action Item A3)
-- Bootstrap 95% confidence intervals for all metrics (Action Item A4)
 - Correct "outperforms across all metrics" claim in Discussion
 - Add EfficientNet longitudinal limitation to Methods/Discussion
 - Discuss clinical implications of low PPV
