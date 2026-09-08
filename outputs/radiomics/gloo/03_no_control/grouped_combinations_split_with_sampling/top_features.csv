@@ -1,0 +1,16 @@
+feature,importance
+log-sigma-3-0-mm-3D_gldm_SmallDependenceLowGrayLevelEmphasis,0.049416788
+exponential_glcm_Idmn,0.033179782
+log-sigma-1-0-mm-3D_firstorder_Mean,0.030893702
+shape2D_Elongation,0.026466763
+square_glrlm_ShortRunHighGrayLevelEmphasis,0.024392512
+square_glszm_LargeAreaEmphasis,0.01842746
+log-sigma-2-0-mm-3D_firstorder_Mean,0.018372126
+exponential_glrlm_ShortRunEmphasis,0.018371414
+wavelet-LL_glrlm_RunEntropy,0.016256742
+log-sigma-2-0-mm-3D_glrlm_GrayLevelNonUniformityNormalized,0.0156169515
+wavelet-LH_firstorder_Skewness,0.01559416
+wavelet-LL_glrlm_ShortRunLowGrayLevelEmphasis,0.014852014
+exponential_ngtdm_Contrast,0.013487664
+exponential_glszm_ZonePercentage,0.010531659
+log-sigma-3-0-mm-3D_ngtdm_Strength,0.010193562

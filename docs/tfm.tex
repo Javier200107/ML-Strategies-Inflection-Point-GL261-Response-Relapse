@@ -1,0 +1,1981 @@
+\documentclass[12pt, a4paper]{report}
+\usepackage[a4paper, total={6in, 9in}]{geometry}
+\usepackage{graphicx}
+\usepackage[most]{tcolorbox}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\hypersetup{hidelinks}
+\usepackage{lipsum} % For example text, you can remove this package.
+\usepackage{geometry}
+\usepackage{makecell}
+\usepackage{amsmath}  % For \text
+\usepackage{amssymb}  % For \mathbb
+\usepackage{multirow}
+\usepackage{pdflscape}
+\usepackage{placeins}
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage{booktabs} % For formal tables
+\usepackage{pdfpages}
+\setlength{\parindent}{0pt}
+\usepackage{enumitem}
+\usepackage[sorting=none]{biblatex}
+\usepackage{tikz}
+\usepackage{parskip} % Add the parskip package
+\usepackage{xcolor}
+\usepackage{algorithm} % for algorithm environment
+\usepackage{algpseudocode} % for pseudocode style
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{titlesec}
+\usepackage{afterpage}
+
+\newcommand\blankpage{%
+    \null
+    \thispagestyle{empty}%
+    \addtocounter{page}{-1}%
+    \newpage}
+
+
+\definecolor{blue}{RGB}{0, 0, 255}
+\bibliography{refs}
+% Set the paragraph spacing
+\setlength{\parskip}{12pt} % You can adjust this value as needed
+
+\title{Unsupervised Learning}
+\author{
+    Javier González Béjar
+}
+
+\begin{document}
+
+\includepdf[pages=1]{portada_new.pdf} 
+
+\afterpage{\blankpage} % Inserta la página en blanco justo después de la portada
+\clearpage % Asegura que la portada y la página en blanco estén separadas
+
+\newpage  % Crea una nueva página antes de comenzar el contenido
+\pagenumbering{gobble}  % Desactiva la numeración de páginas
+
+\textbf{Acknowledgements}
+
+To my family — especially my parents, Juani and Matías, my sister Lucía, my grandparents Antonia and Antonio, and my partner Arevik — thank you for always being there and encouraging me when I needed it most. Balancing work and studies can be challenging, but it becomes much easier when you have people behind you who support you and never let you fall.
+
+I would also like to express my sincere gratitude to my thesis supervisor, Dr. Alfredo Vellido, and my co-supervisor, Dr. Ana Paula Candiota. Thank you for your continuous guidance, valuable feedback, and support throughout these past months.
+
+Finally, I want to acknowledge all the authors and researchers whose work I have cited in this thesis. Their contributions to the field have been essential for shaping and inspiring this project.
+
+\newpage  % Creates a new 
+\pagenumbering{gobble}  % Desactiva la numeración de páginas
+\begin{abstract}
+Glioblastoma is currently considered one of the most aggressive brain tumours, characterised by rapid progression, high heterogeneity, limited treatment success, and frequent recurrence. In this work, we propose a machine learning pipeline to predict treatment outcomes in a preclinical mouse model of glioblastoma using longitudinal MRI data. Our approach first applies classical machine learning techniques to radiomic features extracted from segmented tumour regions, with the aim of identifying imaging biomarkers that correlate with biologically meaningful patterns of tumour progression or regression.
+
+We then introduce a complementary deep learning strategy based on convolutional neural networks, which learns hierarchical representations directly from the images and reduces reliance on manual feature engineering. Both pipelines are rigorously evaluated and compared. The overarching goal is to discover early predictors of tumour relapse or cure that align with underlying biological processes, contributing to the development of non-invasive monitoring strategies and enhancing treatment assessment in translational research.
+\end{abstract}
+
+\newpage  % Creates a new 
+
+\pagenumbering{roman} % Page number for the index
+\tableofcontents % Add the table of contents
+\newpage  % Creates a new page
+\pagenumbering{arabic} % Page numbers for the report
+\setcounter{page}{1} % Set first page
+
+\chapter{Introduction}
+
+Brain tumours occur when a group of cells within the brain grow abnormally, forming a mass. Together with spinal tumours, they are classified as central nervous system (CNS) tumours. Brain tumours can be either malignant with worst prognosis and poor outcome, or benign, with slower evolution and better prognosis. Tumours that originate in the brain are referred to as primary brain tumours, while those that spread to the brain but originate in other parts of the body are known as secondary or metastatic brain tumours.
+
+This type of tumours can significantly affect brain function and overall health if they grow large enough to compress surrounding nerves, blood vessels, or brain tissue. This pressure can result in a variety of symptoms depending on the size and location of the tumour. Common symptoms include headaches, seizures, visual disturbances, nausea or vomiting, and cognitive or behavioural changes. Other symptoms may involve difficulty with speech, movement, or sensation, and in more severe cases, loss of consciousness. Since they grow silently within a closed space, they are usually only detected when tumour size is relatively large. 
+
+Glioma is one of the most common types of tumours that originate in the brain, although it can occasionally be found in the spinal cord. Approximately 33\% of all brain tumours are classified as gliomas. These tumours arise from glial cells, which are the supportive cells that surround and protect neurons. Given the diversity of glial cell types, there are several subtypes of gliomas, including Astrocytomas, Oligodendrogliomas, and Glioblastomas, the latter being particularly aggressive and associated with very poor prognosis.
+
+Although the 2016 World Health Organisation (WHO) classification of brain tumours described four glioma categories according to histological features indicating infiltration and proliferation, the 2021 WHO classification also introduced information about molecular biomarkers of clinicopathological relevance \cite{Louis2021}. According to such a new categorisation system, Glioblastoma, IDH-WT (IDH refers to isocitrate dehydrogenase enzyme, and WT means that no mutation is detected) corresponds to the highest grade, which is grade 4. 
+
+To diagnose brain tumours, clinicians usually rely on a combination of tests. Imaging techniques such as computed tomography (CT) and magnetic resonance imaging (MRI) are commonly used as non-invasive approaches, along with invasive procedures such as stereotactic biopsy only if required. Among the noninvasive approaches, MRI is considered the most accurate imaging modality for diagnosing and following-up treatment of brain tumours. It is a non-invasive and painless technique that produces highly detailed images of the brain based in radiofrequency and powerful magnetic fields. Importantly, MRI does not involve ionising 
+radiation. MRI is the most sensitive imaging tool available for evaluating the brain, offering greater detail level in comparison with modalities such as CT scans. It plays a crucial role not only in the initial diagnosis of brain tumours, but also in monitoring disease progression and response to treatment. 
+
+Glioblastomas are currently a clinical challenge, with limited response to treatment and a dismal outcome in terms of survival. The current standard of care in clinical pipelines for these tumours is based in supramaximal resection in surgery, followed by chemotherapy (Temozolomide, TMZ) and radiotherapy and, despite intensive research, no significant improvements have been achieved since the description of this protocol, known as Stupp Protocol \cite{Stupp2005}. Even after aggressive therapy, survival rates are, on average, 15-18 months. MRI is used to follow-up therapy, but it lacks confidence in early time points due to pseudoresponse/pseudoprogression effects, forcing doctors and patients to wait for several weeks after treatment until confident information can be gathered. 
+
+Due to evident ethical restrictions, exhaustive longitudinal MRI follow-up cannot be performed in clinical patients, and the amount of information arising from clinical datasets is restricted to the established scanning time points. As an alternative, the use of preclinical models (e.g. murine models of brain tumours) allows for longitudinal MRI acquisition along the possibility of histopathological validation, bringing about rich and relevant information that can be further translated to clinical datasets. The acquisition of time series datasets in preclinical settings provides evidence from time points that is not available in clinical settings. 
+
+The GL261 model, based in brain inoculation of murine glioblastoma cells, provides an excellent working frame for assessing tumour evolution and response to therapy, being extensively studied in literature \cite{Wu2020, Roberts2020}. This specific model was described to recapitulate several human glioblastoma features, and to be IDH-WT, thus being a good model for obtaining reliable data.   
+
+From a different viewpoint, the field of Artificial Intelligence (AI) has experienced significant growth in recent years within healthcare and medical imaging domains. Machine Learning (ML) and Deep Learning (DL), two subfields of AI, have shown remarkable potential in supporting clinical decision-making processes by extracting complex patterns from large and high-dimensional datasets. These technologies are increasingly being applied to radiological data, including MRI, where they can assist in tasks such as tumour detection, segmentation, classification, and prognosis estimation.
+
+In the context of brain tumour analysis, AI-based methods have the capacity to improve diagnostic accuracy, reduce inter-observer variability, and accelerate image interpretation. Deep learning models, in particular, are well-suited for medical image analysis due to their ability to learn hierarchical representations directly from raw data. Convolutional Neural Networks (CNNs), for example, have demonstrated state-of-the-art performance in identifying and delineating gliomas from MRI scans. Moreover, these tools can be used to uncover subtle imaging biomarkers that may correlate with treatment response or patient outcome, offering valuable insights beyond human visual perception.
+
+\section{Scope}
+This thesis is conceived as an exploratory analysis of ML strategies to  estimate the inflection point of response or relapse in preclinical GL261 Glioblastoma, using T2 weighted (T2w) MRI data. The study focuses on retrospective groups of GL261 tumour-bearing mice treated with the standard chemotherapy drug TMZ, in a metronomic schedule (every 6 days), to identify early imaging features in T2w MRI scans that could predict tumour relapse or cure before noticeable anatomical or volumetric changes occur. By analysing these longitudinal datasets we seek to improve early prediction of therapy outcomes, with the potential for future translation and applications in clinical settings.
+
+\section{Motivation}
+
+The motivation behind this thesis stems from a strong personal interest in translating ML and, in particular, DL techniques to the healthcare domain. As a student passionate about real-world impact, I was particularly drawn to the challenge of applying computational models to complex, high-stakes problems such as brain cancer.
+
+Glioblastoma, known for its aggressiveness and poor prognosis — with median survival often under 15-18 months, as previously mentioned, and scarce response to therapy — represents a clear case where data-driven methods could provide support to clinical decision-making. The opportunity to work with biomedical imaging data and investigate whether early MRI scans contain predictive markers of relapse or cure, even before visible tumour progression, felt both technically and socially significant.
+
+From a personal and academic perspective, this project offered the opportunity to explore the intersection of AI and medicine fields, which are rapidly converging. My motivation is not only to tackle a scientific question, but also to contribute, even modestly, to the growing effort of developing tools that have the potential to improve precision and timeliness in medical care.
+
+\section{Objectives}
+
+The main objective of this thesis is to investigate whether early imaging biomarkers in longitudinal T2-weighted MRI scans can predict treatment outcomes, specifically relapse or cure, in a preclinical glioblastoma model. This involves the application of ML and DL techniques to extract, analyse, and model information from the images.
+
+The specific research hypotheses are as follows:
+
+\begin{itemize}
+    \item Early relapsing prediction: The investigation of MRI-derived features can help to predict tumour relapse earlier than volumetric changes in tumour size, particularly in cases of relapse.
+    \item Prediction of cure: The investigation of MRI-derived features, beyond tumour size, at the point of maximum tumour volume can help to distinguish between cases that will relapse and those that will be cured.
+\end{itemize}
+
+
+\chapter{Background and Literature Review}
+This chapter offers a comprehensive overview of the key concepts, background knowledge, and recent developments related to the fields of medicine and AI involved in the research reported in this thesis. We begin by introducing Glioblastoma Multiforme (GB), its clinical characteristics, and current therapeutic challenges. The chapter then explores the role of preclinical models, the utility of MRI in tumour assessment, and the principles of radiomics as an image-to-tabular data transformation method. Later, it examines the possibilities of ML and DL methods in oncology, setting the stage for the research presented in this thesis. The last section reviews recent literature and related works addressing response prediction in glioblastoma using imaging and other AI-based approaches for cancer detection, showing current trends and existing research gaps.
+
+\section{Glioblastoma Multiforme (GB)}
+
+Although the new WHO system has eliminated the word "multiforme" from the glioblastoma class, the former naming is still widely used. As previously introduced, GB is the most aggressive and lethal type of primary brain tumour, accounting for the majority of malignant gliomas. It is classified with the highest grade at the WHO classification system, indicating the level of malignancy due to its rapid growth, highly infiltrative nature, and poor prognosis. Despite intensive multimodal treatment —including maximal surgical resection, radiotherapy, and chemotherapy with TMZ —median survival remains dismal, typically ranging between 15 to 18 months after diagnosis.
+
+GB arises from glial cells, which are the supportive cells of the central nervous system. More than 90\% of cases are classified as primary GB, meaning they develop \textit{de novo} without evidence of a lower-grade precursor. The remaining cases are secondary GBs, which evolve over several years from pre-existing low-grade gliomas. While these two subtypes differ genetically (e.g., IDH mutation status), they are morphologically indistinguishable under standard histological analysis.
+
+Epidemiologically, GB is more common in adults over 50 years of age, particularly men and individuals of Caucasian descent, with an incidence of approximately 2–3 cases per 100,000 people annually in Europe and North America, which is consistent with a "rare tumour" class. However, its impact in patient quality of life and lifespan makes it a relevant clinical problem. Although rare in pediatric populations, when GB occurs in children it often exhibits a more proliferative behaviour \cite{Urbańska2014}.
+
+The etiology of GB is not fully understood, and most cases are considered sporadic. However, certain inherited genetic conditions, such as neurofibromatosis type I, Turcot syndrome, and tuberous sclerosis, are associated with increased risk. Proposed environmental risk factors include exposure to ionising radiation and certain chemicals, although conclusive links remain ambiguous. On a molecular level, GB is frequently associated with genetic alterations such as EGFR amplification, PTEN loss, TP53 mutations, and loss of heterozygosity on chromosome 10q.
+
+Clinically, symptoms are typically non-specific and depend on tumour location and size. Patients may experience headaches, seizures, nausea, vision changes, or cognitive and motor deterioration. Because GB often grows silently and aggressively within the closed cranial cavity, it is usually diagnosed at an advanced stage when the mass effect becomes symptomatic.
+
+MRI is the imaging modality of choice for diagnosis, monitoring, and surgical planning due to its superior soft tissue contrast in comparison to other imaging approaches. However, histopathological and immunohistochemical analyses are required for definitive diagnosis. GB tumours often exhibit hallmark features such as necrosis, microvascular proliferation, and pseudopalisading cells.
+
+Current standard treatment for glioblastoma is based on the Stupp protocol, which combines maximal safe surgical resection followed by radiotherapy with concomitant and adjuvant chemotherapy using TMZ. This approach was established after a decisive phase III trial\footnote{Phase III is one of the final stages in drug development, where the treatment is tested on large groups of patients and compared to standard treatment or a placebo to assess its clinical effectiveness.} demonstrated that adding TMZ to radiotherapy extended median overall survival from 12.1 months to 14.6 months and significantly improved the two-year survival rate from 10.4\% to 26.5\% \cite{Stupp2005}. While this represented a breakthrough at the time, the absolute increase in survival remains limited, and most patients still succumb to the disease within 15 to 18 months post-diagnosis.
+
+The high recurrence rate, intrinsic heterogeneity, and resistance to treatment make glioblastoma a particularly challenging tumour to manage. As such, there is a strong consensus in the research community that the current standard of care is not sufficient, and that further therapeutic innovation is urgently needed. This has prompted the investigation of alternative and complementary strategies, including molecularly targeted therapies, such as anti-angiogenic agents like bevacizumab, which aims to disrupt tumour vasculature, as well as immunotherapies, gene therapy, and RNA-based treatments. Although these novel approaches have shown promise in preclinical studies and early-phase clinical trials, their impact on long-term survival and disease progression in glioblastoma patients has so far been modest, which highlights the complexity of the disease and the need for continued translational research. Moreover, it is of paramount importance to improve noninvasive follow-up strategies such as magnetic resonance imaging, to make early decisions about therapeutic efficacy and consider changes for second-line therapy in case of lack of response. 
+
+\section{Preclinical Models in Glioblastoma Research}
+
+Preclinical development represents a critical stage in drug development, conducted prior to human testing. During this phase, researchers evaluate the biological feasibility, safety profile, and therapeutic potential of new compounds or interventions, often using laboratory animals or cell-based models. 
+
+The primary goals of preclinical development are to identify a safe starting dose for first-in-human trials and to uncover any potential toxicity or adverse effects. In oncology, and particularly in glioblastoma research, preclinical models are essential for mimicking tumour biology, assessing treatment responses, and validating biomarkers in a controlled and reproducible environment. Despite their limitations, these models provide valuable insights, bridging the gap between early discovery and clinical translation. Usually, the vast majority of compounds investigated at this stage never reach clinical approval, due to the rigorous filtering process that precedes human trials.
+
+There exist several types of preclinical models used to study glioblastoma. \textbf{In vitro models}, such as traditional 2D cell cultures and more sophisticated 3D systems like spheroids, organoids, and tumoroids, are widely used for testing drug responses and understanding tumour biology in a controlled environment. \textbf{Animal models}, particularly mouse models including syngeneic \footnote{Syngeneic models use genetically identical/compatible mice to study immune response and tumour growth.}, genetically engineered \footnote{Genetically engineered mouse models (GEMMs) develop tumours spontaneously due to specific genetic modifications, making them useful for studying tumour progression}, and xenograft \footnote{Xenograft models involve implanting human tumour cells into immunodeficient mice, allowing researchers to test therapies on human-like tumours.} types, allow researchers to study tumour growth and treatment response in the context of a living organism, offering important findings despite limitations in translating results to human patients. Finally, \textbf{humanised models}, which incorporate patient-derived glioma stem cells or human brain organoids in mice bearing human immune system, offer a closer approximation to human glioblastoma and are especially useful for exploring tumour invasion and interaction with the microenvironment.
+
+In this thesis, glioblastoma is studied using an induced murine model, specifically the well-characterised GL261 glioblastoma in the immunocompetent C57BL/6 mouse strain. This syngeneic model is widely used due to its reproducibility, immunological relevance, and ability to mimic critical features of human GB, including aggressive proliferation, diffuse infiltration, and intrinsic resistance to standard therapies \cite{Liu2021}. After intracranial injection, tumours grow rapidly, with untreated mice typically exhibiting a median survival of approximately three weeks.
+
+The GL261 model enables the study of tumour progression from early development through advanced stages in a controlled in vivo setting. It is particularly valuable for investigating immunotherapeutic strategies and testing novel treatment regimens. In this thesis, therapeutic response is assessed non-invasively using MRI, which allows real-time monitoring of tumour growth and treatment efficacy. All experimental data presented here are derived from MRI-acquired images of GL261 tumour-bearing mice.
+
+\section{Magnetic Resonance Imaging (MRI) in GB}
+
+Magnetic Resonance Imaging is the gold standard imaging modality in the diagnosis and treatment of GB, offering high-resolution, non-invasive visualisation of brain structures without ionising radiation. It relies on magnetic fields and radiofrequency pulses to generate detailed images of the brain's anatomy and function. This technology provides exceptional soft tissue contrast and allows three-dimensional visualisation of key regions, including neural structures and vasculature, as illustrated in Figure \ref{fig:mri_samples}. 
+
+In clinical settings, MRI — particularly sequences such as T1-weighted (with or without exogenous contrast agents), T2-weighted, T2-FLAIR, and gradient echo — is essential for identifying tumour margins, edema, necrosis, and signs of progression or recurrence. These imaging modalities are vital not only for initial diagnosis but also for surgical planning, post-operative assessment, and long-term treatment monitoring \cite{shukla2017advanced}. Furthermore, magnetic resonance imaging facilitates the detection of subtle lesions and the evaluation of treatment efficacy over time, allowing timely therapeutic adjustments.
+
+In the context of this thesis, MRI is applied in a preclinical setting to evaluate tumour progression and response to therapy in the GL261 syngeneic glioma model in C57BL/6 mice. MRI enables non-invasive, longitudinal monitoring of tumour development, offering valuable insights into tumour dynamics and therapeutic effectiveness.
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.23\linewidth}
+        \includegraphics[width=\linewidth]{images/mri/C1258_d24.jpg}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.23\linewidth}
+        \includegraphics[width=\linewidth]{images/mri/C1261_d24.jpg}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.23\linewidth}
+        \includegraphics[width=\linewidth]{images/mri/C1297_d23.jpg}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.23\linewidth}
+        \includegraphics[width=\linewidth]{images/mri/C1361_d20.jpg}
+    \end{subfigure}
+
+    \caption{MRI scans of mice subjects C1258, C1261, C1297, and C1361, displayed from left to right, respectively. CXXXX is a unique identifier assigned to each mouse included in the study}
+    \label{fig:mri_samples}
+\end{figure}
+
+\section{Radiomics}
+
+\textit{Radiomics} is an emerging field at the intersection of medical imaging, data science, and oncology. It focuses on the extraction of large numbers of quantitative features from standard medical images such as CT, PET, or MRI. These features, which describe tumour shape, texture, intensity distributions, and spatial relationships, provide information that is often imperceptible to the human eye and go far beyond traditional radiological interpretation \cite{kumar2012radiomics}.
+
+The central idea of radiomics is to convert medical images into high-dimensional tabular-type data (more amenable than images themselves to standard methods of data analysis), which can then be used to build predictive or prognostic models. This approach enables correlations between imaging features and clinical outcomes, molecular profiles, or treatment responses, supporting more personalised and precise medicine.
+
+A typical workflow involving radiomics includes several key steps: image acquisition, tumour segmentation, feature extraction, and statistical modelling. Each of these steps presents its own challenges, such as standardising image acquisition protocols, ensuring reproducibility in segmentation, and avoiding overfitting in high-dimensional data analysis.
+
+In the context of GB research, radiomics is especially valuable. MRI-derived radiomic features can reveal the heterogeneous nature of tumours, highlighting necrotic areas, enhancing tumour margins and infiltrative zones, which are important for predicting progression and therapeutic response. When applied longitudinally, radiomics enables non-invasive monitoring of tumour evolution and treatment efficacy.
+
+In this project, radiomic features were extracted from MRI scans of GL261 tumour-bearing mice. This enabled a detailed and quantitative evaluation of tumour characteristics and their temporal evolution under different treatment conditions. The extraction process was carried out using the PyRadiomics library \footnote{https://pyradiomics.readthedocs.io/en/latest/}, an open-source Python package designed for high-throughput radiomic feature extraction from medical images and their corresponding segmentations.
+
+\subsection{PyRadiomics}
+PyRadiomics provides a standardised pipeline for computing a wide range of features, including first-order statistics, shape descriptors, and advanced texture features derived from matrices such as the gray-level co-occurrence matrix (GLCM), gray-level run-length matrix (GLRLM), and gray-level size zone matrix (GLSZM). Additionally, it supports the application of image filters—such as wavelet decompositions and Laplacian of Gaussian (LoG) to enhance feature diversity and capture information at multiple scales and frequencies. This allows the extraction of hundreds of features from both the original and filtered images, enriching the data available for downstream analysis and machine learning applications.
+
+Importantly, PyRadiomics feature extraction allows the adhesion to the guidelines of the Image Biomarker Standardisation Initiative (IBSI), which aims to harmonise the definition and calculation of radiomic features across platforms and studies. By following IBSI recommendations, we ensure that the extracted features are reproducible, interpretable, and comparable across research groups, which promotes consistency and transparency.
+
+\section{Machine Learning and Deep Learning in Oncology}
+
+ML and DL are two subfields of AI that have quickly transformed numerous areas of science and technology, including biomedical research and clinical practice, by providing a data-centred approach. On the one hand, ML refers to algorithms that can learn patterns from data and make predictions or decisions without being explicitly programmed for each task. DL, a more recent sub-field of ML, leverages multi-layered artificial neural networks to model complex relationships within high-dimensional data. 
+
+These approaches are particularly well-suited to domains such as medical imaging and genomics, where data is abundant and often too complex for manual analysis. In recent years, machine learning (ML) and deep learning (DL) have shown immense promise in improving the diagnosis, monitoring, and treatment planning of diseases such as cancer, offering tools that can complement—and in some cases surpass—human expertise in both precision and speed. For example, Hosny et al. (2018) highlight how DL algorithms can automatically identify complex imaging patterns and quantify features traditionally interpreted qualitatively by radiologists, particularly in oncology settings \cite{Hosny2018}. Similarly, Tran et al. (2021) describe the transformative potential of DL in cancer diagnosis and therapy selection, emphasising its role in personalised medicine through integrative analysis of genomic and imaging data \cite{Tran2021}. Shen et al. (2017) provide a comprehensive overview of DL’s success in medical image analysis, underscoring how architectures such as CNNs have revolutionised the field by improving detection accuracy and robustness across tasks \cite{Shen2017}.
+
+In glioblastoma research, ML and DL have for long been applied to radiological data, particularly MRI, to support tumour segmentation, classification, and prognosis prediction \cite{Dorfner2025}. Traditional ML methods rely on handcrafted features, such as texture or shape, combined with classifiers like support vector machines (SVM) or random forests (RF), though they require significant domain expertise for feature selection.
+
+DL, and especially convolutional neural networks (CNNs), offers a more automated approach by learning features directly from imaging data. In neuro-oncology, CNNs have achieved expert-level accuracy in tasks like tumour segmentation and can detect subtle imaging patterns linked to progression or treatment response \cite{cancers16020300}.
+
+These technologies also extend to genomics and histopathology \cite{Sultan2020}, enabling mutation prediction and prognosis estimation. Multi-modal models integrating imaging, genetic, and clinical data are also promising tools for personalised treatment strategies. Despite much progress being made in these fields, challenges such as data variability, model interpretability, and the need for large annotated datasets persist nowadays.
+
+\section{State of the Art}
+
+In current research, ML and DL techniques are widely applied to the detection and classification of brain tumours using MRI and other data modalities. These approaches have demonstrated strong performance in identifying tumourous regions, leveraging both handcrafted and data-driven features. However, the prediction of therapy response remains significantly more challenging, as it requires longitudinal data, the integration of multimodal imaging, and often, the correlation with biological or molecular changes. Consequently, fewer studies have addressed this problem in depth. 
+
+The article \textit{"Detection of Tumors on Brain MRI Images Using the Hybrid Convolutional Neural Network Architecture"}  \cite{Cinar2020} introduces a hybrid convolutional neural network based on ResNet50 for the classification of brain tumour MRI images. By modifying the architecture and adding several new layers, the model achieved an accuracy of 97.2\% in detecting tumour presence. Although focused on tumour detection rather than response evaluation, this study exemplifies the utility of CNN architectures in medical image classification and establishes a foundation for more complex applications such as therapy monitoring.
+
+Building on this, the study \textit{"Breast Cancer Classification Through Multivariate Radiomic Time Series Analysis in DCE-MRI Sequences"} \cite{Prinzi2024} proposes a methodology that integrates radiomic feature extraction and multivariate time series classification. By analysing contrast uptake across seven time points in dynamic contrast enhanced (DCE)-MRI, the model mimics clinical interpretation of tumour dynamics. The most successful classifier, Multivariate Rocket, achieved high accuracy and interpretability. While this study is applied to breast cancer, it demonstrates the potential of temporal radiomic analysis for distinguishing treatment responses and aligns conceptually with longitudinal glioblastoma imaging.
+
+The article \textit{"Interpreting Response to TMZ Therapy in Murine GL261 Glioblastoma by Combining Radiomics, Convex-NMF and Feature Selection in MRI/MRSI Data Analysis"} \cite{interpretingLuisMiguel} presents a comprehensive ML pipeline for distinguishing between treated and untreated glioblastoma in a murine model. By combining radiomics from T2w MRI and metabolomics data from MRSI processed via Convex-Nonnegative Matrix Factorisation (C-NMF), the study identifies discriminative patterns related to treatment effect. Feature selection ensures interpretability for clinical translation, marking an important step toward integrating ML into preclinical therapy evaluation.
+
+A more advanced study is \textit{"Tracking Therapy Response in Glioblastoma Using 1D Convolutional Neural Networks"} \cite{Ortega-Martorell2023}, which directly targets response prediction in preclinical glioblastoma. The authors used 1D-CNNs to analyse MRSI spectra and classify brain regions as normal, unresponsive, or responding to therapy. The model achieved high accuracy and outperformed traditional ML approaches and prior semi-supervised methods. Furthermore, the use of Grad-CAM maps enabled explainability by identifying relevant spectral regions, underscoring the potential of DL in early therapy assessment.
+
+Finally, the article \textit{"Correlation of MR-Based Metabolomics and Molecular Profiling in the Tumor Microenvironment of Temozolomide-Treated Orthotopic GL261 Glioblastoma in Mice"}  \cite{Zhao2023} offers an integration of imaging and molecular data. This study correlates MR spectroscopic biomarkers with tumour immune micro-environment signatures, specifically focusing on macrophage subtypes and the expression of proteases like ADAM8. The findings connect metabolomic changes to immune suppression mechanisms such as PD-L1 shedding and relapse. This multimodal and mechanistic approach represents one of the most sophisticated examples of response monitoring and biomarker discovery in preclinical glioblastoma.
+
+As these studies show, while tumour classification using ML and DL is now relatively mature, predicting therapy response remains an in progress research frontier. In particular, preclinical studies such as those involving the GL261 glioblastoma model offer a unique opportunity to explore imaging biomarkers, integrate multimodal data, and test novel methodologies. In parallel, clinical research has highlighted the importance of tumour microenvironment characterisation. For instance, Álvarez-Torres et al. \cite{Alvarez-Torres2020} demonstrated that vascular “habitats” extracted from dynamic susceptibility contrast MRI can robustly stratify glioblastoma patients based on prognosis across multiple clinical centres, underscoring the value of spatially-resolved perfusion biomarkers for survival prediction. This kind of clinically validated imaging signature motivates the exploration of analogous, interpretable biomarkers in preclinical settings. Building on this body of work, this thesis applies ML/DL to longitudinal T2-weighted MRI data from GL261 mice, aiming to detect early signs of relapse or cure — thus contributing to translational efforts in glioblastoma therapy assessment.
+
+
+\chapter{Materials and Data Preparation}
+
+This chapter presents the data sources, experimental setup, and preprocessing steps involved in constructing the dataset used for this study.
+
+\section{Solution Design}
+
+The design of this research focuses on evaluating whether machine learning techniques can identify early imaging biomarkers that predict therapeutic response or relapse in glioblastoma-bearing mice. The study is based on longitudinal T2-weighted MRI scans collected from preclinical models, where each subject belongs to one of three outcome groups: control (untreated), relapsing (treated but not cured), and cured (complete response to treatment and tumour remission). Each scan is associated with metadata such as mouse ID (CXXXX), group, and study day, enabling temporal analysis across individuals.
+
+To enable quantitative analysis, tumours were manually segmented, and binary masks were generated for each image. These masks were used to extract radiomic features with PyRadiomics, capturing a range of texture, intensity, and shape descriptors from the tumour regions. Only 2D slices with visible tumours were considered, and preprocessing steps such as intensity normalisation and label encoding were applied to ensure consistency across the dataset.
+
+\section{Strategy}
+The modelling strategy focuses primarily on supervised learning using traditional ML methods, with particular emphasis on the XGBoost classifier due to its performance on structured, tabular data and its robustness to class imbalance. Additional strategies, such as oversampling minority classes (e.g., with SMOTE) and adjusting group proportions, were tested to improve generalisation and reduce bias. The evaluation process was carefully designed to respect the temporal and individual structure of the data, ensuring that scans of a mouse tumour were not used to predict the past, avoiding data leakage and better simulating a realistic prediction scenario.
+
+Finally, model interpretability was an essential part of the pipeline. Feature importance metrics provided insights into which radiomic descriptors were most relevant for distinguishing between cured and relapsing mice, allowing the generation of hypotheses about the biological or imaging signatures underlying treatment response.
+
+\section{Data Preparation}
+
+Before applying any modelling techniques, it was necessary to acquire, process, and explore the data to understand its structure and quality. This included describing the dataset, identifying potential imbalances, and performing exploratory analyses to guide the modelling strategy.
+
+\subsection{Data Acquisition}
+
+The dataset used in this study consists of T2-weighted (T2w) MRI scans obtained from preclinical experiments with C57BL/6 mice orthotopically implanted with GL261 glioma cells, as described in \cite{Wu2020}. Imaging was performed in vivo using a 7T Bruker BioSpec 70/30 USR spectrometer (Bruker BioSpin GmbH, Ettlingen, Germany), equipped with a 400 mT/m mini-imaging gradient set. A 72-mm inner-diameter linear volume coil was used for radiofrequency transmission, and a mouse brain surface coil for signal reception.
+
+All MRI experiments were carried out at the joint preclinical MRI facility of the Universitat Autònoma de Barcelona and the Centro de Investigación Biomédica en Red-Bioingeniería, Biomateriales y Nanomedicina (CIBER-BBN), as part of Unit 25 of NANBIOSIS (Cerdanyola del Vallès, Spain). Mice were placed in a dedicated cradle with integrated heating via a water circuit to maintain physiological body temperature. Anaesthesia was maintained using isoflurane (1.5–2.0\% in O\textsubscript{2} at 1 L/min), and respiratory rate was monitored with a pressure sensor, kept between 60 and 80 breaths per minute during acquisition. In case the MRI acquisition and treatment administration are performed in the same day, it is worth mentioning that MRI acquisition always precede TMZ administration.
+
+Mice were divided into three outcome-based groups, according to their treatment and tumour evolution:
+
+\begin{itemize}
+    \item \textbf{Control mice} received no anti-tumour treatment. Instead, they were administered a vehicle solution consisting of 10\% dimethyl sulfoxide (DMSO) in 0.9\% NaCl (saline), delivered with an oral gavage following the same schedule and method as the treatment group. This allowed evaluation of natural tumour progression and control for any non-specific effects of the vehicle, as well as the minimum stress derived from treatment administration.
+    
+    \item \textbf{Relapsing mice} were treated with the chemotherapy drug TMZ. They showed transient response to treatment, followed by tumour  regrowth and relapse.
+
+    \item \textbf{Cured mice} were treated with TMZ and showed complete tumour regression and no evidence of recurrence during the follow-up period. Specifically, when GL261 tumours were reduced to the point where no abnormal mass could be detected by MRI, or when the tumour volume remained stable (usually below 2 mm³) for at least two weeks, TMZ administration was halted. Subsequent MRI scans were performed twice weekly. If the residual or abnormal mass remained stable or continued to decrease for a duration of one month, the mice were transiently declared "cured," following criteria established in prior studies \cite{Wu2015}.
+\end{itemize}
+
+Temozolomide (TMZ, Sigma-Aldrich, Madrid, Spain) was prepared in 10\% DMSO saline solution and administered at a dose of 60 mg/kg via oral gavage every six days, starting on Day 11 post-inoculation (p.i.). Control mice received only the vehicle using the same procedure.
+
+\subsubsection{Preprocessing of Bruker MRI Data and Manual Tumour Segmentation}
+
+The raw image data acquired as previously described are stored in proprietary Bruker format, and the corresponding files contain the volumetric MRI data belonging to individual mice at specific study days.
+
+To convert these files into usable formats for visualisation and segmentation, the open-source software \textbf{ImageJ} version 1.54g was employed, along with \textbf{BrukerOpener} plugin. First, a representative slice showing a clear view of the tumour is selected (especially important in high-resolution scans with many slices), and saved as a JPEG image. 
+
+Manual tumour segmentation was then performed using the image editing software GIMP, where the tumour region is carefully outlined in the JPEG image and used to create a binary mask, where white represents the tumour and black corresponds to the surrounding brain tissue, as shown in Figure \ref{fig:mri_samples_preprocessing}. These masks were incorporated into the input data for the deep learning model, where the original MRI image was fed into the first channel and the corresponding mask into the second and third channels. Additionally, they were used to extract radiomic features from the segmented tumour areas.
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.37\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/mri/C1258_mri.png}
+        \vspace{0.5em} % Espacio entre imagen y caption
+        \caption{C1258 MRI scan}
+    \end{subfigure}
+    \hspace{2em}
+    \begin{subfigure}[b]{0.37\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/mri/C1258_mask.png}
+        \vspace{0.5em}
+        \caption{C1258 tumour mask}
+    \end{subfigure}
+    \caption{T2-weighted MRI scan and corresponding tumour mask of mouse C1258.}
+    \label{fig:mri_samples_preprocessing}
+\end{figure}
+
+\subsection{Data Processing}
+To enable reproducible feature extraction, all segmented MRI scans underwent standardised preprocessing using a PyRadiomics compatible pipeline, designed to adhere to IBSI guidelines. Preprocessing steps aimed to normalise intensity values, ensure spatial consistency across samples, and mitigate variability introduced by acquisition conditions or segmentation errors.
+
+First, voxel intensities were normalised across images, with a fixed bin width of 1 applied to standardise grey-level discretisation. A voxel array shift of +1000 was added to enforce non-negative intensities, ensuring compliance with IBSI requirements. Outlier intensities were trimmed at 3 standard deviations from the mean to reduce the influence of artefactual noise or extreme values.
+
+All images were resampled to isotropic spacing of 0.2 mm in-plane using a B-spline interpolator (\texttt{sitkBSpline}), facilitating consistent spatial resolution and reducing variability due to anisotropic voxel dimensions. Tumour masks were corrected and padded with a 5-voxel margin to maintain anatomical context, and cropping was applied to reduce computational burden while preserving relevant image content.
+
+\subsection{Radiomic Feature Extraction}
+
+A total of 1,218 radiomic features from MRI scans were extracted using the PyRadiomics toolkit \cite{pyradiomics}, including shape descriptors and features derived from both original and transformed images. These transformations include Laplacian of Gaussian (LoG) filtering with three sigma levels (1.0, 2.0, 3.0), wavelet decompositions (one level, yielding eight derived images), and intensity-based transformations such as Square, Square Root, Logarithm, Exponential and Gradient filters.
+
+Each type of transformation serves a specific purpose:
+
+\begin{itemize}
+    \item \textbf{LoG filtering}: Enhances edges and texture details by emphasising structures of different spatial scales.
+    \item \textbf{Wavelet decomposition}: Captures multi-scale patterns and directional texture information by decomposing the image into frequency sub-bands.
+    \item \textbf{Intensity-based transformations} (Square, Square Root, Logarithm, Exponential and Gradient): Modify pixel intensity distributions to highlight different contrast patterns and variations in intensity gradients.
+\end{itemize}
+
+Radiomic feature extraction offers several advantages over deep feature extraction. It allows for accurate feature computation even with moderate sample sizes, whereas deep learning typically requires large datasets to mitigate overfitting. Additionally, radiomic features are extracted at the original spatial resolution of the image, avoiding the need for resizing, which can lead to information loss.
+
+A key strength of radiomic features is their interpretability. Each feature has a well-defined mathematical meaning, which facilitates clinical validation of model findings. This explainability is crucial in medical applications, where model transparency is essential for trust and decision-making. By combining interpretability with high predictive power, radiomics provides a robust framework for training accurate and clinically meaningful models.
+
+The extracted features belong to the following categories:
+
+\begin{itemize}
+    \item \textbf{First-order Statistics:} These features describe the distribution of voxel intensities within the segmented tumour region, without accounting for spatial relationships. Examples include mean, median, variance, standard deviation, skewness, kurtosis, energy, or entropy. These descriptors offer fundamental information into the overall intensity profile of the tumour.
+
+    \item \textbf{Shape-based Features:} Shape features quantify the two-dimensional geometry of the tumour region of interest (ROI), independent of intensity values. They include properties such as volume, surface area, sphericity, compactness, and elongation. These are useful for assessing tumour morphology and structural irregularities, which may correlate with malignancy or response to treatment.
+
+    \item \textbf{Gray Level Co-occurrence Matrix (GLCM):} GLCM features measure the frequency of co-occurring intensity values at a given offset and direction. These features, such as contrast, autocorrelation, joint energy, and difference entropy, provide insights into local texture and structural organisation within the tumour.
+
+    \item \textbf{Gray Level Run Length Matrix (GLRLM):} GLRLM features quantify the length of consecutive runs of pixels with the same intensity value in a given direction. They capture information related to texture granularity, such as short run emphasis, long run emphasis, and run entropy.
+
+    \item \textbf{Gray Level Size Zone Matrix (GLSZM):} Unlike GLRLM, which operates along lines, GLSZM measures the size of connected regions (zones) of similar intensity. It includes features like small and large area emphasis, and gray level non-uniformity, offering information about texture coarseness and homogeneity.
+
+    \item \textbf{Gray Level Dependence Matrix (GLDM):} GLDM evaluates the number of neighbouring voxels that depend on a center voxel with a given gray level, based on a defined intensity tolerance. Features such as dependence entropy and large dependence emphasis reflect the degree of local uniformity and dependence.
+
+    \item \textbf{Neighboring Gray Tone Difference Matrix (NGTDM):} NGTDM features compare a voxel’s intensity with the average gray level of its neighbuorhood. They capture high-level texture patterns and include features such as coarseness, contrast, busyness, complexity, and strength.
+
+\end{itemize}
+
+\subsection{Data Description}
+
+As previously described, this study involves a longitudinal MRI dataset of 18 mice, divided into three experimental groups: Control (untreated), TMZ-Treated Cured, and TMZ-Treated Relapsing. Table \ref{tab:data} summarises key details for each subject, including the number of imaging sessions, the number of MRI scans per session, and the time span over which the data were collected. The control group comprises 8 mice (C1258–C1361), each with between 1 and 8 imaging sessions conducted from day 7 to day 26 post-inoculation. The TMZ-treated cured group includes 5 mice (C1276–C1382), with 8 to 15 sessions each, covering a wider time range from day 9 to day 45. The relapsing group also includes 5 mice (C1263–C1383), which underwent 14 to 19 sessions between days 10 and 49.
+
+Each imaging session consists of 1 to 5 MRI scans, capturing the tumour’s morphology and internal heterogeneity across time. This dense and structured sampling allows for the extraction of radiomic features that reflect tumour shape, intensity, and texture dynamics. Such features are intended to offer valuable quantitative information on tumour evolution and response to treatment in different groups, supporting further statistical and machine learning analysis to characterise therapy outcomes and identify relapse patterns.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % Aumenta la altura de cada fila
+\normalsize % Tamaño de letra un poco más grande
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+\textbf{Code} & \textbf{Group} & \textbf{Images per Exploration} & \textbf{Number of Explorations} & \textbf{Range of Days Studied} \\
+\hline
+C1258 & Control & 1-3 & 6 & 7-24 \\
+C1260 & Control & 1-4 & 6 & 8-18 \\
+C1261 & Control & 1-5 & 8 & 10-26 \\
+C1297 & Control & 2 & 1 & 23 \\
+C1299 & Control & 2 & 1 & 17 \\
+C1359 & Control & 1-4 & 3 & 11-16 \\
+C1360 & Control & 1-4 & 6 & 11-22 \\
+C1361 & Control & 1-4 & 5 & 11-20 \\
+\hline
+C1276 & TMZ-Treated - Cured  & 1-2 & 15 & 11-45 \\
+C1281 & TMZ-Treated - Cured  & 1-2 & 8 & 10-27 \\
+C1284 & TMZ-Treated - Cured  & 1 & 8 & 10-27 \\
+C1285 & TMZ-Treated - Cured  & 1-2 & 10 & 9-31 \\
+C1382 & TMZ-Treated - Cured  & 1 & 8 & 11-29 \\
+\hline
+C1263 & TMZ-Treated - Relapsing & 1-4 & 18 & 11-47 \\
+C1264 & TMZ-Treated - Relapsing & 1-4 & 16 & 11-39 \\
+C1270 & TMZ-Treated - Relapsing & 1-4 & 14 & 10-37 \\
+C1380 & TMZ-Treated - Relapsing & 1-4 & 17 & 11-41 \\
+C1383 & TMZ-Treated - Relapsing & 1-4 & 19 & 11-49 \\
+\hline
+\end{tabular}%
+}
+\caption{Description of subjects based on their group: Control, Cured Mice, Relapsing. Each row represents one of the subjects of the study. The first column shows its unique code (CXXXX), the second column shows the group (control or treated), the third column shows the number of MRI images in each timepoint, the fourth column shows the number of explorations made to the subject along the time, and the last column shows the range of days studied, taking as reference the day 0 which is the tumour inoculation day.}
+\label{tab:data}
+\end{table}
+
+\chapter{Methodology}
+This chapter outlines the methodology followed in our research. We begin by detailing our problem formulation, and continue with the exploration of the main configuration aspects of our model training pipelines.
+
+\section{Problem Formulation}
+
+As stated in the introductory section, we aim to explore the early prediction of therapeutic outcomes in preclinical glioblastoma models using longitudinal MRI data.
+
+Specifically, we aim to develop a supervised ML framework capable of predicting whether GL261 GB-bearing mice will present a sustained response to treatment and be cured, or, conversely, regrow and relapse, based on features extracted at different time points from their MRI sequences.
+
+Formally, the problem can be formulated as a binary classification task:  
+Given a sequence of annotated MRI scans with corresponding tumour segmentations and associated radiomic features collected across multiple time points for each subject, the objective is to predict a binary label $y \in \{0, 1\}$, where $y = 1$ indicates that the mouse is expected to be cured, and $y = 0$ indicates that it is not.
+
+The dataset can be represented as:
+\[
+\mathcal{D} = \{(x_{i}^{(t)}, y_i) \mid i = 1, \dots, N;\; t \in T_i\}
+\]
+where $x_{i}^{(t)}$ denotes the feature vector extracted from the MRI image and tumour mask of mouse $i$ at time point $t$, $y_i$ is the final binary outcome label of mouse $i$, and $T_i$ is the set of time points available for that mouse.
+
+This problem presents several challenges due to the nature of the data:
+
+\begin{itemize}
+    \item \textbf{Limited sample size:} The dataset is composed of only 8 control cases, 5 relapsing mice, and 5 cured mice, which restricts model complexity and increases the risk of overfitting.
+    \item \textbf{Heterogeneous longitudinal data:} Each mouse underwent a different number of MRI scans at varying time points, with follow-up durations ranging from a few days to up to day 49, depending on the final outcome.
+    \item \textbf{Temporal dynamics:} The data is longitudinal, and it is critical to determine how early a reliable prediction can be made from the time series.
+    \item \textbf{Class imbalance:} There are fewer time points in the cured cases, which could bias learning towards the majority class.
+    \item \textbf{Inter-subject variability:} Differences in tumour evolution between individual mice introduce biological and treatment-related variability.
+    \item \textbf{High dimensionality:} The radiomic feature space is large, potentially containing thousands of features per image, which requires appropriate feature selection and dimensionality reduction.
+\end{itemize}
+
+\section{Temporal Data Splitting}
+
+A central aspect of this work is the use of longitudinal MRI data, where each subject (mouse) is monitored at several time points throughout the tumour progression. This structure introduces a temporal dimension that must be carefully respected during model training and evaluation to avoid data leakage and overly optimistic performance estimates. To account for this, we decided to employ two complementary data splitting strategies:
+
+\begin{itemize}
+    \item \textbf{Grouped Leave-One-Out Training:} In this setting, each fold consists of leaving out one mouse entirely from training, and using all its time points as the test set. The model is then trained on the remaining mice, whose complete longitudinal data is available. This approach ensures that the test set contains samples from a completely unseen subject, preventing data leakage and allowing for an evaluation of how well the model generalises across individuals.
+
+    This strategy is particularly appropriate in preclinical contexts where each subject may represent a slightly different biological trajectory. Since all time points of the excluded subject are kept in the test set, the model is evaluated not only on early prediction capacity but also on its consistency across the tumour progression of the unseen individual. Moreover, this splitting respects the grouped nature of the data and avoids optimistic bias due to temporal or intra-subject correlations.
+    
+    \item \textbf{Expanding Window Training:} To better assess the model’s behaviour over time and its ability to make early predictions, an expanding window strategy was also used. This method involves sorting the dataset chronologically and defining a sequence of time-based folds where training data accumulates progressively. The model is initially trained on a small window containing only the earliest time points and tested on the immediately following ones. In each subsequent fold, additional days are added to the training window, and the model is tested again on the next available day.
+
+    This incremental structure reflects how data is typically collected in a real longitudinal follow-up, where predictions must be made based on the information available up to that point in time. In practice, this method reveals whether meaningful predictions can be made early in the disease timeline and how the model’s performance evolves as more information becomes available. It also provides insight into which radiomic features become discriminative at specific stages of tumour progression.
+
+\end{itemize}
+
+\section{Model Selection}
+
+In our implementation, we decided to use eXtreme Gradient Boosting \textbf{XGBoost}, an efficient and scalable  implementation of the gradient boosting framework previously developed by Friedman \textit{et al}. \cite{Friedman2000, Friedman2001}.
+
+\subsection{Ensemble learning}
+
+The Gradient Boosting Machine (GBM) and XGBoost are both ensemble learning methods.
+Ensemble learning is a powerful ML paradigm, where multiple base learners are combined to produce a more robust and accurate predictive model. The core idea is that, while individual models may have limitations (e.g., high variance or bias), combining their outputs through methods like bagging, boosting, or stacking can lead to superior generalisation performance \cite{Mienye2022}.
+
+Among ensemble techniques, boosting is particularly relevant for this work. It works by sequentially training a set of weak learners, typically decision trees, where each new model attempts to correct the errors made by the previous ones. This iterative process continues until a strong ensemble is formed.
+
+\subsection{Gradient Boosting Machine}
+The GBM is a specific implementation of the boosting paradigm that builds models incrementally, where each subsequent learner is trained to minimise the loss function using the gradient of the error with respect to the previous ensemble’s predictions. The use of gradient descent allows GBM to optimise a wide variety of differentiable loss functions, making it highly adaptable to both classification and regression tasks.
+
+This method typically uses shallow decision trees as weak learners. At each iteration, a new tree is fitted to the residuals (errors) of the combined predictions from all previous trees. This iterative refinement leads to a final model that is able to capture complex patterns in the data.
+
+Despite its strong predictive performance, the standard GBM can be computationally intensive and sensitive to hyperparameters such as the number of estimators, learning rate, and tree depth. Moreover, overfitting can occur if the model is not properly regularised or validated.
+
+\subsection{eXtreme Gradient Boosting (XGBoost)}
+
+XGBoost builds upon the foundation of gradient boosting by introducing several algorithmic and system-level enhancements aimed at improving both efficiency and predictive power \cite{Chen2016}. It incorporates L1 and L2 regularisation into the objective function, helping to prevent overfitting, which is particularly important when used to model high-dimensional datasets.
+
+Additionally, XGBoost employs a second-order Taylor approximation for the loss function, enabling more precise and faster optimisation. It also includes techniques like tree pruning, shrinkage (learning rate), and column subsampling, which contribute to better generalisation and speed.
+
+From an implementation perspective, XGBoost is optimised for performance, supporting parallel computation and handling sparse input automatically. These characteristics make it especially suitable for large-scale, structured data problems, and have contributed to its widespread adoption in both academic research and industrial applications.
+
+In the context of this work, XGBoost was chosen as the primary classifier due to its strong performance on tabular data, robustness to overfitting, and interpretability through feature importance metrics.
+
+\section{Feature Preprocessing}
+
+Prior to model training, and in order to ensure the consistency, reliability and relevance of the radiomic features, a structured preprocessing pipeline was applied. The goal of this process was to reduce noise, address missing values, avoid multicollinearity, and retain statistically significant features.
+
+\begin{itemize}
+    \item \textbf{Missing Value Imputation:} Missing values were handled using mean imputation, in which each missing entry was replaced with the mean of its corresponding feature across the dataset.
+
+    \item \textbf{Low Variance Filtering:} Features exhibiting very low variance (threshold $< 0.01$) were discarded, as they are unlikely to contribute useful information for the classification task and may increase the risk of overfitting.
+
+    \item \textbf{Correlation Filtering:} To mitigate feature redundancy and multicollinearity, a Spearman correlation matrix was computed. Pairs of features with a high absolute correlation ($|\rho| > 0.95$) were examined, and one feature from each pair was removed.
+
+    \item \textbf{Statistical Feature Selection (Mann–Whitney U Test):} To retain only those features that showed significant differences between the outcome groups (cured vs. non-cured), the non-parametric Mann–Whitney U test was applied. This test is appropriate because it was revealed through exploratory data analysis, that the vast majority of features did not follow a normal distribution. Therefore, a non-parametric approach was necessary to reliably assess differences between the groups without relying on the assumption of normality. Features with a $p$-value below 0.05 were selected, ensuring that the model focuses on variables with the highest discriminatory power.
+
+    \item \textbf{Feature Standardisation:} The final set of features was standardised using z-score normalisation:
+    \[
+    z = \frac{x - \mu}{\sigma}
+    \]
+    where $x$ is the raw feature value, $\mu$ is the feature mean, and $\sigma$ is the standard deviation. This transformation ensures that all features are on a comparable scale, which benefits gradient-based algorithms such as XGBoost. 
+\end{itemize}
+
+Together, these steps helped control for data variability, reduced dimensionality, and enhanced the model's generalisation capability, which was particularly important given the high dimensionality of radiomic data and the small number of subjects in the dataset.
+
+\section{Hyperparameter Tuning}
+
+The XGBoost classifier involves numerous hyperparameters that allow fine control over model complexity and training behaviour. Proper tuning of these hyperparameters is essential to maximise predictive performance while preventing overfitting.
+
+To identify a robust and generalisable configuration, we conducted a grid search over a carefully selected set of hyperparameters. The tuning process was embedded within a nested cross-validation framework, where the inner loop was used for model selection and the outer loop served to obtain an unbiased estimate of the generalisation error.
+
+The hyperparameters considered are as follows:
+
+\begin{itemize}
+    \item \textbf{max\_depth}: Defines the maximum depth of each decision tree. Deeper trees allow the model to capture more complex patterns but also increase the risk of overfitting.
+    
+    \item \textbf{learning\_rate}: It scales the contribution of each tree before it is added to the ensemble. Lower values lead to slower but more robust learning, typically requiring more trees.
+
+    \item \textbf{n\_estimators}: Specifies the number of boosting rounds, or equivalently, the number of trees to be added. This parameter works in conjunction with \textbf{learning\_rate} to control the training duration and convergence.
+
+    \item \textbf{subsample}: Denotes the fraction of the training data to be used for fitting each individual tree. Introducing subsampling helps reduce variance and can improve model generalisation.
+
+    \item \textbf{colsample\_bytree}: Refers to the fraction of features randomly selected for building each tree. This parameter acts as a regularisation technique to prevent overfitting and promote feature diversity.
+
+    \item \textbf{min\_child\_weight}: Controls the minimum sum of instance weights (i.e., Hessians) needed in a child node. A higher value leads to more conservative tree splitting, helping avoid overly specific partitions based on few training samples.
+
+    \item \textbf{gamma}: Represents the minimum loss reduction required to make a further partition on a leaf node. Increasing \textbf{gamma} makes the algorithm more conservative by requiring greater improvement in the loss function to allow new splits.
+\end{itemize}
+
+After exploring combinations of these parameters, we retained those that consistently yielded strong classification performance across folds, with particular attention to metrics such as AUC, sensitivity, and F1-score. The best-performing configuration is summarised in Table~\ref{tab:best_params}.
+
+\begin{table}[H]
+\centering
+
+\begin{tabular}{|l|c|}
+\hline
+\textbf{Hyperparameter} & \textbf{Value} \\
+\hline
+\texttt{colsample\_bytree} & 0.6 \\
+\texttt{gamma} & 0.5 \\
+\texttt{learning\_rate} & 0.01 \\
+\texttt{max\_depth} & 3 \\
+\texttt{min\_child\_weight} & 1 \\
+\texttt{n\_estimators} & 100 \\
+\texttt{subsample} & 0.6 \\
+\hline
+\end{tabular}
+\caption{Best hyperparameter configuration for \texttt{XGBoostClassifier}}
+\label{tab:best_params}
+\end{table}
+
+
+\section{Addressing Class Imbalance}
+
+One of the main challenges in this study was the inherent class imbalance in the dataset. A significantly larger proportion of the samples belonged to mice whose tumours either did not respond to treatment or were not treated (i.e., relapse or control) showing highly proliferative profiles, while cured cases were underrepresented. Such imbalance can lead ML models to become biased towards the majority class, resulting in poor sensitivity and recall for the minority class, which in this case corresponds to the positive treatment outcome that is of particular clinical interest.
+
+To address this issue and ensure that the classifier could learn representative decision boundaries for both classes, we implemented and evaluated several resampling strategies, applied exclusively to the training set.
+
+\begin{itemize}
+    \item \textbf{Oversampling using SMOTE:} The Synthetic Minority Oversampling Technique (SMOTE) generates synthetic examples of the minority class by interpolating between existing samples and their nearest neighbours \cite{Chawla2002}. This helps to enrich the \textit{cured} class distribution without duplicating data, potentially improving the model’s ability to generalise from limited minority class examples.
+    
+    \item \textbf{Edited Nearest Neighbours (ENN):} ENN, first proposed by Dennis Wilson in 1972 in \cite{Wilson1972} is an undersampling method that removes ambiguous or noisy examples from the majority class. Specifically, it eliminates samples whose class label differs from the majority of its $k$-nearest neighbours. This method is helpful for both rebalancing the dataset and also reducing class overlap and potential outliers, potentially leading to cleaner decision boundaries.
+    
+    \item \textbf{No Resampling (Baseline):} Models were trained using the original, imbalanced class distribution to assess the impact of resampling strategies on performance and determine if artificial rebalancing improves generalisation, especially for the minority class.
+\end{itemize}
+
+Each of these techniques was systematically tested under the same experimental conditions and evaluation protocol. Metrics such as sensitivity, precision, Area Under the ROC plot (AUC), and F1-score (see description below) were closely monitored to understand the trade-offs introduced by each method. This evaluation was essential to identify the approach that most effectively improved model performance on the minority class without compromising overall predictive stability.
+
+\section{Temporal Feature Engineering: Extraction of Lag-Based Descriptors}
+
+Given the longitudinal nature of the dataset, where each subject has multiple MRI acquisitions over time, we introduced a set of lag features to capture the temporal dynamics of tumour progression. Lag features are derived variables that incorporate information from previous timepoints, enabling the model to account for trends, fluctuations, or inertia in the evolution of radiomic characteristics.
+
+These features are designed to summarise how a given variable changes over time, either by measuring the difference between current and past values (delta), capturing local trends (slopes), or aggregating statistics from recent windows (e.g., rolling averages or variances). By embedding temporal context into the feature space, lag-based descriptors allow machine learning models to better identify patterns related to tumour growth, response to therapy, or relapse. For each original radiomic feature, we generated a series of such temporal descriptors, enriching the dataset with dynamic information beyond static measurements.
+
+
+
+\section{Evaluation Metrics}
+
+To evaluate model performance, especially in the context of an imbalanced dataset with clinically meaningful minority cases (cured mice), we employed a range of classification metrics which offer complementary perspectives on the model’s behaviour:
+
+\begin{itemize}
+    \item \textbf{Accuracy:} Proportion of correctly classified instances among the total number of predictions. While commonly used, it can be misleading when classes are imbalanced.
+
+    \[
+    \text{Accuracy} = \frac{TP + TN}{TP + TN + FP + FN}
+    \]
+    where $TP$ = true positives, $TN$ = true negatives, $FP$ = false positives, and $FN$ = false negatives.
+
+    
+    \item \textbf{Sensitivity:} Measures the proportion of actual positive cases (cured) that were correctly identified by the model. High sensitivity is crucial in medical contexts to minimise missed cures.
+
+    \[
+    \text{Sensitivity} = \frac{TP}{TP + FN}
+    \]
+
+    \item \textbf{Specificity:} Indicates the proportion of actual negative cases (non-cured) correctly predicted, helping to avoid false positives.
+
+    \[
+    \text{Specificity} = \frac{TN}{TN + FP}
+    \]
+
+\item \textbf{AUC:} Defined as the area under a curve (the ROC) defined by plotting sensitivity versus (1-specificity). It evaluates the model’s ability to distinguish between positive and negative cases across various classification thresholds. A high AUC (close to a value of 1, or 100\% if described as a percentage) indicates that the model effectively separates the two classes, correctly ranking positive instances higher than negative ones. Conversely, a low AUC (a 0.5 or 50\% indicates a random classification) suggests poor discriminatory performance, meaning the model struggles to differentiate between classes and may make incorrect predictions.
+
+    \item \textbf{Positive Predictive Value (PPV):} Measures the proportion of predicted positive cases that are truly positive. It is useful when the cost of false positives is high.
+
+    \[
+    \text{PPV} = \frac{TP}{TP + FP}
+    \]
+
+    \item \textbf{Negative Predictive Value (NPV):} Reflects the proportion of predicted negatives that are truly negative, important for evaluating the reliability of negative predictions.
+
+    \[
+    \text{NPV} = \frac{TN}{TN + FN}
+    \]
+
+    \item \textbf{F1-Score:} Harmonic mean of precision and recall. This metric balances both false positives and false negatives, and is particularly informative when classes are imbalanced.
+
+    \[
+    \text{F1-Score} = 2 \cdot \frac{\text{Precision} \cdot \text{Recall}}{\text{Precision} + \text{Recall}} = \frac{2TP}{2TP + FP + FN}
+    \]
+\end{itemize}
+
+\section{Model Interpretation}
+
+To better understand the internal decision-making process of the XGBoost model, we performed a feature importance analysis under both temporal validation strategies: Grouped Leave-One-Out training and Expanding Window training. This analysis aimed to identify which radiomic features contributed most significantly to the classification task and to examine whether these features aligned with known biological markers or tumour progression patterns.
+
+In the Grouped Leave-One-Out setting, we trained and evaluated the model on multiple folds after determining the best-performing configuration, each leaving out one mouse for testing. Then, we computed the feature importance scores for the final model in each fold. These scores were then averaged across all folds to obtain a global importance ranking. From this aggregated ranking, we selected the top features for further biological analysis. 
+
+For the Expanding Window strategy, the model was trained on increasingly longer historical sequences and evaluated on the immediate next time point. This setup allowed us to observe which features became informative at specific stages of tumour progression.
+
+To focus on early predictive power, we defined a temporal threshold based on domain knowledge. In our dataset, tumours are first administered with TMZ treatment on day 11, with a second treatment administration by day 17. In cured cases, tumour volume usually begins to show shrinkage after the second treatment round. Based on this, we defined “early” as time points up to and including day 17.
+
+We then examined the folds from the Expanding Window training that included only early time points (day 17 and before), and collected the most important features in each. By identifying which features were repeatedly ranked as important across these early folds, we aimed to uncover potential early biomarkers of treatment efficacy.
+
+\chapter{Experiments and Results}
+
+This chapter presents the experimental setup, the evaluation of the proposed methods/approaches, and an analysis of the results. 
+
+\section{Latent Space Visualisation}
+
+The direct interpretation of high-dimensional datasets, such as those derived from radiomic features, is challenging. To enable visual exploration in our experiments, we applied non-linear dimensionality reduction techniques, namely \textbf{t-SNE} and \textbf{UMAP}, that project the transformed observed data into latent representations in a 2D space. This allows us to explore whether the two outcome groups in our data (\textit{Cured} and \textit{Relapse}) exhibit any structural separation.
+
+Both t-SNE and UMAP are useful for visualising complex, high-dimensional data like radiomic features. They help uncover potential clusters or patterns by projecting the data into 2D, making it easier to explore group separability (e.g., Cured vs. Relapse).
+
+t-SNE focuses on preserving local relationships but can distort global structure and is computationally slower. UMAP also preserves local structure but maintains more of the global layout and is faster, making it more practical for larger datasets or integration into clinical pipelines.
+
+Although both methods are unsupervised and do not use class labels during projection, they are useful for assessing whether the data contains meaningful structure. Such visualisations serve as a qualitative sanity check, providing insights into the complexity of the classification problem.
+
+Figure \ref{fig:latent-space} shows the resulting embeddings. In the t-SNE plot (above), Cured samples (green) appear more concentrated on the left, while Relapse samples (red) are more dispersed across the space, although somehow more concentrated on the right-hand side of the representation space. UMAP (below) reveals a more distinct vertical separation, with Cured samples tending towards the top and Relapse samples towards the bottom. While overlap remains, as you might expect from a real discrimination problem, these patterns suggest that some local structure is captured, though the problem is far from linearly separable, which is consistent with the complexity of clinical data.
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.9\linewidth}
+        \includegraphics[width=\linewidth]{images/tsne.png}
+        \caption{Latent space via t-SNE}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.9\linewidth}
+        \includegraphics[width=\linewidth]{images/umap.png}
+        \caption{Latent space via UMAP}
+    \end{subfigure}
+    \caption{2D projections of the latent space using t-SNE and UMAP. Each point represents a sample, coloured by outcome group (\textit{Cured} (green) or \textit{Relapse} (red)).}
+    \label{fig:latent-space}
+\end{figure}
+
+\vspace{1em}
+
+%\begin{tcolorbox}[colback=gray!10, colframe=gray!10, boxrule=0.5pt]
+%\textbf{Why t-SNE and UMAP?}
+
+%Both t-SNE and UMAP are useful for visualising complex, high-dimensional data like radiomic features. They help uncover potential clusters or patterns by projecting the data into 2D, making it easier to explore group separability (e.g., Cured vs. Relapse).
+
+%t-SNE focuses on preserving local relationships but can distort global structure and is computationally slower. UMAP also preserves local structure but maintains more of the global layout and is faster, making it more practical for larger datasets or integration into clinical pipelines.
+%\end{tcolorbox}
+
+\section{Machine Learning Approach}
+
+To explore different temporal modelling strategies, our goal was to assess whether radiomic signatures extracted from longitudinal T2-weighted MRI scans could anticipate long-term treatment outcomes in GL261 glioblastoma-bearing mice. We implemented an incremental binary classification pipeline designed to identify early predictive signs of therapeutic response, with particular emphasis on detecting cured cases — the minority class — given their clinical relevance.
+
+While our primary objective was not to achieve perfect classification performance, the rationale of this study aligns with the broader objective of uncovering biologically meaningful features that could support hypothesis generation and provide insights into tumour evolution. Predicting tumour cure is inherently complex, especially when working solely with non-invasive imaging data. However, by incorporating temporal and radiomic information, we aimed to build models that could serve as early indicators of therapeutic response.
+
+\subsection{Grouped Leave-One-Out Pipeline}
+
+Our experimental pipeline followed an incremental design, where each experiment built upon the previous one by introducing targeted changes to the feature set, resampling strategy, and temporal feature engineering. To ensure robust evaluation across individuals and prevent data leakage, we employed a \textit{grouped leave-one-out cross-validation} scheme, in which all time points from a single mouse were left out during training and used for testing. This approach, well-suited for small sample sizes, allowed us to average performance metrics across all mice, yielding representative and unbiased estimates. The progression of model performance across configurations can be found later on in this chapter accompanying the summary of results reported in Table~\ref{table:pm_c}.
+
+\subsubsection{Baseline}
+For the baseline experiment, we trained a model using all 1,218 extracted radiomic features without any class balancing. Although this configuration yielded a high overall \textit{accuracy} (0.8455) and \textit{specificity} (0.9494), its \textit{sensitivity} was markedly low (0.3485), suggesting that the model clearly struggled to identify mice that would be cured. This behaviour is characteristic of class imbalance problems, particularly when the positive class (\textit{cured}) is underrepresented. 
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % Aumenta la altura de cada fila
+\normalsize % Tamaño de letra un poco más grande
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
+\hline
+\textbf{Accuracy} & \textbf{AUC} & \textbf{Sensitivity} & \textbf{Specificity} & \textbf{PPV} & \textbf{NPV} & \textbf{F1 (Weighted)} & \textbf{F1 (Macro)} \\
+\hline
+0.8455 & 0.6489 & 0.3485 & 0.9494 & 0.5897 & 0.8746 & 0.8289 & 0.6743 \\
+\hline
+\end{tabular}
+}
+\caption{Baseline experiment (All Features)}
+\end{table}
+
+In this setup, the dataset included 316 samples from mice that would eventually die —either from uncontrolled tumour progression (control group) or from tumour relapse after treatment— and only 66 samples from mice that were ultimately cured. One of the key modelling decisions was to merge the control and relapsing mice into a single class representing treatment failure. This choice was motivated by the fact that, despite different treatment conditions, both groups share a similar prognostic trajectory: tumour progression leading to death. Grouping them allowed the model to focus on distinguishing between mice with a poor prognosis (non-cured) and those who responded successfully to therapy (cured), aligning better with the biological and clinical goal of identifying early predictors of treatment success. In addition, for obvious ethical reasons, there is no "untreated" group in clinical scenario.
+
+The model also likely suffered from the \textit{curse of dimensionality}, as the disproportion between the high number of features (1,218) and the limited number of samples (382) can introduce substantial noise and overfitting. In such scenarios, many features may be redundant or irrelevant, which can obscure the underlying signal and reduce the model’s ability to generalise to unseen data. Without applying dimensionality reduction or feature selection, the model becomes more prone to capturing spurious correlations rather than learning meaningful patterns.
+
+\subsubsection{Experiment 1}
+We started building on the model pipeline by applying SMOTE oversampling to the training set to address the class imbalance by synthetically generating new instances of the minority class (\textit{cured}). This led to a notable improvement in \textit{sensitivity} (0.4697), meaning the model became more capable of identifying cured mice. Although there was a moderate drop in \textit{specificity}, this trade-off is expected in imbalanced settings. Importantly, the \textit{AUC} increased to 0.6874, indicating a better overall ability to distinguish between both cases. 
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % Aumenta la altura de cada fila
+\normalsize % Tamaño de letra un poco más grande
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
+\hline
+\textbf{Accuracy} & \textbf{AUC} & \textbf{Sensitivity} & \textbf{Specificity} & \textbf{PPV} & \textbf{NPV} & \textbf{F1 (Weighted)} & \textbf{F1 (Macro)} \\
+\hline
+0.8298 & 0.6874 & 0.4697 & 0.9051 & 0.5082 & 0.8910 & 0.8272 & 0.6931 \\
+\hline
+\end{tabular}
+}
+\caption{Configuration 1 - Oversample}
+\end{table}
+
+
+\subsubsection{Experiment 2}
+
+Having control and relapse cases grouped into the same class was a challenging modelling decision. While both ultimately result in treatment failure, their underlying biological mechanisms differ: control mice receive no therapy, whereas relapsing mice initially respond to treatment before experiencing tumour regrowth. This heterogeneity within the negative class may introduce confounding patterns and limit the model’s ability to learn meaningful distinctions.
+
+To address this, in Experiment 2 we removed control cases from the dataset and trained the model solely on \textit{cured} versus \textit{relapsing} mice. This adjustment allowed us to isolate the effect of treatment response and focus on a more clinically relevant classification problem. Although all performance metrics slightly decreased compared to the previous experiment, the new setup reduced biological noise and enabled a more focused evaluation of early predictors of therapeutic efficacy.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % Aumenta la altura de cada fila
+\normalsize % Tamaño de letra un poco más grande
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
+\hline
+\textbf{Accuracy} & \textbf{AUC} & \textbf{Sensitivity} & \textbf{Specificity} & \textbf{PPV} & \textbf{NPV} & \textbf{F1 (Weighted)} & \textbf{F1 (Macro)} \\
+\hline
+0.7785 & 0.6626 & 0.4545 & 0.8707 & 0.5000 & 0.8487 & 0.7747 & 0.6679 \\
+\hline
+\end{tabular}
+}
+\caption{Configuration 2 - Control cases removal}
+\end{table}
+
+\subsubsection{Experiment 3}
+
+From Experiment 3 onwards, we introduced feature selection techniques to address the curse of dimensionality and reduce the risk of overfitting. Specifically, we removed features with very low variance (variance $<$ 0.01), since such features carry little discriminative information, and eliminated highly correlated features using the \textit{Spearman} correlation coefficient, discarding one feature from each pair with $|\rho| > 0.95$. These preprocessing steps aimed to reduce redundancy and retain only the most informative features. As a result, the model's performance improved slightly—particularly in \textit{sensitivity} (0.4848) and \textit{precision} (0.5161)—indicating that a more compact and cleaner feature space can enhance generalisation by reducing noise in the input data.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % Aumenta la altura de cada fila
+\normalsize % Tamaño de letra un poco más grande
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
+\hline
+\textbf{Accuracy} & \textbf{AUC} & \textbf{Sensitivity} & \textbf{Specificity} & \textbf{PPV} & \textbf{NPV} & \textbf{F1 (Weighted)} & \textbf{F1 (Macro)} \\
+\hline
+0.7852 & 0.6778 & 0.4848 & 0.8707 & 0.5161 & 0.8559 & 0.7828 & 0.6816 \\
+\hline
+\end{tabular}
+}
+\caption{Configuration 3 - Remove low variance \& correlated features}
+\end{table}
+
+\subsubsection{Experiment 4}  
+In Experiment 4, we further refined the feature space by retaining only those features that exhibited statistically significant differences between the \textit{cured} and \textit{non-cured} classes. This was done using the \textit{Mann–Whitney U} test with a significance threshold of $p < 0.05$. 
+
+By focusing exclusively on features with strong discriminatory power, the aim was to reduce noise and highlight biologically relevant patterns. As a result, the model achieved its best discriminative performance across all experiment recorded so far, with the highest \textit{AUC} (0.7015) and \textit{sensitivity} (0.5152). These improvements suggest that statistical filtering effectively enhanced the model's ability to identify cured cases.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % Aumenta la altura de cada fila
+\normalsize % Tamaño de letra un poco más grande
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
+\hline
+\textbf{Accuracy} & \textbf{AUC} & \textbf{Sensitivity} & \textbf{Specificity} & \textbf{PPV} & \textbf{NPV} & \textbf{F1 (Weighted)} & \textbf{F1 (Macro)} \\
+\hline
+0.8054 & 0.7015 & 0.5152 & 0.8879 & 0.5667 & 0.8655 & 0.8020 & 0.7081 \\
+\hline
+\end{tabular}
+}
+\caption{Configuration 4 - Keep only significant features}
+\end{table}
+
+\subsubsection{Experiment 5}
+In this experiment, we proceeded by introducing temporal engineering, incorporating features that captured the dynamic evolution of tumour characteristics over time. Specifically, we computed time-dependent statistics such as 3-day rolling means and slopes, differences every two days, and lagged values. These features were designed to represent how radiomic properties change across consecutive MRI acquisitions, which is crucial for prediction tasks in longitudinal data.
+
+Surprisingly, the overall performance decreased slightly compared to previous configurations.  This slight drop in performance may be attributed to the lack of a defined selection criterion for the added temporal features, potentially introducing noise or redundant information into the model.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % Aumenta la altura de cada fila
+\normalsize % Tamaño de letra un poco más grande
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
+\hline
+\textbf{Accuracy} & \textbf{AUC} & \textbf{Sensitivity} & \textbf{Specificity} & \textbf{PPV} & \textbf{NPV} & \textbf{F1 (Weighted)} & \textbf{F1 (Macro)} \\
+\hline
+0.7886 & 0.6799 & 0.4848 & 0.8750 & 0.5246 & 0.8565 & 0.7665 & 0.6587 \\
+\hline
+\end{tabular}
+}
+\caption{Configuration 5 - Lag features}
+\end{table}
+
+\subsubsection{Experiment 6}
+In Experiment 6, we aimed to improve upon the previous configuration by applying a more principled approach to temporal feature engineering. Instead of generating lag and time-derived features for the entire feature space, we implemented a heuristic strategy to selectively create temporal features.
+
+The process was as follows:
+
+\begin{itemize}
+    \item \textbf{Start from a refined feature set:} We used the feature space resulting from Experiment 4, which had already removed low-variance features (variance $<$ 0.01), highly correlated features (Spearman's $\rho > 0.95$), and those not statistically significant between classes (based on a Mann-Whitney U test with $p < 0.05$).
+    
+    \item \textbf{Train and extract feature importance:} Using this cleaned set, we trained the \textit{XGBoost} classifier and computed the average feature importance across 10 cross-validation folds. This provided a robust estimate of the most informative features.
+    
+    \item \textbf{Select top 50 features:} Based on the importance scores, we retained the top 50 features for further processing.
+    
+    \item \textbf{Apply temporal engineering selectively:} We created time-dependent features such as 3-day rolling means, 2-day deltas, and 3-day slopes only for these 50 most relevant features. 
+\end{itemize}
+
+This configuration yielded competitive performance, maintaining high \textit{sensitivity} (0.5152), which is crucial for identifying cured mice, and high \textit{specificity} (0.8836), avoiding false positives. \textit{PPV} (0.5574) and \textit{NPV} (0.8650) were also relatively strong, reflecting the consistency of the model in both positive and negative predictions. The model achieved an overall \textit{accuracy} of 0.8020 and a \textit{AUC} of 0.6994, confirming that this targeted approach preserved discriminative power and generalisation.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % Aumenta la altura de cada fila
+\normalsize % Tamaño de letra un poco más grande
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
+\hline
+\textbf{Accuracy} & \textbf{AUC} & \textbf{Sensitivity} & \textbf{Specificity} & \textbf{PPV} & \textbf{NPV} & \textbf{F1 (Weighted)} & \textbf{F1 (Macro)} \\
+\hline
+0.8020 & 0.6994 & 0.5152 & 0.8836 & 0.5574 & 0.8650 & 0.7992 & 0.7048 \\
+\hline
+\end{tabular}
+}
+\caption{Configuration 6 - Lag Features with Heuristic}
+\end{table}
+
+\subsubsection{Experiment 7}
+
+In this experiment, we chose not to apply the Mann–Whitney U test for statistical feature selection. The rationale behind this decision was to avoid reducing the feature set too aggressively, especially after several rounds of variance and correlation filtering. At this stage, we wanted to assess whether retaining a broader set of features—prior to introducing temporal engineering—could preserve potentially useful information that might otherwise be discarded by strict univariate filtering.
+
+The model maintained similar performance to the previous one, with an accuracy of 0.8054 and a AUC of 0.6961. Sensitivity was slightly reduced to 0.5000 compared to the previous configuration, but overall results remained stable. 
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % Aumenta la altura de cada fila
+\normalsize % Tamaño de letra un poco más grande
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
+\hline
+\textbf{Accuracy} & \textbf{AUC} & \textbf{Sensitivity} & \textbf{Specificity} & \textbf{PPV} & \textbf{NPV} & \textbf{F1 (Weighted)} & \textbf{F1 (Macro)} \\
+\hline
+0.8054 & 0.6961 & 0.5000 & 0.8922 & 0.5690 & 0.8625 & 0.8007 & 0.7047 \\
+\hline
+\end{tabular}
+}
+\caption{Configuration 7 – No Mann–Whitney U test in feature selection}
+\end{table}
+
+\subsubsection{Experiment 8}
+
+In Experiment 8, we refined the temporal engineering strategy by applying additional filtering to the set of lag-derived features introduced in earlier experiments. Building upon the configuration of Experiment 6 —which already employed a heuristic to generate lag features from the top-ranked radiomic descriptors—, variance thresholding, correlation filtering, and statistical testing (Mann–Whitney U) were again employed to retain only the most informative temporal features.
+
+This process aimed to eliminate redundant, uninformative, or noisy lag variables that may have diluted the predictive signal. As a result, the model yielded the highest precision (0.5926) and specificity (0.9052) across all configurations. This improvement suggests that the model became more conservative and reliable in its positive predictions, i.e., when identifying mice likely to be cured. The overall performance was reasonably balanced in context, with competitive scores in sensitivity (0.4848), F1 (macro: 0.7078), and weighted F1 (0.8051), indicating that the streamlined set of lag features successfully preserved relevant temporal dynamics while reducing overfitting risk.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % Aumenta la altura de cada fila
+\normalsize % Tamaño de letra un poco más grande
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
+\hline
+\textbf{Accuracy} & \textbf{AUC} & \textbf{Sensitivity} & \textbf{Specificity} & \textbf{PPV} & \textbf{NPV} & \textbf{F1 (Weighted)} & \textbf{F1 (Macro)} \\
+\hline
+0.8121 & 0.6950 & 0.4848 & 0.9052 & 0.5926 & 0.8607 & 0.8051 & 0.7078 \\
+\hline
+\end{tabular}
+}
+\caption{Configuration 8 – Final model with filtered lag features (low variance, high correlation, and non-significance removed).}
+\end{table}
+
+\subsubsection{Experiment 9}
+Finally, in Experiment 9, we tested the application of Edited Nearest Neighbours (ENN) as an undersampling technique. ENN aims to improve the quality of the majority class by removing borderline or noisy instances that may confuse the classifier. However, in our case, its impact was mixed. Although sensitivity remained acceptable (0.4242), all other major metrics—including AUC (0.6367), precision (0.4444), and F1-score—significantly dropped compared to previous experiments. This decline suggests that aggressive undersampling may have led to the loss of valuable information, especially in a small dataset like ours, where every instance contributes meaningfully to the learning process.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % Aumenta la altura de cada fila
+\normalsize % Tamaño de letra un poco más grande
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
+\hline
+\textbf{Accuracy} & \textbf{AUC} & \textbf{Sensitivity} & \textbf{Specificity} & \textbf{PPV} & \textbf{NPV} & \textbf{F1 (Weighted)} & \textbf{F1 (Macro)} \\
+\hline
+0.7550 & 0.6367 & 0.4242 & 0.8491 & 0.4444 & 0.8383 & 0.7530 & 0.6389 \\
+\hline
+\end{tabular}
+}
+\caption{Configuration 9: Undersampling (ENN)}
+\end{table}
+
+\subsubsection{Discussion of Results}
+
+The results obtained throughout the experimental process, as summarily reported in Table \ref{table:pm_c}, were moderately successful (something expected given the limitations of availability of experimental data ), but promising, given the complexity of the problem to tackle. Predicting tumour relapse from early-stage MRI data is an inherently difficult task, becoming even more challenging in this case by the small sample size and the high class imbalance —only a minority of tumour images belonged to the cured class. This imbalance skews simple models toward predicting non-recovery, which explains why the baseline configuration (Experiment 0) achieved very high specificity (0.9494) and accuracy (0.8455) despite having a poor sensitivity (0.3485); it simply defaulted to predicting that no mouse would recover.
+
+Improving sensitivity, which is key to correctly identifying cured mice, was the primary goal of this incremental procedure. To this end, multiple iterations were conducted to balance the trade-off between sensitivity and specificity. Some of the most notable improvements emerged in Experiments 4, 6, and 8.
+
+In \textbf{Experiment 4}, statistically filtering the features using the Mann–Whitney U test led to the best AUC (0.7015) and the highest sensitivity (0.5152), while still maintaining strong overall performance. \textbf{Experiment 6} extended this strategy by introducing lag features only for top-ranked variables, based on a heuristic approach, maintaining sensitivity and similar results. \textbf{Experiment 8}, which involved an additional filtering step for the lag features based on variance, correlation, and significance, achieved the highest precision (PPV = 0.5926) and a satisfactory AUC (0.6950), with sensitivity slightly reduced (0.4848), indicating a fair balance between false positives and false negatives, which is important in a clinical setting where overestimating treatment success could be misleading.
+
+Overall, although the improvements may seem modest, they reflect meaningful progress within a highly constrained and biologically complex scenario. The ability to moderately increase sensitivity without heavily compromising specificity or precision is encouraging and suggests that, even with limited data, careful feature engineering and temporal modelling can yield predictive insights—particularly when those features are linked to biologically relevant indicators. This motivates further investigation into which radiomic features are driving model performance and how they relate to underlying tumour behaviour. As a next step, we aim to analyse the contribution and relevance of individual features to better understand their biological significance and interpretability within the modelling process. This line of inquiry aligns with our latent space visualisation, where we observe partial — but not complete —separability between outcome groups. The presence of some local structure, despite significant overlap, supports the notion that the model captures subtle yet meaningful distinctions tied to tumour biology.
+
+\vspace{0.5cm}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % Aumenta la altura de cada fila
+\normalsize % Tamaño de letra un poco más grande
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|p{5.2cm}|c|c|c|c|c|c|c|c|}
+\hline
+\textbf{Configuration} & \textbf{Accuracy} & \textbf{AUC} & \textbf{Sensitivity} & \textbf{Specificity} & \textbf{PPV} & \textbf{NPV} & \textbf{F1 (Weighted)} & \textbf{F1 (Macro)} \\
+\hline
+0: Baseline (All Features) & \textbf{0.8455} & 0.6489 & 0.3485 & \textbf{0.9494} & 0.5897 & 0.8746 & \textbf{0.8289} & 0.6743 \\
+\hline
+1: 0 + Oversampling (SMOTE) & 0.8298 & 0.6874 & 0.4697 & 0.9051 & 0.5082 & \textbf{0.8910} & 0.8272 & 0.6931 \\
+\hline
+2: 1 without control cases & 0.7785 & 0.6626 & 0.4545 & 0.8707 & 0.5000 & 0.8487 & 0.7747 & 0.6679 \\
+\hline
+3: 2 + Remove Low Var. \& High Corr. Features & 0.7852 & 0.6778 & 0.4848 & 0.8707 & 0.5161 & 0.8559 & 0.7828 & 0.6816 \\
+\hline
+4: 3 + Keep Significant Features & 0.8054 & \textbf{0.7015} & \textbf{0.5152} & 0.8879 & 0.5667 & 0.8655 & 0.8020 & \textbf{0.7081} \\
+\hline
+5: 4 + Add Lag Features & 0.7886 & 0.6799 & 0.4848 & 0.8750 & 0.5246 & 0.8565 & 0.7665 & 0.6587 \\
+\hline
+6: 5 + Lag Features with Heuristic & 0.8020 & 0.6994 & \textbf{0.5152} & 0.8836 & 0.5574 & 0.8650 & 0.7992 & 0.7048 \\
+\hline
+7: 6 without Significant Features & 0.8054 & 0.6961 & 0.5000 & 0.8922 & 0.5690 & 0.8625 & 0.8007 & 0.7047 \\
+\hline
+8: 7 + Remove Low Var., High Corr. \& Not Significant Lag & 0.8121 & 0.6950 & 0.4848 & 0.9052 & \textbf{0.5926} & 0.8607 & 0.8051 & 0.7078 \\
+\hline
+9: 8 + Undersampling (ENN) & 0.7550 & 0.6367 & 0.4242 & 0.8491 & 0.4444 & 0.8383 & 0.7530 & 0.6389 \\
+\hline
+\end{tabular}
+}
+\caption{Performance metrics across different experimental configurations. Highest value in each column is in bold.}
+\label{table:pm_c}
+\end{table}
+
+\subsubsection{Temporal Trends and Prediction Errors}
+
+To gain further insight into model behaviour across the study timeline, we visualised the distribution of prediction outcomes (correct vs incorrect) stratified by true label (\textit{cured} vs \textit{non-cured}) and day of study (Figures~\ref{fig:boxplot-exp4}, \ref{fig:boxplot-exp6}, and \ref{fig:boxplot-exp8}). Across all three experiments, a consistent pattern emerged: prediction errors were more frequent at earlier study days, particularly for cured cases (true label 1). This suggests that early in the study, when tumours had yet to exhibit strong treatment effects, radiomic signatures were less distinctive, making early outcome prediction more challenging.
+
+Correctly classified samples, especially among non-cured mice (true label 0), tended to be more uniformly distributed across the study period, indicating that features associated with poor prognosis were more readily detectable even at earlier time points. In contrast, for cured cases, correct predictions became more prominent at later days, likely reflecting the cumulative manifestation of therapeutic effects on imaging biomarkers.
+
+These temporal trends support the hypothesis that longitudinal monitoring improves the separability between treatment outcomes over time. They also emphasise the difficulty of early prediction — a clinically valuable yet inherently challenging goal — particularly when attempting to forecast cure based solely on imaging-derived features.
+
+\begin{figure}[H]
+    \centering
+
+    % Primera imagen
+    \begin{subfigure}[b]{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/boxplot-exp4.png}
+        \caption{Experiment 4}
+        \label{fig:boxplot-exp4}
+    \end{subfigure}
+    \hfill
+    % Segunda imagen
+    \begin{subfigure}[b]{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/boxplot-exp6.png}
+        \caption{Experiment 6}
+        \label{fig:boxplot-exp6}
+    \end{subfigure}
+    \hfill
+    % Tercera imagen
+    \begin{subfigure}[b]{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/boxplot-exp8.png}
+        \caption{Experiment 8}
+        \label{fig:boxplot-exp8}
+    \end{subfigure}
+
+    \caption{Distribution of study days grouped by prediction outcome and true label for Experiments 4, 6, and 8. Each boxplot shows the distribution of the MRI acquisition days (y-axis) for the corresponding sample groups. Boxes are grouped by whether the prediction was correct or incorrect, and coloured by true class (Cured or Relapse).}
+    \label{fig:study_days_experiments}
+\end{figure}
+
+Given that Experiment 4 achieved the best overall results among all configurations (Table~\ref{table:pm_c}), we further examined classification behaviour at the mouse level for this experiment. Figures~\ref{fig:mouse_accuracy} and~\ref{fig:misclassification_combined} provide a deeper analysis.
+
+Figure~\ref{fig:mouse_accuracy} shows the individual classification accuracy per mouse, separated by true class (relapse or cured). Mice with relapse outcomes were classified with notably higher accuracy compared to cured cases. However, the classification performance for cured mice was not poor, with all mice achieving accuracy above 50\% except for mouse 1285. Given the small sample size, even individual complicated cases can strongly bias the results.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\linewidth]{images/group_level_kfold/m_class_accuracy.png}
+    \caption{Accuracy by mouse}
+    \label{fig:mouse_accuracy}
+\end{figure}
+
+Figure \ref{fig:misclassification_combined} explores temporal patterns of errors using two complementary views. The left panel shows individual misclassification events by day and mouse, while the right panel displays the percentage of misclassified samples per day. Both highlight that most errors occur during the earlier days of the study, particularly for cured mice. This further supports the idea that early prediction of treatment response based on radiomic features is difficult, and that the distinction between cured and relapse groups becomes clearer as the effects of therapy accumulate over time.
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.8\linewidth}
+        \includegraphics[width=\linewidth]{images/group_level_kfold/missclassified_days.png}
+        \caption{Misclassified mice per day}
+        \label{fig:missclassified_points}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.8\linewidth}
+        \includegraphics[width=\linewidth]{images/group_level_kfold/missclassified_days_barplot.png}
+        \caption{Misclassification rate per day}
+        \label{fig:missclassified_days_barplot}
+    \end{subfigure}
+    \caption{Misclassifications over time. (a) Individual misclassification events by day and mouse. (b) Percentage of misclassified samples per study day. }
+
+    \label{fig:misclassification_combined}
+\end{figure}
+
+\subsubsection{Feature Study}
+To better understand what drives model predictions, we analysed the top 10 most important features from Experiments 4, 6, and 8, our three best-performing configurations, as summarily reported in Table \ref{table:top10_segmented}. According to these rankings, several features consistently appeared across all three experiments, suggesting that they are especially relevant for characterising tumour progression or remission in the GL261 preclinical GB model.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.4} % Aumenta la altura de cada fila
+\normalsize % Tamaño de letra un poco más grande
+\resizebox{\linewidth}{!}{%
+
+\begin{tabular}{|l|c|}
+\hline
+\multicolumn{2}{|c|}{\textbf{Experiment 4}} \\
+\hline
+\textbf{Feature} & \textbf{Importance} \\
+\hline
+shape2D\_Elongation & 0.0446 \\
+wavelet-LL\_glrlm\_RunEntropy & 0.0444 \\
+log-sigma-1-0-mm-3D\_gldm\_DependenceEntropy & 0.0353 \\
+square\_glrlm\_ShortRunHighGrayLevelEmphasis & 0.0350 \\
+log-sigma-2-0-mm-3D\_glrlm\_HighGrayLevelRunEmphasis & 0.0317 \\
+exponential\_firstorder\_Entropy & 0.0255 \\
+logarithm\_glszm\_GrayLevelVariance & 0.0251 \\
+square\_gldm\_DependenceNonUniformityNormalised & 0.0247 \\
+log-sigma-1-0-mm-3D\_firstorder\_Skewness & 0.0216 \\
+wavelet-LH\_firstorder\_Skewness & 0.0200 \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Experiment 6}} \\
+\hline
+\textbf{Feature} & \textbf{Importance} \\
+\hline
+rolling\_mean\_3\_logarithm\_glszm\_HighGrayLevelZoneEmphasis & 0.0876 \\
+rolling\_mean\_3\_shape2D\_Elongation & 0.0853 \\
+rolling\_mean\_3\_log-sigma-2-0-mm-3D\_glrlm\_HighGrayLevelRunEmphasis & 0.0690 \\
+rolling\_mean\_3\_square\_glrlm\_ShortRunHighGrayLevelEmphasis & 0.0435 \\
+rolling\_mean\_3\_glrlm\_RunEntropy & 0.0377 \\
+rolling\_mean\_3\_log-sigma-3-0-mm-3D\_glszm\_GrayLevelNonUniformityNormalised & 0.0291 \\
+rolling\_mean\_3\_wavelet-LH\_firstorder\_Skewness & 0.0266 \\
+slope\_3\_wavelet-LL\_gldm\_DependenceNonUniformityNormalised & 0.0237 \\
+rolling\_mean\_3\_exponential\_gldm\_DependenceEntropy & 0.0231 \\
+delta\_2\_day\_of\_study & 0.0224 \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Experiment 8}} \\
+\hline
+\textbf{Feature} & \textbf{Importance} \\
+\hline
+rolling\_mean\_3\_square\_glrlm\_ShortRunHighGrayLevelEmphasis & 0.1200 \\
+rolling\_mean\_3\_log-sigma-2-0-mm-3D\_glrlm\_HighGrayLevelRunEmphasis & 0.0891 \\
+shape2D\_Elongation & 0.0480 \\
+rolling\_mean\_3\_wavelet-LL\_glrlm\_RunEntropy & 0.0418 \\
+rolling\_mean\_3\_logarithm\_glszm\_HighGrayLevelZoneEmphasis & 0.0368 \\
+rolling\_mean\_3\_exponential\_gldm\_DependenceEntropy & 0.0255 \\
+rolling\_mean\_3\_wavelet-LH\_firstorder\_Skewness & 0.0229 \\
+slope\_3\_firstorder\_90Percentile & 0.0191 \\
+rolling\_mean\_3\_day\_of\_study & 0.0158 \\
+log-sigma-2-0-mm-3D\_glrlm\_HighGrayLevelRunEmphasis\_lag\_1 & 0.0152 \\
+\hline
+\end{tabular}
+}
+\caption{Top 10 features and their importance scores for Experiments 4, 6, and 8}
+\label{table:top10_segmented}
+\end{table}
+
+Although the exact names of the top features may vary across experiments—particularly due to temporal or lag-based transformations (e.g., \texttt{rolling\_mean\_3}) and filter-derived representations (e.g., \texttt{wavelet\-LL})—the core radiomic descriptors that are consistently assigned high importance across Experiments 4, 6, and 8 remain closely related. Notably, the following features, or their derived counterparts, appear repeatedly and prominently: 
+\begin{itemize}
+    \item \textbf{Elongation},
+    \item \textbf{Run Entropy},
+    \item \textbf{Dependence Entropy},
+    \item \textbf{Short Run High Gray Level Emphasis},
+    \item \textbf{High Gray Level Run Emphasis}.
+\end{itemize}
+
+Their recurrence suggests that these descriptors capture fundamental aspects of tumour morphology and texture that are relevant across model configurations. We consider them next one by one.
+
+\subsubsection{Elongation}
+Elongation quantifies how much the tumour shape deviates from being rounded. In glioblastoma, increased elongation may indicate anisotropic growth and infiltration along white matter tracts, often observed in more invasive tumour phenotypes. This morphological trait may evolve with treatment, especially in tumours transitioning from active growth to residual or regressing states. Bae \textit{et al}. \cite{Bae2018} identified Elongation as one of the radiomic shape features significantly associated with progression-free survival in patients with GB, supporting its value as a prognostic imaging biomarker.
+
+In the distributions plotted in Figure \ref{fig:elongation}, tumours classified as relapse tend to maintain or even increase their elongation over time, reflecting persistent invasive behaviour. In contrast, cured tumours show a progressive reduction in elongation, suggesting more isotropic shrinkage and treatment response.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\linewidth]{images/features/grouplevelsplit/elongation.png}
+    \caption{Elongation value evolution across cured and relapse groups.}
+    \label{fig:elongation}
+\end{figure}
+
+\subsubsection{Run Entropy}
+
+Run Entropy quantifies the randomness in the distribution of homogeneous runs — defined as consecutive voxels with the same intensity — after image intensities are squared, a common preprocessing step to enhance high-intensity regions typical of tumour or edema in T2-weighted MRI. This feature is derived from the Gray Level Run Length Matrix (GLRLM), which captures texture patterns by measuring how often specific run lengths occur across different directions. Run Entropy specifically reflects the irregularity and complexity of these patterns, offering insight into tissue heterogeneity.
+
+Higher entropy indicates more heterogeneous and disorganised tissue, which may evolve with treatment and it is a clear feature observed when tissues are responding to therapy for GL261 tumours \cite{AriasRamos2017}. Yang et al. \cite{Yang2025} studied different habitats within low-grade gliomas which could determine the potential risk, having implications in response to therapy, and this feature was investigated in contrast-enhanced T1w and T2flair sequences. Finally, and although not related to brain tumour, but still, reinforcing the potential of such approaches in other tumour types, this feature was also shown to be part of a radiomic signature predicting response to chemotherapy in endometrial cancer models, using T2w MRI \cite{Espedal2024}.
+
+In the results presented in Figure \ref{fig:runentropy}, Run Entropy showed a diverging pattern between relapse and cured groups. Relapsing tumours exhibited a steady increase in this feature over time, consistent with ongoing tissue disruption and growing heterogeneity. In contrast, cured tumours showed a stabilisation or decline in Run Entropy during later stages, potentially reflecting more structured tissue reorganisation and reduced tumour activity.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\linewidth]{images/features/grouplevelsplit/runentropy.png}
+    \caption{Run Entropy value evolution across cured and relapse groups.}
+    \label{fig:runentropy}
+\end{figure}
+
+\subsubsection{Dependence Entropy}  
+Dependence Entropy is a texture feature derived from the Gray Level Dependence Matrix (GLDM), quantifying the randomness in the spatial distribution of voxel intensity dependencies. It reflects how unpredictable or heterogeneous the local texture of an image is. Tumours with irregular internal architecture—such as disorganised vasculature, necrotic regions, or immune-mediated tissue damage— tend to exhibit higher Dependence Entropy values due to increased spatial complexity.
+
+Interestingly, in our dataset, the trends plotted in Figure \ref{fig:dependenceentropy} reveal that Dependence Entropy value progressively increases in the cured group, while remaining low, stable, or even decreasing in the relapse group. At first glance, this may seem counterintuitive, as one might expect progressing tumours to become more disorganised over time, leading to higher entropy.
+
+However, this trend may be explained by biological processes unique to effective therapy. In cured animals, tumour regression often involves large-scale necrosis, tissue fragmentation, and the development of localised scar tissue, all of which introduce heterogeneity in the voxel dependencies. This results in higher Dependence Entropy values over time. Notably, the texture of scar tissue differs from that of active tumour regions, and such transitions can be captured by this feature.
+
+It is worth noting, however, that such patterns are difficult to observe in human data, as true “cure” is rarely achieved in glioblastoma. As highlighted by Patel et al.~\cite{Patel2021}, when distinguishing true progression (tPD) from pseudoprogression (psPD), higher Dependence Entropy was observed in the perilesional oedema on T2-weighted images in tPD cases. As they note, ``there was a relatively higher dependence entropy value within the perilesional oedema on T2WI in tPD compared with psPD, implying a more complex texture to the oedema in tPD \cite{Cheng2019}.'' This observation is attributed to the infiltrative nature of glioblastoma: ``Given that glioblastoma tends to microscopically infiltrate the surrounding tissue \cite{Chamberlain2011}, there may be variations in texture in this surrounding region of radiological apparent hyperintensity on T2WI in cases of tPD compared with treatment-related effects where there is expected to be less tumour infiltration of the surrounding tissue.''
+
+These clinical findings highlight how Dependence Entropy can reflect subtle microstructural differences in tumour progression versus treatment effects, even in the absence of overt morphological changes.
+
+Thus, while our findings may seem unexpected, they could reflect meaningful biological responses not typically characterised in clinical datasets due to the lack of curative outcomes in human GB. This further supports the need for more biologically detailed characterisation of the post-treatment tumour microenvironment in both preclinical and clinical studies.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\linewidth]{images/features/expandingwindow/dependenceentropy.png}
+    \caption{Dependence Entropy evolution across cured and relapse groups.}
+    \label{fig:dependenceentropy}
+\end{figure}
+
+\subsubsection{Short Run High Gray Level Emphasis}
+
+Short Run High Gray Level Emphasis (SRHGLE) highlights the presence of small, bright regions within the tumour, which may correspond to dense cellular foci or inflammatory infiltrates. These features are commonly observed in partially responding tumours, where residual cell clusters persist amidst regressing tissue. 
+
+In our data, as represented in Figure \ref{fig:ShortRunHighGrayLevelEmphasis}, SRHGLE values tend to decrease in the relapse group toward the later stages. This may be explained by the emergence of hypointense areas—likely associated with necrosis or haemorrhage that replace the previously bright, compact zones and reduce the frequency of short, high-intensity runs. Conversely, the increase in SRHGLE observed in cured tumours may be related to the presence of small hyperintense foci persisting temporarily during local inflammation or early scar formation. Although the scarred tissue is not completely homogeneous, it may retain some bright points that contribute to increased SRHGLE before full tissue reorganisation is achieved.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\linewidth]{images/features/grouplevelsplit/ShortRunHighGrayLevelEmphasis.png}
+    \caption{Short Run High Gray Level Emphasis value evolution across cured and relapse groups.}
+    \label{fig:ShortRunHighGrayLevelEmphasis}
+\end{figure}
+
+
+\subsubsection{High Gray Level Run Emphasis}
+
+High Gray Level Run Emphasis (HGRLE) quantifies the presence of long runs of high-intensity voxels, which may reflect persistent hypercellular regions, oedema, or tumour burden. In theory, non-responding tumours may retain or expand such regions, while responding tumours would show a reduction in both signal intensity and run length as tissue normalises.
+
+However, in our dataset, as illustrated in Figure \ref{fig:HighGrayLevelRunEmphasis}, HGRLE tends to increase in the cured group. One possible interpretation is that cured tumours, while shrinking, still contain small zones of persistent hyperintensity, possibly due to reactive tissue, fibrosis, or inflammation—that remain relatively structured and brighter than the surrounding regressing tissue. Meanwhile, relapsing tumours may develop internal necrosis or haemorrhage, leading to lower signal intensity and loss of continuity in high-intensity structures. As a result, the contrast between bright structured areas and the rest of the tumour becomes greater in cured cases.
+
+Although this behaviour is not widely reported in literature —partly because “cured” glioblastoma cases are extremely rare— our findings are consistent with prior studies that have associated this feature with treatment response. Cullison \textit{et al}. \cite{Cullison2023S155} identified High Gray Level Zone Emphasis (a related feature) as one of the most prognostic radiomic markers in a delta-radiomics model designed to differentiate pseudoprogression from true progression during MR-guided radiotherapy in GB patients. This supports the notion that bright, structured signal components within the tumour may contain prognostic information during the therapeutic course.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\linewidth]{images/features/grouplevelsplit/HighGrayLevelZoneEmphasis.png}
+    \caption{High Gray Level Run Emphasis value evolution across cured and relapse groups.}
+    \label{fig:HighGrayLevelRunEmphasis}
+\end{figure}
+
+
+\subsection{Expanding Window Pipeline}
+
+In addition to grouped leave-one-out validation, we explored a temporal validation strategy using an \textit{expanding window} approach. In this scheme, the training set progressively incorporated earlier time points, while testing was performed on immediate future, unseen days. This setup aimed to better mimic real-world scenarios, where models are trained on available historical data to predict future tumour behaviour.
+
+Performance metrics for each fold are summarised in Table \ref{tab:expwindow}. Overall, the results exhibit a clear trend of gradual performance improvement as more training data accumulated over time. This progression is expected, since tumour evolution patterns likely become more pronounced and distinguishable at later stages of disease progression. As more information becomes available, the model can better capture the underlying dynamics differentiating cured from non-cured mice.
+
+Interestingly, a trade-off between sensitivity and specificity emerged throughout the expanding window process. Early folds, with limited training data, exhibited lower sensitivity but relatively balanced specificity. As more data accumulated and tumour evolution patterns became increasingly distinguishable, the model progressively improved, achieving near-perfect metrics in later folds. This behaviour contrasts with the grouped leave-one-out approach, where specificity was consistently prioritised and gains in sensitivity were harder to achieve.
+
+However, it is important to note that the excellent results observed in the later folds (particularly Folds 8–10) are influenced by the changing distribution of test samples. According to the confusion matrices, very few positive cases (cured mice) remained at later stages, which simplifies the classification task and artificially inflates performance metrics such as specificity and negative predictive value (NPV). In these folds, the model faced a more imbalanced and easier-to-separate test set.
+
+From Fold 5 onwards (around day 25), the model consistently achieved high sensitivity and very high NPV ($\geq 0.95$), indicating that it became particularly reliable at identifying non-cured cases. Fold 8, which achieved perfect scores across all metrics, stands out, but these results should be interpreted very cautiously and only as a promising preliminary result, given the very low number of positive cases available for testing.
+
+ 
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % Aumenta la altura de cada fila
+\normalsize % Tamaño de letra un poco más grande
+
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+\textbf{Fold} & \makecell{\textbf{Train Days}\\(min–max)} & \makecell{\textbf{Test Days}\\(min–max)} & \textbf{Accuracy} & \textbf{AUC} & \textbf{Sensitivity} & \textbf{Specificity} & \textbf{PPV} & \textbf{NPV} & \textbf{F1 (Weighted)} & \textbf{F1 (Macro)} \\
+\hline
+1 & 9–15 & 15–17 & 0.6296 & 0.5647 & 0.6000 & 0.6471 & 0.5000 & 0.7333 & 0.6349 & 0.6165 \\
+2 & 9–17 & 17–21 & 0.7037 & 0.7716 & 0.6667 & 0.7222 & 0.5455 & 0.8125 & 0.7098 & 0.6824 \\
+3 & 9–21 & 21–23 & 0.8519 & 0.9145 & 0.7500 & 0.8947 & 0.7500 & 0.8947 & 0.8519 & 0.8224 \\
+4 & 9–23 & 23–25 & 0.8148 & 0.8947 & 0.8750 & 0.7895 & 0.6364 & 0.9375 & 0.8215 & 0.7970 \\
+5 & 9–25 & 25–27 & 0.9259 & 1.0000 & 1.0000 & 0.8889 & 0.8182 & 1.0000 & 0.9275 & 0.9206 \\
+6 & 9–27 & 27–31 & 0.9259 & 0.9636 & 0.8000 & 0.9545 & 0.8000 & 0.9545 & 0.9259 & 0.8773 \\
+7 & 9–31 & 31–33 & 0.9630 & 1.0000 & 1.0000 & 0.9583 & 0.7500 & 1.0000 & 0.9652 & 0.9179 \\
+8 & 9–33 & 35–37 & 1.0000 & 1.0000 & 1.0000 & 1.0000 & 1.0000 & 1.0000 & 1.0000 & 1.0000 \\
+9 & 9–37 & 37–41 & 0.9630 & 1.0000 & 1.0000 & 0.9583 & 0.7500 & 1.0000 & 0.9652 & 0.9179 \\
+10 & 9–41 & 41–49 & 0.9630 & 1.0000 & 1.0000 & 0.9615 & 0.5000 & 1.0000 & 0.9688 & 0.8235 \\
+\hline
+\end{tabular}
+}
+\caption{Performance metrics per fold using the expanding window approach.}
+\label{tab:expwindow}
+\end{table}
+
+
+\begin{figure}[H]
+\centering
+
+% Folds 1–5
+\begin{subfigure}[b]{0.18\textwidth}
+\centering
+\begin{tabular}{|c|c|}
+\hline
+6 & 4 \\
+\hline
+6 & 11 \\
+\hline
+\end{tabular}
+\caption*{Fold 1}
+\end{subfigure}
+\begin{subfigure}[b]{0.18\textwidth}
+\centering
+\begin{tabular}{|c|c|}
+\hline
+6 & 3 \\
+\hline
+5 & 13 \\
+\hline
+\end{tabular}
+\caption*{Fold 2}
+\end{subfigure}
+\begin{subfigure}[b]{0.18\textwidth}
+\centering
+\begin{tabular}{|c|c|}
+\hline
+6 & 2 \\
+\hline
+2 & 17 \\
+\hline
+\end{tabular}
+\caption*{Fold 3}
+\end{subfigure}
+\begin{subfigure}[b]{0.18\textwidth}
+\centering
+\begin{tabular}{|c|c|}
+\hline
+7 & 1 \\
+\hline
+4 & 15 \\
+\hline
+\end{tabular}
+\caption*{Fold 4}
+\end{subfigure}
+\begin{subfigure}[b]{0.18\textwidth}
+\centering
+\begin{tabular}{|c|c|}
+\hline
+9 & 0 \\
+\hline
+2 & 16 \\
+\hline
+\end{tabular}
+\caption*{Fold 5}
+\end{subfigure}
+
+\vspace{1em}
+
+% Folds 6–10
+\begin{subfigure}[b]{0.18\textwidth}
+\centering
+\begin{tabular}{|c|c|}
+\hline
+4 & 1 \\
+\hline
+1 & 21 \\
+\hline
+\end{tabular}
+\caption*{Fold 6}
+\end{subfigure}
+\begin{subfigure}[b]{0.18\textwidth}
+\centering
+\begin{tabular}{|c|c|}
+\hline
+3 & 0 \\
+\hline
+1 & 23 \\
+\hline
+\end{tabular}
+\caption*{Fold 7}
+\end{subfigure}
+\begin{subfigure}[b]{0.18\textwidth}
+\centering
+\begin{tabular}{|c|c|}
+\hline
+1 & 0 \\
+\hline
+0 & 26 \\
+\hline
+\end{tabular}
+\caption*{Fold 8}
+\end{subfigure}
+\begin{subfigure}[b]{0.18\textwidth}
+\centering
+\begin{tabular}{|c|c|}
+\hline
+3 & 0 \\
+\hline
+1 & 23 \\
+\hline
+\end{tabular}
+\caption*{Fold 9}
+\end{subfigure}
+\begin{subfigure}[b]{0.18\textwidth}
+\centering
+\begin{tabular}{|c|c|}
+\hline
+1 & 0 \\
+\hline
+1 & 25 \\
+\hline
+\end{tabular}
+\caption*{Fold 10}
+\end{subfigure}
+\caption{Confusion matrices for each fold in the expanding window approach.}
+\end{figure}
+
+In order to extract early MRI biomarkers, we defined an early prediction window based on the biological timeline of tumour progression. Specifically, we considered MRI scans acquired up to \textbf{day 17} as ``early'', since this marks a clinically and experimentally meaningful turning point: after day 17, cured mice typically begin to show a visible tumour volume decrease, meaning that it is common for the tumour volume to peak around this time. The first administration of TMZ treatment occurs at day 11, and day 17 marks the start of the second treatment cycle. Thus, radiomic features extracted during this early window could serve as valuable predictors of long-term treatment outcomes. We focused on the first two training windows, covering days 9–15 and 9–17, and examined the features that exhibited the highest importance in these early stages.
+
+This trend can be clearly observed in Case 1281 (Figure~\ref{fig:1281_full}), which belongs to the cured group. Up to day 17, the tumour region of interest (ROI) gradually increases in size, with the largest visible volume occurring precisely around that point. From day 19 onward, however, a progressive shrinkage of the tumour is evident in both the anatomical images and the corresponding masks. By day 27, the ROI has substantially decreased, which is consistent with the ideally expected response to treatment in cured subjects. 
+
+\begin{figure}[H]
+    \centering
+
+    \begin{subfigure}[b]{0.9\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/1281_ev.png}
+        \caption{Tumour images over time (1–4).}
+        \label{fig:1281_ev}
+    \end{subfigure}
+
+    \vspace{1em}
+
+    \begin{subfigure}[b]{0.9\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/1281_mask_ev.png}
+        \caption{Tumour masks over time (1–4).}
+        \label{fig:1281_mask_ev}
+    \end{subfigure}
+
+    \vspace{1em}
+
+    \begin{subfigure}[b]{0.9\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/1281_2_ev.png}
+        \caption{Tumour images over time (5–8).}
+        \label{fig:1281_2_ev}
+    \end{subfigure}
+
+    \vspace{1em}
+
+    \begin{subfigure}[b]{0.9\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/1281_2_mask_ev.png}
+        \caption{Tumour masks over time (5–8).}
+        \label{fig:1281_2_mask_ev}
+    \end{subfigure}
+
+    \caption{Case 1281 - tumour volume and mask evolution over time.}
+    \label{fig:1281_full}
+\end{figure}
+
+
+\subsubsection{Feature Study}
+To continue our analysis, we examined the top 10 most important features from Folds 1 and 2, as reported in Table \ref{table:top10_folds}, which included MRI scans up to \textbf{day 17} in the training set, as previously discussed. From these rankings, features such as \textit{GrayLevelNonUniformityNormalised}, \textit{ClusterProminence}, \textit{Kurtosis}, \textit{DependenceEntropy}, and \textit{Skewness} consistently appeared among the most important. Therefore, we focused our subsequent analysis on these key features.
+
+\begin{table}[H]
+\centering
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{|l|c|}
+\hline
+\multicolumn{2}{|c|}{\textbf{Fold 1}} \\
+\hline
+\textbf{Feature} & \textbf{Importance} \\
+\hline
+rolling\_mean\_3\_exponential\_glrlm\_GrayLevelNonUniformityNormalised & 0.1773 \\
+square\_glcm\_ClusterProminence & 0.1491 \\
+rolling\_mean\_3\_original\_glrlm\_RunEntropy & 0.1438 \\
+log-sigma-1-0-mm-3D\_firstorder\_Kurtosis & 0.0894 \\
+slope\_3\_log-sigma-1-0-mm-3D\_gldm\_DependenceEntropy & 0.0802 \\
+squareroot\_firstorder\_90Percentile & 0.0762 \\
+original\_firstorder\_10Percentile & 0.0673 \\
+square\_firstorder\_InterquartileRange & 0.0537 \\
+gradient\_firstorder\_Kurtosis & 0.0331 \\
+wavelet-HL\_firstorder\_Skewness & 0.0236 \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Fold 2}} \\
+\hline
+\textbf{Feature} & \textbf{Importance} \\
+\hline
+slope\_3\_exponential\_gldm\_DependenceEntropy & 0.1433 \\
+slope\_3\_log-sigma-3-0-mm-3D\_glszm\_GrayLevelNonUniformityNormalised & 0.1352 \\
+rolling\_mean\_3\_original\_ngtdm\_Busyness & 0.0674 \\
+rolling\_mean\_3\_wavelet-LH\_firstorder\_Skewness & 0.0598 \\
+wavelet-LH\_gldm\_DependenceEntropy & 0.0433 \\
+rolling\_mean\_3\_square\_glszm\_HighGrayLevelZoneEmphasis & 0.0428 \\
+slope\_3\_original\_shape2D\_MajorAxisLength & 0.0376 \\
+exponential\_glrlm\_GrayLevelNonUniformityNormalised\_lag\_1 & 0.0350 \\
+log-sigma-1-0-mm-3D\_firstorder\_Kurtosis & 0.0346 \\
+exponential\_glcm\_ClusterProminence & 0.0302 \\
+\hline
+\end{tabular}
+}
+\caption{Top 10 features and their importance scores for Fold 1 and Fold 2.}
+\label{table:top10_folds}
+\end{table}
+
+\subsubsection{Cluster Prominence}
+\textit{Cluster Prominence}, as plotted in Figure \ref{fig:clusterprominence}, is a texture feature derived from the Gray Level Co-occurrence Matrix (GLCM), which captures the fourth moment (or "peakedness") of the distribution of neighbouring gray-level clusters. High values of cluster prominence indicate a distribution with heavier tails or extreme intensity differences in spatially adjacent voxels. 
+
+In the context of glioblastoma, a high cluster prominence score can reflect the presence of intense textural variation, often associated with intratumoural heterogeneity, necrotic cores, or invasive margins. However, when dealing with response to therapy, the characterisation of responding samples in histopathological studies indicated the appearance of giant multinucleated cells, empty spaces and immune cell infiltrates \cite{AriasRamos2017}, which can contribute to the textural variation, as opposed to non-responding or control samples, with a packed and consistent tumour cell profile.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\linewidth]{images/features/expandingwindow/clusterprominence.png}
+    \caption{Cluster Prominence value evolution across cured and relapse groups.}
+    \label{fig:clusterprominence}
+\end{figure}
+
+
+\subsubsection{Dependence Entropy}
+
+\textit{Dependence Entropy} (Figure \ref{fig:de2}) measures the randomness or complexity of voxel intensity dependencies, and was previously highlighted as an important feature in the group-level analysis. Interestingly, it re-emerged as one of the top features in the early prediction windows of the expanding window approach.
+
+Its recurrence strengthens the hypothesis that early heterogeneity in tumour structure—captured by increased spatial disorder—could be indicative of a better therapeutic response. As discussed earlier, although intuitively one might expect more aggressive tumours to exhibit higher entropy, in our dataset it was the cured group that tended to show increasing Dependence Entropy over time, likely reflecting effective therapy-induced disruption of the tumour microarchitecture.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\linewidth]{images/features/expandingwindow/dependenceentropy.png}
+    \caption{Dependence Entropy value evolution across cured and relapse groups.}
+    \label{fig:de2}
+\end{figure}
+\subsubsection{Gray Level Non-Uniformity Normalised}
+
+\textit{Gray Level Non-Uniformity Normalised (GLNN)}, illustrated in Figure \ref{fig:graylevel}, is a feature from the Gray Level Run Length Matrix (GLRLM). It quantifies the variability of gray levels within the image, normalised by the total number of runs. Essentially, it captures how evenly distributed the gray-level values are across the tumour region. A lower GLNN value indicates a more homogeneous tumour, while higher values signal greater intensity variation. In glioblastoma imaging, elevated GLNN may reflect the presence of multiple tissue types (e.g., viable tumour, necrotic tissue, edema), a hallmark of aggressive and treatment-resistant tumours. 
+
+Bae et al. \cite{Bae2018} incorporated GLNN among the radiomic features extracted from multiparametric MRI, and demonstrated that these features significantly improve survival prediction when integrated with clinical and genetic data.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\linewidth]{images/features/expandingwindow/graylevelnonuniformitynormalized.png}
+    \caption{Gray Level Non-Uniformity Normalised value evolution across cured and relapse groups.}
+    \label{fig:graylevel}
+\end{figure}
+
+\subsubsection{Kurtosis}
+\textit{Kurtosis}, tracked in Figure \ref{fig:kurtosis}, is a first-order statistical feature that measures the ``tailedness'' or peakedness of a distribution of voxel intensities within a region of interest (ROI). In the context of radiomics, higher kurtosis values typically indicate a more heterogeneous distribution with sharp intensity peaks, while lower values suggest a more uniform or flattened intensity profile. This feature captures localised textural changes at different spatial frequencies, making it sensitive to subtle alterations in tissue architecture that may result from therapy-induced effects such as necrosis, edema resolution, or tumour shrinkage.
+
+In treated gliomas, a reduction in kurtosis might reflect decreased cellularity or the loss of complex structural heterogeneity, which could be an indication of a favourable therapeutic response. Conversely, persistently high or increasing kurtosis values may be associated with tumour recurrence or suboptimal treatment response. Prior studies investigating molecular glioma characterisation and prognosis have identified kurtosis as a relevant imaging biomarker \cite{Yan2021}. Other research has leveraged the feature to distinguish true tumour recurrence from treatment-related changes in clinical settings \cite{Ren2023}. It is notable that both of these studies included T2-weighted MRI, reinforcing the utility of this imaging sequence for assessing therapeutic effects and tracking tumour evolution in glioblastoma.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\linewidth]{images/features/expandingwindow/kurtosis.png}
+    \caption{Kurtosis value evolution across cured and relapse groups.}
+    \label{fig:kurtosis}
+\end{figure}
+
+\subsubsection{Skewness}
+\textit{Skewness} measures the asymmetry of the intensity distribution within the tumour region. A positive skew indicates a longer tail on the right side (higher intensity values dominate), while a negative skew suggests a tail on the left (lower intensities dominate). In brain tumours, skewness may capture the presence of outlier regions—such as focal necrosis or regions of hyperintensity that deviate from the otherwise normal signal. Moreover, chaotic tissue architecture with necrotic cores and hyperintense proliferating margins could also contribute. Importantly, skewness can highlight subtle changes in tumour biology that are not captured by simpler statistics like mean or standard deviation. A shift in skewness over time, especially during early imaging, may reflect early responses to therapy or the development of aggressive phenotypes.
+
+Previous work has revealed that histogram-based features such as skewness and kurtosis may predict response to antiangiogenic therapy in glioblastoma patients, particularly when derived from contrast-enhanced T1-weighted MRI \cite{Najafi2012}. Although our study focuses on T2-weighted imaging in a preclinical model, these findings support the potential of higher-order statistics to capture meaningful biological differences.
+
+In our case, represented in Figure \ref{fig:skewness}, and although more studies would be needed to confirm or discard this hypothesis, the increase in skewness precisely around days 17 and 20 is a clear differential characteristic between relapsing and cured cases, with potential to predict the evolution before any changes in tumour volumes.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\linewidth]{images/features/expandingwindow/skewness.png}
+    \caption{Skewness value evolution across cured and relapse groups.}
+    \label{fig:skewness}
+\end{figure}
+
+\section{Deep Learning Exploratory Experiment}
+
+After extensively addressing the problem using classical ML methods, we became interested in exploring how a DL approach might perform in this context. Given the limited size of our dataset, training a model from scratch would likely lead to poor generalisation and suboptimal performance. Therefore, we designed a controlled exploratory experiment using pretrained convolutional neural networks (CNN), with the goal of complementing and comparing these results with those obtained from traditional radiomics-based pipelines.
+
+The main goals of this exploratory effort were twofold:
+\begin{itemize}
+    \item To assess whether deep neural networks could capture additional patterns that handcrafted radiomic features might miss.
+    \item To explore the feasibility and effectiveness of \textit{Transfer Learning} in mitigating data scarcity.
+\end{itemize}
+
+\subsubsection{Experimental Design}
+
+We initially managed to train some convolutional models using all the available data. However, the small dataset size and absence of a dedicated evaluation set made it difficult to validate the performance or generalisation ability of these models. To enable a fair comparison with the radiomics-based approach used throughout the thesis, we designed two alternative strategies based on pretrained models:
+
+\begin{enumerate}
+    \item \textbf{Deep feature extraction + classical classifier}: We employed the EfficientNetB0 architecture, pretrained on ImageNet, strictly as a frozen feature extractor. Features were extracted from the penultimate layer (after global average pooling and a dense block) using grayscale MRI scans, optionally including the tumour mask. The resulting feature vectors were then fed into an XGBoost classifier. This setup allowed for direct comparison with our radiomics-based approach by applying the same \textit{Leave-One-Mouse-Out} cross-validation at the group level.
+
+    \item \textbf{Fine-tuning a pretrained model}: We also experimented with fine-tuning the EfficientNetB0 model pretrained on ImageNet. Due to our limited dataset size, we froze most of the base layers and trained only the final convolutional block along with a custom classification head. Different input configurations were tested, such as using the MRI image alone, or combining it with the tumour mask by inserting it in one or two of the RGB channels.
+\end{enumerate}
+
+\subsubsection{Preprocessing, Data Handling, and Model Setup}
+
+Prior to feeding the MRI scans into the models, all images were normalised to ensure their pixel intensity distributions matched the expectations of models pretrained on ImageNet. This step facilitates faster convergence and contributes to training stability by aligning the input distribution with the source domain of the pretrained networks. Additionally, as in the ML approach, we excluded control cases from the training process. These mice do not undergo actual treatment and thus do not reflect the therapeutic dynamics we aim to model. Including them introduces noise and reduces the model’s ability to generalise to treated subjects.
+
+To efficiently handle the data, especially given the size of the dataset, all samples were converted into the TFRecord format. This binary format is optimised for use with TensorFlow and allows for efficient, parallel reading of data. The data pipeline was implemented using TensorFlow’s \texttt{tf.data} API, enabling on-the-fly data augmentation, parallel loading, shuffling, batching, and prefetching. These operations ensure high throughput and effective GPU utilisation throughout training.
+
+A batch size of 32 was chosen as a compromise between training stability and computational efficiency. While smaller batches can introduce noisy gradient estimates, larger batches may lead to memory constraints or slower convergence.
+
+To mitigate the issue of class imbalance, random oversampling was applied during training. Specifically, instances from the minority class (e.g., cured mice) were duplicated with replacement until both classes were equally represented. Importantly, this balancing procedure was applied only to the training data within each fold of cross-validation to avoid information leakage and preserve the integrity of the evaluation.
+
+The experiments were structured around two complementary strategies, as previously described. The technical implementation of these approaches is summarised below:
+
+\begin{itemize}
+    \item \textbf{Feature Extractor Architecture:} A fixed feature extractor was implemented using EfficientNetB0 with all layers frozen. Each preprocessed input image was passed through the network, followed by a global average pooling layer to reduce the spatial dimensions. A dense layer with ReLU activation, batch normalisation, and dropout was added to produce a 256-dimensional embedding vector. This representation encodes both spatial and textural patterns from the MRI scans.
+    \item \textbf{Fine-Tuned Classification Model:} For the fine-tuning approach, the EfficientNetB0 backbone was partially unfrozen, allowing the last 50 layers to be trainable. The model accepted three-channel input images and included a custom classification head consisting of a global pooling layer, dense layer, batch normalisation, dropout, and a final sigmoid activation for binary classification. This setup was designed to benefit from transfer learning while allowing adaptation to domain-specific features, which is especially valuable given the limited size of the dataset.
+\end{itemize}
+
+\subsubsection{Deep Feature Extraction + Classical Classifier Experiments}
+
+These first experiments were aimed to evaluate whether deep features extracted from a CNN could effectively support tumour classification from MRI scans. Specifically, we tested several configurations of the EfficientNetB0 model used strictly as a frozen feature extractor. In all cases, the resulting embeddings were used to train an XGBoost classifier under the same \textit{Leave-One-Mouse-Out} cross-validation scheme as in the radiomics-based models.
+
+\subsubsection{Configuration 1 - Random Weights, No Tumour Mask}
+
+In the first experiment, we employed EfficientNetB0 without any pretrained weights, using random initialisation. The input images consisted of raw grayscale MRI scans not including the tumour mask. The intention behind this setup was to assess whether the network architecture alone, without leveraging any prior knowledge (e.g., from ImageNet), could extract meaningful features from the MRI data.
+
+According to Table \ref{fig:cf1}, the results were poor across all metrics. The model achieved an AUC of only 0.53, which is even lower than the radiomics-based classical ML models. Sensitivity was particularly low (0.35), indicating that the model struggled to correctly identify positive cases (i.e., cured mice), and the overall accuracy was only 55.7\%.
+
+\begin{table}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
+\hline
+\textbf{Accuracy} & \textbf{AUC} & \textbf{Sensitivity} & \textbf{Specificity} & \textbf{PPV} & \textbf{NPV} & \textbf{F1 (Weighted)} & \textbf{F1 (Macro)} \\
+\hline
+0.5570 & 0.5331 & 0.3485 & 0.6164 & 0.2054 & 0.7688 & 0.5899 & 0.4713 \\
+\hline
+\end{tabular}
+}
+\caption{Configuration 1 - No weights} 
+\label{fig:cf1}
+\end{table}
+
+These results suggest that, in the absence of pretraining, the network fails to learn useful features from the limited dataset available. This reinforces the value of using transfer learning when data is scarce.
+
+\subsubsection{Configuration 2 - Random Weights + Tumour Mask}
+
+To improve the model’s focus on the relevant region, we incorporated the tumour mask as an additional input channel. This adjustment required modifying the input layer of EfficientNetB0 to accommodate the extra channel.
+
+This configuration yielded improved performance (Table \ref{tab:cf2}). The AUC rose to 0.656, and accuracy increased to nearly 69\%. Notably, specificity improved substantially (0.73), and sensitivity also rose to 0.53. These gains suggest that providing the model with explicit spatial information about the tumour helped it to extract more discriminative features, even in the absence of pretrained weights.
+
+\begin{table}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
+\hline
+\textbf{Accuracy} & \textbf{AUC} & \textbf{Sensitivity} & \textbf{Specificity} & \textbf{PPV} & \textbf{NPV} & \textbf{F1 (Weighted)} & \textbf{F1 (Macro)} \\
+\hline
+0.6879 & 0.6560 & 0.5303 & 0.7328 & 0.3608 & 0.8458 & 0.7064 & 0.6073 \\
+\hline
+\end{tabular}
+}
+\caption{Configuration 2 - Incorporating Tumour Mask, No weights}
+\label{tab:cf2}
+\end{table}
+
+
+\subsubsection{Configuration 3 - ImageNet Weights (No Mask)}
+
+In the third setup, we used EfficientNetB0 with pretrained ImageNet weights as a frozen feature extractor. Since ImageNet models are designed for three-channel RGB images, the tumour mask was not included in this configuration to preserve compatibility with the pretrained model.
+
+The results, as illustrated in Table \ref{tab:cf3}, represent a significant improvement over both the random-weight models and the radiomics-based approach. The AUC reached 0.80, with an accuracy of nearly 80\%, and an F1 score (macro) of 0.72. These findings indicate that, despite being originally trained on natural images, the pretrained filters from ImageNet provide a solid foundation for extracting general image features relevant to tumour classification in MRI scans. The pretrained convolutional layers likely capture fundamental low-level patterns, such as edges and textures, that remain useful across different domains, enabling the XGBoost classifier to leverage a more informative feature space.
+
+\begin{table}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
+\hline
+\textbf{Accuracy} & \textbf{AUC} & \textbf{Sensitivity} & \textbf{Specificity} & \textbf{PPV} & \textbf{NPV} & \textbf{F1 (Weighted)} & \textbf{F1 (Macro)} \\
+\hline
+0.7987 & 0.8015 & 0.6061 & 0.8534 & 0.5405 & 0.8839 & 0.8026 & 0.7199 \\
+\hline
+\end{tabular}
+}
+\caption{Configuration 3 - ImageNet weights}
+\label{tab:cf3}
+\end{table}
+
+
+\subsubsection{Configuration 4 - ImageNet Weights, Mask on the 3rd channel}
+
+In this configuration, we incorporated the tumour mask as the third input channel, while channels 1 and 2 contained the original grayscale MRI image (replicated to match the expected RGB input format). The idea behind this setup was to leverage the pretrained ImageNet weights of EfficientNetB0, while subtly injecting spatial tumour information via the third channel.
+
+\begin{table}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
+\hline
+\textbf{Accuracy} & \textbf{AUC} & \textbf{Sensitivity} & \textbf{Specificity} & \textbf{PPV} & \textbf{NPV} & \textbf{F1 (Weighted)} & \textbf{F1 (Macro)} \\
+\hline
+0.8054 & 0.8583 & 0.6212 & 0.8578 & 0.5541 & 0.8884 & 0.8092 & 0.7293 \\
+\hline
+\end{tabular}
+}
+\caption{Configuration 4 - ImageNet weights, mask in the 3rd image channel}
+\label{tab:cf4}
+\end{table}
+
+The results in Table \ref{tab:cf4} show a strong overall performance, with the highest AUC (0.8583) among all configurations tested. The inclusion of the tumour mask helps guiding the model's attention to relevant areas, improving discriminative ability without disrupting the pretrained weights too much. The relatively balanced sensitivity and specificity suggest robust behaviour on both positive and negative classes.
+
+
+\subsubsection{Configuration 5 - ImageNet Weights, Mask on the 2nd and 3rd channel}
+
+After testing the tumour mask in the third channel, we aimed to evaluate whether introducing it in the second channel as well could further encourage the model to focus on those regions. To this end, the mask was placed in both the second and third channels, while the MRI image was assigned to the first channel. The rationale behind this configuration was to emphasise tumour areas by reinforcing the mask signal across two input channels. The results are reported in Table \ref{tab:cf5}.
+
+\begin{table}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
+\hline
+\textbf{Accuracy} & \textbf{AUC} & \textbf{Sensitivity} & \textbf{Specificity} & \textbf{PPV} & \textbf{NPV} & \textbf{F1 (Weighted)} & \textbf{F1 (Macro)} \\
+\hline
+0.8087 & 0.7734 & 0.5758 & 0.8750 & 0.5672 & 0.8788 & 0.8092 & 0.7242 \\
+\hline
+\end{tabular}
+}
+\caption{Configuration 5: ImageNet Weights, Mask on the 2nd and 3rd channel}
+\label{tab:cf5}
+\end{table}
+
+Although this configuration achieves a slightly higher accuracy (0.8087), it presents a notable drop in AUC (0.7734), suggesting reduced discriminatory power. In agreement with this, the sensitivity also decreases when compared to Configuration 4. This may be due to an overemphasis on the mask signal, which could distort the pretrained filters’ interpretation of the input, leading to suboptimal feature extraction. In contrast, Configuration 4 strikes a better balance by preserving more of the original image structure in the input.
+
+\subsubsection{Fine-tuning Experiments}
+
+Finally, we explored a fine-tuning approach, instead of using the pre-trained model solely as a feature extractor. To do this, we trained 10 different models using a leave-one-group-out cross-validation scheme, where each fold left out one group of mice entirely for testing. In this setting, we unfroze the final layers of the pre-trained model to allow fine-tuning during training, enabling the network to adapt more directly to our specific data.
+
+\subsubsection{Configuration 1 - No Tumour Mask}
+
+First, the model was fine-tuned using only the original grayscale MRI image as input. As reported in Table \ref{fig:cf1_ft}, this setup achieved the best performance among all fine-tuning configurations — not in terms of raw AUC, but in the balance between sensitivity (0.9091) and specificity (0.7931). This trade-off is particularly relevant for our goal: developing a model that is not only capable of identifying cured mice (true positives), but also reliable at not misclassifying relapsing mice as cured (true negatives). The high negative predictive value (NPV = 0.9684) further reinforces the model's reliability when predicting a negative (non-cured) outcome, which is critical in clinical and preclinical contexts where missing a relapsing subject could have an impact in patient management.
+
+\begin{table}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
+\hline
+\textbf{Accuracy} & \textbf{AUC} & \textbf{Sensitivity} & \textbf{Specificity} & \textbf{PPV} & \textbf{NPV} & \textbf{F1 (Weighted)} & \textbf{F1 (Macro)} \\
+\hline
+0.8188 & 0.8511 & 0.9091 & 0.7931 & 0.5556 & 0.9684 & 0.8316 & 0.7808 \\
+\hline
+\end{tabular}
+}
+\caption{Configuration 1 - No Tumour Mask} 
+\label{fig:cf1_ft}
+\end{table}
+
+
+\subsubsection{Configuration 2 - Tumour Mask on the 3rd Channel}
+In the last configuration, we reintroduced the tumour mask by placing it in the third channel of the input, while the MR image was kept in the first two channels. This strategy was previously the best-performing one when using the model as a frozen feature extractor. However, under fine-tuning, the performance decreased compared to the no-mask configuration, as reported in Table \ref{fig:cf2_ft}. Although specificity and NPV remained strong, the drop in sensitivity and AUC suggests that the model may have relied too heavily on the mask signal, reducing its generalisation ability when adapting its weights.
+
+\begin{table}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
+\hline
+\textbf{Accuracy} & \textbf{AUC} & \textbf{Sensitivity} & \textbf{Specificity} & \textbf{PPV} & \textbf{NPV} & \textbf{F1 (Weighted)} & \textbf{F1 (Macro)} \\
+\hline
+0.7852 & 0.7699 & 0.7424 & 0.7974 & 0.5104 & 0.9158 & 0.7977 & 0.7287 \\
+\hline
+\end{tabular}
+}
+\caption{Configuration 2 - Tumour Mask on the 3rd Channel} 
+\label{fig:cf2_ft}
+\end{table}
+
+
+\subsubsection{Discussion of Results}
+
+The results obtained in our exploratory DL experiments are overall positive considering the complexity of the task and the limited amount of data available. They are summarised in Table \ref{table:dl_results}. Compared to classical ML approaches, DL-based methods, especially those trained end-to-end, achieved superior overall performance.
+
+\textbf{Configuration 1}, using feature extraction (FE) from MRI images without masks and random weights, yielded the weakest performance across all metrics (e.g., Accuracy = 0.5570, AUC = 0.5331, F1 Macro = 0.4713). These results confirm that training CNNs from scratch without any mask information or transfer learning offers poor generalisation due to insufficient discriminative features.
+
+\textbf{Configuration 2} introduces binary tumour masks and already shows a substantial performance increase across all metrics (e.g., Accuracy = 0.7852, Sensitivity = 0.7424, NPV = 0.9158), suggesting that incorporating tumour localisation improves model training even without pre-trained weights.
+
+\textbf{Configurations 3–5} apply transfer learning from ImageNet to obtain features, with increasing complexity in how the mask is used). These setups outperform previous configurations, with \textbf{Configuration 4} achieving the highest AUC (0.8583) and Macro F1-score (0.7293) so far, while \textbf{Configuration 5} leads in specificity (0.8750) and PPV (0.5672). This supports the hypothesis that combining CNN-based feature extraction with mask-based guidance and pre-trained weights yields more robust representations.
+
+The best results overall come from the \textbf{end-to-end fine-tuned (FT) model without a mask (FT1)}, which reaches the top values in Accuracy (0.8188), Sensitivity (0.9091), NPV (0.9684), Weighted F1 (0.8316), and Macro F1 (0.7808). Despite not incorporating explicit mask information, this model benefits from full fine-tuning, learning directly from image data and labels without relying on intermediary feature extraction or XGBoost classifiers.
+
+Interestingly, \textbf{adding a mask as an extra input channel in the FT model (FT2)} did not improve results. This suggests that when enough training capacity is available, the network can learn effective features directly from the raw grayscale MRI, and the added mask may not provide significant additional benefit.
+
+Overall, these findings highlight that:
+\begin{itemize}
+    \item Transfer learning significantly boosts performance over training the model from scratch.
+    \item Tumour masks improve results in feature extraction settings, but not necessarily in end-to-end fine-tuning.
+    \item Fine-tuning the network gives the best and most balanced classification, particularly for the positive class.
+\end{itemize}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5} % Aumenta la altura de cada fila
+\normalsize % Tamaño de letra un poco más grande
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|p{6cm}|c|c|c|c|c|c|c|c|}
+\hline
+\textbf{Configuration} & \textbf{Accuracy} & \textbf{AUC} & \textbf{Sensitivity} & \textbf{Specificity} & \textbf{PPV} & \textbf{NPV} & \textbf{F1 (Weighted)} & \textbf{F1 (Macro)} \\
+\hline
+1: FE $\rightarrow$ XGBoost: MRI (No mask, random weights) & 0.5570 & 0.5331 & 0.3485 & 0.6164 & 0.2054 & 0.7688 & 0.5899 & 0.4713 \\
+\hline
+2: FE $\rightarrow$ XGBoost: MRI (Mask, Random Weights) & 0.7852 & 0.7699 & 0.7424 & 0.7974 & 0.5104 & 0.9158 & 0.7977 & 0.7287 \\
+\hline
+3: FE $\rightarrow$ XGBoost: MRI (No Mask, ImageNet) & 0.7987 & 0.8015 & 0.6061 & 0.8534 & 0.5405 & 0.8839 & 0.8026 & 0.7199 \\
+\hline
+4: FE $\rightarrow$ XGBoost: MRI (Mask 3rd channel, ImageNet) & 0.8054 & \textbf{0.8583} & 0.6212 & 0.8578 & 0.5541 & 0.8884 & 0.8092 & 0.7293 \\
+\hline
+5: FE $\rightarrow$ XGBoost: MRI (Mask 2nd and 3rd channels, ImageNet) & 0.8087 & 0.7734 & 0.5758 & \textbf{0.8750} & \textbf{0.5672} & 0.8788 & 0.8092 & 0.7242 \\
+\hline
+1: FT (No Mask) & \textbf{0.8188} & 0.8511 & \textbf{0.9091} & 0.7931 & 0.5556 & \textbf{0.9684} & \textbf{0.8316} & \textbf{0.7808} \\
+\hline
+2: FT (Mask 3rd channel) & 0.7718 & 0.7938 & 0.8333 & 0.7543 & 0.4911 & 0.9409 & 0.7887 & 0.7276 \\
+\hline
+\end{tabular}
+}
+\caption{Performance comparison of all evaluated DL configurations. Highest value in each column is in bold.}
+\label{table:dl_results}
+\end{table}
+
+\subsubsection{Temporal Trends and Prediction Errors}
+
+To assess how DL models handle temporal variability, we revisited the analysis of prediction errors over the study timeline. Figure~\ref{fig:misclassified_days_barplot_dl} presents the percentage of misclassified samples per study day for our best DL model (FT1). Compared to the previous ML approach (Figure~\ref{fig:missclassified_days_barplot}), the overall misclassification rate substantially decreases across most study days.
+
+Notably, the peak of misclassifications in early days — a prominent pattern in the ML experiments — is significantly reduced. While early time points (e.g., days 9 to 15) still exhibit higher error rates than later stages, the difference is far less pronounced. This suggests that the DL model is better equipped to extract informative features from early MRIs, which traditionally pose a challenge due to the subtler manifestations of treatment effects at those stages.
+
+This improvement in early prediction is crucial from a clinical perspective, as accurate identification of treatment response at earlier time points can inform timely decisions. The DL model’s capacity to generalise better across the study timeline indicates a more robust representation of imaging features related to prognosis.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\linewidth]{images/dl/misclassified_samples_per_day.png}
+    \caption{Misclassification rate per study day using the DL model.}
+    \label{fig:misclassified_days_barplot_dl}
+\end{figure}
+
+Furthermore, as shown in Figure~\ref{fig:mouse_accuracy_dl}, the accuracy classification per mouse has also improved, compared to Figure \ref{fig:mouse_accuracy}. Whereas in the ML setup several cured mice showed relatively low individual accuracies, the DL model achieved higher consistency across subjects. Nearly all mice, including those with cured outcomes, surpassed 60\% accuracy — and most relapsing cases remained classified with high confidence. This reflects a stronger and more stable model that is less sensitive to individual variability.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\linewidth]{images/m_classification_accuracy_by_class.png}
+    \caption{Accuracy by mouse using the deep learning model.}
+    \label{fig:mouse_accuracy_dl}
+\end{figure}
+
+In summary, the DL approach not only enhances overall classification performance, but also reduces the early-day vulnerability previously observed. This indicates better temporal robustness and improved generalisation across both individual cases and time points — a key advancement for clinical translation.
+
+\subsubsection{Grad-CAM Visualisation of Temporal Attention}
+
+To better understand the model’s behaviour, particularly at time points with higher misclassification rates, we applied Grad-CAM to visualise the regions that most influenced the model’s decisions. Grad-CAM, introduced by Selvaraju et al.~\cite{selvaraju2017gradcam}, is a widely used technique to interpret CNNs by highlighting those salient regions in the input image that contributed the most to the predicted class.
+
+We extracted the activations from the final convolutional layer of our best-performing model (FT1), which preserves spatial information before the dense layers, making it suitable for spatial interpretability. The analysis was conducted on subject \textbf{C1263}, a mouse with a confirmed relapsing outcome and a model classification accuracy of 60\% throughout its time points. The Grad-CAM visualisations across the temporal dimension revealed varying behaviours, from anatomically consistent attention to misplaced focus. In these visualisations, warmer colours (reds and yellows) indicate regions of higher attention by the model, whereas cooler colours (blues) reflect areas of lesser importance. This colour mapping helps to visually interpret where the model is focusing at each time point.
+
+We selected four representative days (Day 11, 14, 17, and 19) to illustrate this variability. On Day 11 (Figure~\ref{fig:day11}), the sample was correctly classified, and the model’s attention was centred on the tumour region, including the surrounding areas. This suggests that the model’s prediction was based on relevant anatomical features.
+
+On Day 14 (Figure~\ref{fig:day14}), the model misclassified the image, with the attention map shifting towards a brain region unrelated to the tumour. The saliency appeared diffuse and misaligned, possibly contributing to the incorrect decision. By Day 17 (Figure~\ref{fig:day17}), the model focused unexpectedly on the right eye of the mouse—an area with no pathological significance. This could reflect artefacts in the image or learned biases from the training dataset. On Day 19 (Figure~\ref{fig:day19}), although some attention was directed toward the lower brain region, the model again failed to pay attention to the tumour, resulting in another misclassification.
+
+Overall, when the attention maps aligned with the tumour region, the predictions tended to be correct. This pattern was consistent in other subjects as well. Conversely, failures often corresponded to attention being misplaced on irrelevant or misleading areas. These findings suggest that guiding the model’s attention more effectively could improve performance.
+
+Future work should explore architectural and training modifications to encourage anatomically coherent attention, such as integrating attention-aware modules or loss functions that penalise irrelevant focus. Additionally, we may experiment with input modifications, such as cropping around tumour regions or masking distractors, to further improve model reliability and interpretability.
+
+% Día 11
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/dl/1263_d11_mri.png}
+        \caption{D11 - MRI}
+        \label{fig:1263_d11_mri}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/dl/1263_d11_heat.png}
+        \caption{D11 - Heatmap}
+        \label{fig:1263_d11_heat}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/dl/1263_d11_gradcam.png}
+        \caption{D11 - GradCAM}
+        \label{fig:1263_d11_gradcam}
+    \end{subfigure}
+    \caption{Day 11 Visualisation – Subject C1263 (Correctly Predicted)}
+    \label{fig:day11}
+\end{figure}
+
+% Día 14
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/dl/1263_d14_mri.png}
+        \caption{D14 - MRI}
+        \label{fig:1263_d14_mri}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/dl/1263_d14_heat.png}
+        \caption{D14 - Heatmap}
+        \label{fig:1263_d14_heat}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/dl/1263_d14_gradcam.png}
+        \caption{D14 - GradCAM}
+        \label{fig:1263_d14_gradcam}
+    \end{subfigure}
+    \caption{Day 14 Visualisation – Subject C1263 (Incorrectly Predicted)}
+    \label{fig:day14}
+\end{figure}
+
+% Día 17
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/dl/1263_d17_mri.png}
+        \caption{D17 - MRI}
+        \label{fig:1263_d17_mri}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/dl/1263_d17_heat.png}
+        \caption{D17 - Heatmap}
+        \label{fig:1263_d17_heat}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/dl/1263_d17_gradcam.png}
+        \caption{D17 - GradCAM}
+        \label{fig:1263_d17_gradcam}
+    \end{subfigure}
+    \caption{Day 17 Visualisation – Subject C1263 (Incorrectly Predicted)}
+    \label{fig:day17}
+\end{figure}
+
+% Día 19
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/dl/1263_d19_mri.png}
+        \caption{D19 - MRI}
+        \label{fig:1263_d19_mri}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/dl/1263_d19_heat.png}
+        \caption{D19 - Heatmap}
+        \label{fig:1263_d19_heat}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/dl/1263_d19_gradcam.png}
+        \caption{D19 - GradCAM}
+        \label{fig:1263_d19_gradcam}
+    \end{subfigure}
+    \caption{Day 19 Visualisation – Subject C1263 (Incorrectly Predicted)}
+    \label{fig:day19}
+\end{figure}
+
+\chapter{Sustainability Analysis and Ethical Implications}
+
+\section{Sustainability Context}
+
+This thesis was developed using pre-existing preclinical imaging data from prior research and experiments, thereby avoiding the need for new data acquisition and minimising the consumption of additional resources. The computational work, which was considerable, was carried out entirely on local machines. No large-scale cloud infrastructure was employed, thereby reducing the overall environmental footprint.
+
+To carry out the analysis, only open-source tools were used, including PyRadiomics, XGBoost, and various Python libraries. The use of freely available software contributes to sustainability by minimising economic costs and promoting reuse within the scientific community. Additionally, the project integrated strategies such as transfer learning, which significantly reduces both the volume of required data and the computational time required. This approach exemplifies resource-efficient research and aligns with modern principles of sustainable AI development, as well as resource-conscious research practices.
+
+The dataset employed had already been used in previously published studies, reinforcing the principle of data reuse and avoiding unnecessary duplication of animal experimentation. The computational tasks were executed using a personal workstation equipped with an RTX 3060 Ti GPU, making use of available hardware.
+
+Beyond technical execution, this thesis aims to contribute to the field of glioblastoma research, particularly in the development of tools to support early detection and prediction of therapeutic outcomes. Given the aggressive nature and high recurrence rate of glioblastoma, advancements in personalised treatment planning have significant clinical relevance. Although this work is based on preclinical models in mice, the methodologies developed here could lay the groundwork for future translational research involving human data, with the potential to support more effective and timely clinical interventions.
+
+\section{Potential Impact of Project Implementation}
+
+If the methods and findings proposed in this work were to be integrated into a clinical research pipeline, several implications should be considered:
+
+\subsection{Environmental Impact}
+
+If the methods and models proposed in this thesis were scaled and deployed in clinical environments, a notable increase in computational demand would be expected. Clinical settings may require real-time or high-frequency inference on 3D radiological data, which would necessitate the use of high-performance computing (HPC) systems or cloud infrastructures. Such systems tend to consume significantly more energy than local computation, which increases the environmental footprint.
+
+However, the environmental cost of the increase in the computation could be offset by downstream benefits. For example, more accurate prediction tools can help clinicians avoid unnecessary imaging sessions, reduce the use of ineffective treatments, and better schedule follow-up assessments, ultimately leading to fewer emissions related to patient transport, medical imaging, and hospitalisation.
+
+\subsubsection{Estimated Carbon Footprint.} 
+
+To estimate the \textbf{carbon footprint} of the computational work in this thesis, we assume an approximate total GPU usage of 50 hours over several months. The following parameters are considered:
+
+\begin{itemize}
+    \item \textbf{Power consumption of RTX 3060 Ti:} An average of 200 Watts (0.2 kW) during active use, depending on workload.
+    \item \textbf{Carbon intensity of electricity:} A global average of approximately 0.45 kg CO\textsubscript{2}e per kWh\footnote{Note: Carbon intensity values vary by region. In Badalona (Catalonia, Spain), the actual value is likely lower due to a higher share of renewable energy, but the global average is used here for a conservative estimate.}.
+\end{itemize}
+
+\[
+\text{Energy use} = 50 \, \text{hours} \times 0.2 \, \text{kW} = 10 \, \text{kWh}
+\]
+\[
+\text{Estimated carbon footprint} = 10 \, \text{kWh} \times 0.45 \, \frac{\text{kg CO}_2\text{e}}{\text{kWh}} = \textbf{4.5 kg CO\textsubscript{2}e}
+\]
+
+This value is roughly equivalent to the emissions produced by driving a typical passenger car for about 30 km or the carbon footprint of one or two meat-heavy meals. Compared to larger machine learning projects that involve hundreds or thousands of GPU hours on cloud platforms, this represents a \textbf{low-impact} and environmentally responsible research practice.
+
+\subsection{Economic Impact}
+
+Integrating the proposed radiomics and machine learning pipeline into clinical workflows could have a meaningful economic effect in both the short and long term, as we explained earlier. In the long term, the ability to predict treatment response early could allow for the discontinuation of ineffective therapies, better treatment stratification, and optimisation of clinical resources, ultimately reducing healthcare costs. Predictive tools such as those proposed in this thesis could lead to fewer imaging procedures, shorter hospital stays, and more targeted therapies.
+
+In the short term, however, deployment would require initial investments. These may include costs related to software integration, validation, employee training, and regulatory compliance, particularly if such models are to be approved for clinical decision support. In addition, transitioning from preclinical to clinical data needs further development, including retraining on human datasets and collaboration with clinical teams, which could increase both time and financial demands.
+
+Despite these initial challenges, the use of open-source software, existing hospital IT infrastructure, and already digitised radiological data may help lower the entry barrier and facilitate the cost-effective adoption of such tools in clinical practice.
+
+\subsection{Social Impact}
+
+The implementation of predictive models in cancer settings has significant potential to improve patient outcomes and advance precision medicine. If widely implemented, such technologies could empower clinicians with tools to make more informed decisions, thus improving the quality of care.
+
+However, equitable access still remains a key concern. Advanced machine learning tools often require computational infrastructure and technical expertise, which may not be uniformly available across healthcare institutions, particularly in low-resource or rural areas. Without proper planning, these differences could make well-funded hospitals much more advanced than clinics with fewer resources.
+
+Furthermore, while this work is based on preclinical (murine) data, as said before, it serves as a foundational step toward translational research. As such, its long-term social impact will depend on how successfully and ethically the models are adapted, validated, and applied to human datasets in future research. Promoting transparency, reproducibility, and open collaboration can help ensure that these technologies contribute positively to the broader healthcare ecosystem.
+
+\section{Risks and Limitations}
+
+One of the main environmental risks associated with the implementation of this project lies in the potential scaling of machine learning models to clinical environments, which would demand more intensive use of high-performance GPUs and extended training or inference times. This increased computational load could lead to a higher energy footprint, particularly if cloud-based infrastructures are employed. However, this limitation could be mitigated by adopting resource-efficient practices such as model pruning, or optimised preprocessing pipelines.
+
+From an economic standpoint, a significant limitation involves the potential regulatory and financial barriers to the clinical adoption of AI tools. Validation processes, certification for medical use, and integration into hospital systems can produce high costs and long timelines.
+
+Socially, while the project contributes to the advancement of precision medicine, it also raises concerns regarding equity and accessibility. The deployment of sophisticated AI tools may remain confined to well-funded institutions with the required computational infrastructure, potentially widening existing healthcare disparities. Moreover, the use of animal models introduces ethical considerations that must be acknowledged, especially in terms of justifying animal experimentation when human data is not yet available. Additionally, the generalisability of the models to human clinical settings remains uncertain until further validation is conducted on human subjects.
+
+\section{Ethical Considerations}
+
+From an ethical perspective, this project adheres to the standards of responsible research practice, particularly concerning the use of animal data. All data employed were sourced from previously approved and completed studies. These were conducted in accordance with regional and national ethical standards, and approved by the Comité de Ética en la Investigación (CERec) of the Universitat Autònoma de Barcelona \footnote{\url{https://www.uab.cat/es/etica-investigacion/experimentacion-animal}}, under protocols CEA-OH-9685 and CEEAH-3665.
+
+The project fully embraced the 3Rs principle—Replacement, Reduction, and Refinement. \textbf{Reduction} was implemented by using the minimum number of animals necessary to achieve statistically meaningful results. In longitudinal experiments, the same subjects were monitored over time, allowing each animal to serve as its own control. \textbf{Refinement} was ensured through the use of environmental enrichment and strict veterinary oversight to monitor animal health and minimise suffering. Although this work did not involve human subjects, future extensions of this research must prioritise transparency, informed consent, and data privacy, in line with emerging guidelines for the ethical use of AI in healthcare.
+
+Finally, the models developed are intended as supportive tools for medical decision-making and not as replacements for clinical expertise. Reproducibility, transparency, and fairness must remain central in future model development and deployment phases.
+
+\chapter{Conclusions}
+
+\section{Findings}
+
+This thesis has provided solid evidence of the feasibility of using both standard classifiers together with radiomics transformations of MRI, and DL approaches to predict therapy outcomes in preclinical glioblastoma, even within the constraints of a small and imbalanced data sample. Our findings indicate that both methodologies can yield valuable insights, although DL ultimately provided superior performance.
+
+We began by training standard classifiers using hand-crafted radiomic features extracted from T2-weighted MR images. Adopting a classic radiomics pipeline, we evaluated multiple strategies to address the imbalanced nature of our dataset, particularly the under-representation of the cured class. Using a group-level split by mouse, we followed an incremental approach to model development and validation. Our best-performing standard model achieved an AUC of 0.7015 and improved sensitivity from a baseline of 0.34 to 0.52. The per-mouse accuracy exceeded 50\% in all but a few cases, particularly in cured mice, where predictions proved more challenging. When we plotted misclassification rates over time, it became evident that early days in the treatment timeline posed the greatest difficulty for the classifiers, likely due to the minimal tumour volume differences at these stages.
+
+For model interpretability, we analysed the most relevant radiomic features from the top-performing models. We were particularly interested in identifying features that remained consistently important throughout the treatment timeline and could potentially have biological relevance. Notably, features such as elongation, run entropy, dependence entropy, short run high gray-level emphasis, and high gray-level run emphasis emerged as influential. The prominence of elongation and run entropy aligns with prior literature, where changes in tumour morphology and texture complexity are associated with treatment response. Interestingly, short run high gray-level emphasis and high gray-level run emphasis displayed patterns contrary to initial expectations, possibly indicating complex structural reorganisation in the tumour microenvironment post-treatment, a hypothesis requiring further biological validation.
+
+We further explored a time-aware modelling strategy using an expanding window approach. Here, we defined an early diagnostic window—prior to day 17 of the study, when tumour volume typically peaks—and trained 10-fold cross-validated classifiers using only early-timepoint data. The models yielded a balanced sensitivity and specificity, achieving 0.60 and 0.65 in fold 1, and 0.67 and 0.72 in fold 2, respectively. Feature importance analysis in this early window highlighted cluster prominence, dependence entropy, gray-level non-uniformity normalised, kurtosis, and skewness—further supporting the relevance of tumour heterogeneity and distributional asymmetries in early prediction of treatment outcomes.
+
+Although the primary focus of the study was on radiomics-based analytical pipelines, we conducted a complementary exploratory analysis using DL due to its potential for capturing abstract and non-linear features, particularly beneficial in image-based tasks. Given the limited dataset, we adopted transfer learning strategies by leveraging pre-trained CNNs, specifically EfficientNetB0, both as a feature extractor and as an end-to-end classifier. In the first approach, deep features were extracted and classified using an XGBoost model, facilitating direct comparison with the radiomics-based pipeline. In the second approach, we fine-tuned the CNN directly on our dataset.
+
+To our surprise, the DL models outperformed radiomics-based classifiers across most metrics. The best-performing DL model achieved an AUC of 0.85 and a balanced sensitivity and specificity of 0.91 and 0.79, respectively. Moreover, the misclassification rate per study day was considerably more stable, with less degradation in early timepoints compared to the radiomics approach. The per-mouse accuracy also improved substantially, suggesting that deep features capture more generalisable and biologically meaningful patterns that radiomic features may miss.
+
+These results suggest that, despite data scarcity, DL-based approaches hold significant promise for non-invasive therapy response prediction in glioblastoma, likely due to their ability to learn complex spatial patterns and semantic abstractions directly from raw imaging data. However, the performance gap between classical and DL models also underscores the need for larger annotated datasets, which could further unlock the potential of deep neural networks in preclinical and clinical settings.
+
+In summary, both radiomics-based and DL approaches demonstrate valuable potential for glioblastoma outcome prediction. Radiomics offers more interpretability and can perform reasonably well even with smaller datasets, while DL shows superior performance in extracting high-level features from imaging data, paving the way for more robust and scalable predictive tools in translational oncology research.
+
+\section{Future work}
+
+While this project has provided some really encouraging results for predicting therapy outcomes in glioblastoma using both radiomics and deep learning, we reckon that several avenues still remain for future exploration and improvement.
+
+First and foremost, increasing the dataset size would be a key priority. One of the biggest challenges we faced was the limited number of preclinical subjects available, constraining both the statistical power and the generalisation of our models. Acquiring more data, either through additional experiments or collaborations with other laboratories, would allow for more robust training, validation, and potentially enable the use of more complex models without overfitting. In particular, it would facilitate the creation of a dedicated validation set, which is currently missing, to enable more reliable model selection. It would be also advisable to acquire and save a restricted dataset in magnetic fields compatible with clinical fields (e.g. 3T instead of 7T, a usual magnetic field in preclinical studies) to assess the impact of the magnetic field in relaxation times and MR imaging appearance. 
+
+Second, the temporal dynamics of tumour evolution represent a rich but still a bit underutilised source of information. While we attempted to address this through an expanding window approach, future work could explore advanced temporal modelling techniques such as recurrent neural networks (RNNs), transformers, or survival models that explicitly account for longitudinal changes in tumour appearance. Such models could better capture the trajectory of treatment response and potentially provide earlier and more accurate predictions. Since such longitudinal assessment will not be possible in patients, it is important to spot the best intermediate time point to extrapolate to the clinical setting in the future. 
+
+In the radiomics domain, integrating multi-parametric MRI sequences (e.g., diffusion-weighted imaging or contrast-enhanced T1-weighted imaging) could enrich the feature space and improve predictive performance.
+
+On the DL front, model explainability is an important area for development. While our CNN-based models outperformed classical approaches, they mostly operate as black boxes. Incorporating explainability tools such as Grad-CAM, SHAP, or integrated gradients could help uncover which image regions or structures drive the model's predictions and increase trust in clinical or experimental settings.
+
+Another promising direction is the use of generative models and data augmentation techniques to artificially increase the diversity and quantity of training samples. Methods such as generative adversarial networks (GANs) or diffusion models could be employed to synthesise realistic MR images, particularly for underrepresented classes such as cured subjects.
+
+Finally, although this study was conducted using a preclinical mouse model, an important direction for future work involves translating these methodologies to clinical datasets. However, this transition is far from straightforward. Beyond the expected differences in spatial resolution, contrast properties, and anatomical scale, clinical imaging introduces additional layers of complexity, including greater biological variability and significant patient heterogeneity.
+%
+Moreover, working with human data poses substantial practical and ethical challenges. Issues like data privacy regulations, restricted access to medical records, and inconsistent imaging protocols across institutions make it difficult to assemble large, well-curated datasets for model training and validation. Unlike the controlled conditions of preclinical studies, the analysis of clinical data often suffers from variability, noise, and missing information, which can severely affect model performance.
+
+In summary, future work should focus on dataset expansion, temporal modelling, feature validation, explainability, and clinical translation. These steps are essential to build upon the preliminary but promising results of this study and move toward reliable, interpretable, and scalable tools for glioblastoma therapy response prediction.
+
+\section*{Publications and Dissemination}
+
+The work presented in this thesis is currently in the process of being disseminated through the following initiatives:
+
+\begin{itemize}
+    \item \textbf{Poster in preparation:} For presentation at the \textit{5th Annual Meeting of the ISMRM Iberian Chapter}, to be held on July 3--4, 2025, at the Institute for Bioengineering of Catalonia (IBEC), Barcelona.
+    
+    \item \textbf{Manuscript in preparation:} ``Deep Learning for Early Prediction of Therapy Response and Relapse in Preclinical Glioblastoma Models from Radiomics Transformation of T2-Weighted MRI.'' Target journal: \textit{Cancers}, Special Issue: \textit{The Future of Machine Learning in Predicting the Treatment Responses of Cancers}.
+\end{itemize}
+
+
+\newpage
+\printbibliography
+\end{document}
