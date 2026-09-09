@@ -7,16 +7,29 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
-### Done (paper revision — notebook `09_final_pipeline_PAPER.ipynb`)
-- **A1 DONE** — Feature selection (variance + Spearman + Mann-Whitney + original_ heuristic) moved inside GLOO folds, fitted on training subjects only (no data leakage)
-- **A2 DONE** — Animal-level majority-vote metrics added (AUC=0.92, Sens=0.60, Spec=1.00, PPV=1.00, Acc=0.80 across 10 mice)
-- **A3 DONE** — Stratified temporal analysis early/mid/late terciles by day_of_study (AUC: 0.576 / 0.803 / 0.962)
-- **A4 DONE** — Bootstrap 95% CIs (10,000 resamples) on exam-level AUC, Sensitivity, Specificity, PPV, Accuracy
+### Done — code and analysis
+- **A1** — Feature selection (variance + Spearman + Mann-Whitney + `original_` heuristic) moved inside GLOO folds; no data leakage. New radiomics exam-level results: AUC=0.770 [0.703–0.832], Sens=0.545, Spec=0.806, PPV=0.444, NPV=0.862, Acc=0.748
+- **A2** — Animal-level majority-vote metrics: AUC=0.92, Sens=0.60, Spec=1.00, PPV=1.00, Acc=0.80 (N=10 mice)
+- **A3** — Stratified temporal analysis by day tercile: AUC early(≤21d)=0.576, mid(≤31d)=0.803, late(>31d)=0.962
+- **A4** — Bootstrap 95% CIs (10,000 resamples) on exam-level AUC, Sensitivity, Specificity, PPV, Accuracy
+- **DeLong test** — `notebooks/radiomics/10_delong_roc_comparison.ipynb` created with DeLong + subject-level permutation test; runs when DL per-fold predictions are saved (GPU required)
 
-### Pending (paper revision)
-- Correct "outperforms across all metrics" claim in Discussion
-- Add EfficientNet longitudinal limitation to Methods/Discussion
-- Discuss clinical implications of low PPV
+### Done — manuscript (`docs/paper/main.tex`)
+- Abstract: "across all metrics" → "across most metrics"; AUC updated to ~0.77 [0.70–0.83]; early-prediction claim softened
+- Table 1: radiomics row updated with corrected metrics; caption adds exam-level note, bootstrap CIs, FT vs FE selection rationale
+- Results: exam-level vs animal-level clarified throughout; animal-level radiomics results added
+- Results radiomics: explicit statement that feature selection is applied within each GLOO fold
+- Results temporal: replaced "reliable early prediction" with stratified AUC values (0.576 / 0.803 / 0.962)
+- Results DL: Dependence Entropy framed as illustrative/hypothesis-generating on 5 animals
+- Discussion: proof-of-concept framing added; effective N=10 + wide CIs acknowledged; DL does not model longitudinal sequences noted; low PPV discussed with clinical caveat
+- Discussion: Dependence Entropy biomarker claim moderated
+- Conclusion: proof-of-concept; FT over FE selection justified; no "across all metrics"
+- Methods feature selection: explicit within-fold procedure described (addresses R1+R2 comment 1)
+- Methods DL fine-tuning: clarified that validation_data was monitoring only, no early stopping or checkpoint selection (addresses R1 DL validation concern)
+- Methods performance metrics: exam-level and animal-level definitions added; bootstrap CIs described
+
+### Pending
+- Run DeLong/permutation test once DL per-fold predictions are saved (GPU needed for DL notebooks)
 - Verify supplementary Tables S3/S4 appear in compiled PDF
 
 ---
