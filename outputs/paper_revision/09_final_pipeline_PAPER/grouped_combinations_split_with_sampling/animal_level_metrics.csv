@@ -1,0 +1,2 @@
+AUC,Sensitivity,Specificity,PPV,NPV,Accuracy,TP,TN,FP,FN
+0.92,0.6,1.0,1.0,0.7142857142857143,0.8,3,5,0,2
