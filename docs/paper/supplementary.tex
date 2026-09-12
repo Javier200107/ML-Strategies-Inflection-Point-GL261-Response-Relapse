@@ -80,7 +80,13 @@ A total of 1,218 features were extracted per image using PyRadiomics \cite{pyrad
 \item \textbf{Neighboring Gray-Tone Difference Matrix (NGTDM)}: coarseness, complexity, and contrast.
 \end{itemize}
 
-Features were computed on the original images and on multiple transformed representations: Laplacian-of-Gaussian (LoG) filtered images ($\sigma = 1.0, 2.0, 3.0$), one-level wavelet decompositions (eight frequency-specific sub-bands), gradient images, and intensity transformations (square, square-root, logarithmic, and exponential). Temporal descriptors (first-order differences, rolling means and standard deviations, local slopes, and relative percentage changes) were subsequently derived from the retained features to encode longitudinal dynamics without modeling complete sequences as a jointly classified multivariate time series.
+Features were computed on the original images and on multiple transformed representations: Laplacian-of-Gaussian (LoG) filtered images ($\sigma = 1.0, 2.0, 3.0$), one-level wavelet decompositions (eight frequency-specific sub-bands), gradient images, and intensity transformations (square, square-root, logarithmic, and exponential). In the corrected pipeline (used in the revised manuscript), feature selection is applied exclusively within the training partition of each GLOO fold, and no temporal (lag) descriptors are added; only the original image-derived features are retained after the four-step filter. The temporal feature engineering described in earlier exploration phases of this work was not included in the final corrected pipeline.
+
+\subsection*{DeLong test and subject-level permutation test}
+
+To formally assess whether the observed differences in AUC between pipelines were statistically significant, two complementary tests were applied. The DeLong test \cite{DeLong1988} uses a non-parametric variance estimator for the AUC based on structural components derived from the predicted score distributions for positive (cured) and negative (relapsing) cases. For two correlated AUCs estimated on the same set of test observations, the test statistic follows an approximately standard normal distribution under the null hypothesis of equal AUCs, enabling a two-sided $p$-value to be computed without assumptions about the underlying score distributions. This test was applied at the examination level (N\,=\,298 pooled predictions across all GLOO folds).
+
+A subject-level permutation test (10,000 permutations) was additionally applied at the animal level (N\,=\,10 animals) to assess whether the observed AUC difference between models exceeded what would be expected by random reassignment of animal labels. Mean predicted probabilities per animal were permuted and the AUC difference recomputed at each permutation to obtain a null distribution; the two-sided $p$-value was estimated as the proportion of permuted differences exceeding the observed difference in absolute value.
 
 \section*{Supplementary Tables}
 
@@ -170,14 +176,17 @@ Parameter & Value \\
 \hline
 Backbone & EfficientNetB0 (ImageNet pre-trained) \\
 Trainable layers & Last 50 layers unfrozen \\
-Input & 3-channel images \\
-Classification head & Global pooling + dense + batch norm + dropout + sigmoid \\
+Input & 3-channel images (grayscale converted to RGB) \\
+Classification head & Global pooling + dense(256, ReLU) + batch norm + dropout(0.3) + sigmoid \\
 Loss function & Binary cross-entropy \\
-Optimizer & Adam \\
+Optimizer & Adam (learning rate $= 10^{-4}$) \\
 Batch size & 32 \\
-Class-imbalance handling & Random oversampling (training folds only) \\
-Regularization & Dropout, early stopping \\
+Epochs per fold & 20 (fixed; no early stopping) \\
+Class-imbalance handling & Random oversampling (training partition of each fold only) \\
+Regularization & Dropout only \\
 Validation & Grouped Leave-One-Out (GLOO) \\
+Random seed & 42 (Python, NumPy, TensorFlow, XGBoost) \\
+GPU determinism & \texttt{tf.config.experimental.enable\_op\_determinism()} \\
 \hline
 \end{tabular}
 \caption{Configuration of the EfficientNetB0 fine-tuning procedure.}
