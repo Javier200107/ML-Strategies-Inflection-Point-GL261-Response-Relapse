@@ -158,7 +158,7 @@ The revised text states: *"Radiomics performance is near-chance in early treatme
 ### R2-1 (Major) — Clarify if model development pipeline was performed within training portion of each fold
 
 **Reviewer comment:**
-In the radiomics-based pipeline, it is not specified whether feature selection steps (correlation filtering, Mann-Whitney U test, temporal feature engineering) were refitted using only training animals within GLOO folds.
+> Would you be able to clarify if the model development pipeline was performed within the training portion of each subject level cross-val fold? I do like that the author used GLOO CV with all exams from one mouse withheld together. That said, in the radiomics-based pipeline, the manuscript did not sufficiently specify if their statistical analysis and feature selection steps (correlation filtering, Mann-Whitney U test step, temporal feature engineering) were refitted using only the training animals within GLOO folds. Please explicitly clarify this, especially for the feature selection step. If any of these preprocessing was performed before GLOO CVs splits, I recommend that the analysis be repeated using a fully nested subject-level procedure.
 
 **Response — IMPLEMENTED ✅**
 
@@ -169,7 +169,7 @@ Addressed identically to R1-3. The corrected pipeline runs all feature selection
 ### R2-2 (Major) — Clarify if metrics in Table 1 are exam-level or animal-level; correct wording
 
 **Reviewer comment:**
-The manuscript stated "EfficientNet correctly identified 90.9% of cured animals compared with 51.5% for XGBoost" — these numbers do not represent subject-level sensitivity. Define the unit for every reported metric. Strongly recommend reporting subject-level performance.
+> The author should explicitly clarify if metrics in table 1 were calculated at the level of individual MRI exams or at animal level. The manuscript stated that "EfficientNet correctly identified 90.9% of cured animals compared with 51.5% for XGBoost", but these numbers does not look like they represent subject-level sensitivity. Please explicitly define the unit used for every reported performance metric. If the current metrics are examination-level, the wording should be corrected accordingly. I strongly recommend report subject-level performance because that is a more interesting than exam-level performance.
 
 **Response — IMPLEMENTED ✅**
 
@@ -194,7 +194,7 @@ All five relapsing animals were correctly identified by all three models (Specif
 ### R2-3 (Major) — Manuscript overstates early prediction performance
 
 **Reviewer comment:**
-The main AUC is calculated across examinations from the full follow-up period. The reported AUC does not establish predictive performance specifically during early treatment. Authors should either report performance within early treatment windows or revise conclusions.
+> The manuscript overstates the evidence for early prediction performance without actually showing it. The temporal analysis shows that errors vary with study day, but the main AUC is calculated across examinations from the full follow-up period. Therefore, the reported AUC does not establish predictive performance specifically during early treatment. The authors should either report performance within clearly defined early treatment windows using the existing data or revise the conclusions to avoid claiming good early prediction performance.
 
 **Response — IMPLEMENTED ✅**
 
@@ -205,7 +205,7 @@ Addressed identically to R1-6(d). A stratified temporal analysis is now reported
 ### R2-4 (Major) — Several conclusions should be rewritten
 
 **Reviewer comment:**
-(a) Radiomics showed higher Specificity and PPV, so DL did not outperform radiomics "across all metrics" — should be "most". (b) EfficientNet FE+XGB has higher AUC than FT in the original Table 1, yet FT is presented as best.
+> Several conclusions should be rewritten to match the reported results more precisely. Radiomics showed higher Specificity and PPV, so DL model did not outperformed radiomics approach across all metrics as stated in the abstract. It should be "most" or the majority of. You chose AUC to be the main metric, but EfficientNet FE + XGB has higher AUC than FT. I do agree that the FT model is overall giving more balanced classification performance.
 
 **Response — IMPLEMENTED ✅**
 
@@ -220,7 +220,7 @@ Addressed identically to R1-6(d). A stratified temporal analysis is now reported
 ### R2-5 (Major) — Missing Supplementary Tables S3/S4
 
 **Reviewer comment:**
-Authors referenced Supplementary Tables S3 and S4 for hyperparameter search, but these were not found in the supplementary files.
+> Some important tables are missing? The authors talked about table S3/S4 for hyperparameters search but I didn't see it in the supplementary files.
 
 **Response — IMPLEMENTED ✅**
 
@@ -260,7 +260,7 @@ Tables S3 and S4 are present in `supplementary.tex` and are confirmed to exist. 
 ### R2-Minor-1 — Bootstrap confidence intervals for performance metrics
 
 **Reviewer comment:**
-Provide measures of uncertainty (e.g., 95% CI) for performance metrics; uncertainty should account for clustering of examinations within animals.
+> Please provide measures of uncertainty (e.g., 95% confidence intervals) for the performance metrics. Uncertainty estimation should account for clustering of examinations within animals.
 
 **Response — IMPLEMENTED ✅**
 
@@ -271,7 +271,7 @@ Bootstrap 95% CIs (10,000 resamples, examination-level) are now reported for all
 ### R2-Minor-2 — DL does not model longitudinal sequences
 
 **Reviewer comment:**
-Explicitly acknowledge that the DL strategy uses longitudinally acquired data but is not itself a temporal sequence model.
+> The paper acknowledges the small cohort. I recommend explicitly acknowledge that the DL did not model longitudinal sequences. The current strategy therefore uses longitudinally acquired data but is not itself a temporal sequence model.
 
 **Response — IMPLEMENTED ✅**
 
@@ -284,7 +284,7 @@ The following statement has been added to both the Introduction and Discussion: 
 ### R2-Minor-3 — Low PPV should be acknowledged clinically
 
 **Reviewer comment:**
-PPV is pretty low across models — this is an important clinical point.
+> PPV is pretty low across models. This should be acknowledged because it's an important point clinically still.
 
 **Response — IMPLEMENTED ✅**
 
