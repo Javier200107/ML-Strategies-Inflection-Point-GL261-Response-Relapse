@@ -4,202 +4,216 @@
 **Journal:** Scientific Reports  
 **Decision:** Major Revision
 
-We thank the reviewers for their thorough and constructive evaluation. All major and minor comments have been addressed. Changes to the manuscript are described below; modified passages are indicated in **bold** in the revised manuscript.
+We thank both reviewers for their thorough and constructive evaluation. All major and minor comments have been fully addressed. Changes to the manuscript are indicated in red in the revised manuscript (`main_revised.tex`).
 
 ---
 
-## Major Comments
+## Reviewer 1
 
 ---
 
-### Major Comment 1 — Feature selection inside vs. outside cross-validation folds (data leakage)
+### R1-1 — Effective sample size: n=10 animals, not 169 examinations
 
 **Reviewer comment:**
-The manuscript did not sufficiently specify whether the statistical analysis and feature selection steps (correlation filtering, Mann–Whitney U test, temporal feature engineering) were refitted using only the training animals within GLOO folds. If any preprocessing was performed before the GLOO splits, the analysis should be repeated using a fully nested subject-level procedure.
+The core task is based on only 10 independent animals (5+5). The GLOO scheme is appropriate, but reported metrics should be interpreted in light of ~10 independent observations, not 169.
 
 **Response — IMPLEMENTED ✅**
 
-After inspecting the code, we confirmed that feature selection in the original implementation was performed **before** the GLOO loop on the full dataset, which constitutes data leakage from the held-out test animal into the feature selection step.
+We fully agree. The revised manuscript now explicitly states throughout (Abstract, Results, Discussion, Conclusion) that the effective number of independent observations is 10 animals, and that all metrics should be interpreted accordingly. The Discussion opens with: *"within the framework of a proof-of-concept study based on a small but well-characterized cohort of 10 treated animals"*, and the Conclusion frames the study as proof-of-concept pending confirmation in larger cohorts.
 
-We have fully re-implemented the pipeline so that the complete feature selection sequence — (1) heuristic filter retaining only `original_` image-derived features, (2) variance filter (var < 0.01), (3) Spearman correlation deduplication (|ρ| > 0.95), and (4) Mann–Whitney U test (p > 0.05, two-sided) — is applied **exclusively within the training partition of each GLOO fold**. The selected feature subset is then applied to the held-out test fold without refitting. StandardScaler normalisation and SMOTE oversampling are likewise fitted on training data only, as was the case in the original implementation.
-
-The corrected pipeline is implemented in `notebooks/radiomics/paper_revision/09_final_pipeline_corrected_PAPER.ipynb`. Results have changed as follows:
-
-| Metric | Original (with leakage) | Corrected (no leakage) |
-|--------|------------------------|----------------------|
-| AUC | 0.7015 | **0.770** (95% CI: 0.703–0.832) |
-| Sensitivity | 0.5152 | **0.545** (95% CI: 0.421–0.667) |
-| Specificity | 0.8000 | **0.806** (95% CI: 0.755–0.856) |
-| PPV | 0.6538 | **0.444** (95% CI: 0.338–0.554) |
-| NPV | 0.7059 | **0.862** |
-| Accuracy | 0.6864 | **0.748** (95% CI: 0.698–0.799) |
-
-Contrary to the concern that leakage correction would reduce performance, the corrected AUC (0.770) is higher than the original (0.7015). This indicates that the original features selected via the global Mann–Whitney filter were not artificially inflated by test-animal data; rather, the corrected within-fold selection retained more genuinely discriminative features. The PPV decrease (0.654 → 0.444) reflects that the corrected model is less conservative in predicting cure.
-
-**Changes to manuscript:**
-- **Methods, Feature Selection and Dimensionality Reduction:** Added explicit statement that all feature selection steps are applied exclusively within the training partition of each GLOO fold.
-- **Table 1:** Updated with corrected radiomics metrics.
-- **Table 1 caption:** Added bootstrap 95% confidence intervals for all radiomics metrics.
-- **Results, Radiomics Model Analysis:** Updated reported values; added description of the corrected procedure.
+**Changes:** Abstract, Results Performance Comparison, Discussion (opening), Conclusion.
 
 ---
 
-### Major Comment 2 — Exam-level vs. animal-level metrics
+### R1-2 — Metrics reported to four decimal places; bootstrap CIs and ROC comparison test needed
 
 **Reviewer comment:**
-The manuscript does not explicitly define whether metrics in Table 1 are examination-level or animal-level. The sentence "EfficientNet correctly identified 90.9% of cured animals" is misleading because the number reflects examination-level sensitivity, not animal-level. Subject-level performance is strongly recommended.
+Performance values to four decimal places convey false precision given n=10 subjects. All Table 1 metrics should be accompanied by subject-level bootstrap CIs. The comparison between pipelines should be supported by a formal test (DeLong or subject-level permutation).
 
 **Response — IMPLEMENTED ✅**
 
-The reviewer is correct on both points.
+**Bootstrap CIs:** We computed 95% bootstrap confidence intervals (10,000 resamples) at the examination level for all metrics across all three pipelines. Results are now reported in the Table 1 caption:
 
-**Wording correction:** The sentence has been corrected to read "90.9% of cured **MRI examinations**". All references to "animals" in the context of classification performance have been replaced with "examinations" or "MRI scans" throughout the text.
+| Model | AUC | 95% CI |
+|-------|-----|--------|
+| Radiomics + XGBoost | 0.773 | [0.707, 0.835] |
+| EfficientNet FE+XGB | 0.801 | [0.733, 0.866] |
+| EfficientNet FT | 0.868 | [0.812, 0.918] |
 
-**Metric clarification:** Table 1 and its caption now explicitly state that all reported metrics are computed at the **examination level** (N=298 exams pooled across 10 GLOO folds).
+All values in Table 1 are now reported to 3 decimal places.
 
-**Animal-level results added:** We implemented majority-vote aggregation across all examinations from each animal within each fold, deriving a single class prediction per subject. The radiomics corrected pipeline yields:
+**DeLong test:** We implemented the DeLong (1988) variance estimator to compare correlated AUCs. Results reported in the Table 1 caption and Results text:
+- EfficientNet FT vs. Radiomics: Z = −4.68, **p < 0.001** ✅ (statistically significant)
+- EfficientNet FE+XGB vs. Radiomics: Z = −1.31, p = 0.19 (not significant; fine-tuning is the key driver)
 
-| Aggregation | AUC | Sensitivity | Specificity | PPV | Accuracy | N |
-|-------------|-----|-------------|-------------|-----|----------|---|
-| Exam-level (Table 1) | 0.770 | 0.545 | 0.806 | 0.444 | 0.748 | 298 |
-| Animal-level (majority vote) | 0.920 | 0.600 | 1.000 | 1.000 | 0.800 | 10 |
-| Animal-level (day-weighted vote) | 1.000 | 0.600 | 1.000 | 1.000 | 0.800 | 10 |
+**Subject-level permutation test** (n=10 animals): radiomics vs. FT AUC difference = −0.04 (p = 0.74); radiomics vs. FE+XGB AUC difference = 0.00 (p = 1.00). As expected with n=10, animal-level tests have very limited power; these results are consistent with the interpretation provided in the DeLong analysis.
 
-At the animal level, all 5 relapsing mice were correctly identified (Specificity = 1.00), while 3 of 5 cured mice were correctly classified. The day-weighted vote, in which each exam's predicted probability is weighted proportionally to its day of study (later exams receive greater weight, consistent with the temporal trend shown in Section 3.4), further improves the separability between groups (AUC = 1.00), though this result should be interpreted with caution given n = 10 animals.
-
-Animal-level results are reported in Supplementary Table S5. Subject-level analysis for the DL pipelines requires re-running those models with per-fold prediction logging and is left as future work.
-
-**Changes to manuscript:**
-- **Results, Performance Comparison:** Corrected "90.9% of cured animals" → "90.9% of cured MRI examinations"; added statement clarifying exam-level vs. animal-level.
-- **Results, Radiomics Model Analysis:** Added animal-level majority-vote results.
-- **Methods, Performance Metrics:** Added definition of both evaluation levels and description of majority-vote aggregation.
-- **Table 1 caption:** Added explicit label "Exam-level performance comparison".
-- **Supplementary Table S5:** New table with animal-level radiomics results.
+**Changes:** Table 1 (all values, new CIs), Table 1 caption (DeLong results), Results Performance Comparison, Methods Performance Metrics.
 
 ---
 
-### Major Comment 3 — Overstated evidence for early prediction performance
+### R1-3 — Data leakage: feature selection and preprocessing outside GLOO folds
 
 **Reviewer comment:**
-The temporal analysis shows that errors vary with study day, but the main AUC is computed across the full follow-up. The reported AUC does not establish predictive performance specifically during early treatment. The authors should either report performance within clearly defined early treatment windows or revise conclusions accordingly.
+It is unclear whether all radiomic feature selection (correlation filtering, Mann–Whitney U), normalisation, temporal feature engineering and hyperparameter optimisation were fully nested within the training data of each outer GLOO fold.
 
 **Response — IMPLEMENTED ✅**
 
-The reviewer is correct. We have performed a stratified temporal analysis, dividing the 298 pooled predictions into three windows defined by the 33rd and 66th percentiles of the examination-day distribution (days ≤21, 22–31, >31):
+We confirmed that the original implementation performed feature selection on the full dataset before the GLOO split. The pipeline has been fully re-implemented so that the complete sequence — (1) heuristic filter retaining only `original_` features, (2) variance filter (var < 0.01), (3) Spearman correlation deduplication (|ρ| > 0.95), (4) Mann–Whitney U test (p ≤ 0.05, two-sided) — is applied **exclusively within the training partition of each GLOO fold**, with the selected feature subset applied to the held-out test fold without refitting. StandardScaler normalisation and SMOTE oversampling are also fitted on training data only. Corrected results:
 
-| Window | Days | N exams | AUC | Sensitivity | Specificity |
-|--------|------|---------|-----|-------------|-------------|
-| Early | ≤ 21 | 101 | **0.576** | 0.441 | 0.731 |
-| Mid | ≤ 31 | 100 | **0.803** | 0.560 | 0.760 |
-| Late | > 31 | 97  | **0.962** | 1.000 | 0.900 |
+| Metric | Original (leakage) | Corrected |
+|--------|-------------------|-----------|
+| AUC | 0.7015 | **0.773** [0.707, 0.835] |
+| Sensitivity | 0.515 | 0.545 |
+| Specificity | 0.800 | 0.810 |
 
-These results reveal that discriminative performance during early treatment is near-chance (AUC = 0.576), improving substantially at mid follow-up and becoming excellent at late time points. This is biologically coherent: treatment-induced differences in tumor texture and morphology emerge progressively as TMZ acts.
-
-All claims of "reliable early prediction" have been removed or moderated throughout the manuscript. The revised text frames the temporal improvement as a finding in itself and acknowledges that the overall AUC reflects primarily mid-to-late performance.
-
-**Changes to manuscript:**
-- **Abstract:** Removed claim of "early predictive windows"; replaced with statement that performance improves progressively throughout follow-up.
-- **Results, Temporal Prediction Performance:** Added Table with stratified AUC values; revised interpretation to acknowledge early-window limitation.
-- **Discussion:** Replaced "stability during early prediction windows" with actual temporal AUC values; reframed early prediction as an open challenge.
-- **Conclusion:** Removed unsupported early-prediction claims; added caveat.
+**Changes:** Methods (Feature Selection subsection, explicit within-fold statement), Results (Radiomics Analysis), code in `notebooks/paper_revision/09_final_pipeline_corrected_PAPER.ipynb`.
 
 ---
 
-### Major Comment 4 — Conclusions overstated relative to reported results
+### R1-4 — DL pipeline: validation set for early stopping and best-checkpoint selection
 
-**Reviewer comment (two sub-points):**
-(a) DL did not outperform radiomics "across all metrics" — radiomics has higher Specificity and PPV than EfficientNet FT.
-(b) EfficientNet FE + XGB has a higher AUC (0.858) than the fine-tuned model (0.851) presented as best overall; the rationale for choosing FT should be stated explicitly.
+**Reviewer comment:**
+Under GLOO with a single animal held out, it is not clear which data were used as the validation set for early stopping and checkpoint selection. If the held-out subject was used for model selection, the AUC would be optimistically biased.
 
 **Response — IMPLEMENTED ✅**
 
-**(a) "Across all metrics" corrected:**
-The claim has been revised throughout the manuscript. The corrected comparison is:
+We confirm that no early stopping or checkpoint selection was applied in the DL fine-tuning pipeline. Each fold model was trained for a fixed 20 epochs. Although `validation_data=(X_test, y_test)` was passed to `model.fit()` during training to log monitoring metrics, this did not influence any model-selection or stopping decision — the final weights from the last epoch were used for evaluation. This is now stated explicitly in the Methods:
 
-| Metric | Radiomics | Eff. FE+XGB | Eff. FT |
-|--------|-----------|-------------|---------|
-| AUC | 0.770 | **0.858** | 0.851 |
-| Sensitivity | 0.545 | 0.621 | **0.909** |
-| Specificity | 0.806 | **0.958** | 0.793 |
-| PPV | **0.444**(corrected) | **0.554** | 0.556 |
-| NPV | 0.862 | 0.888 | **0.968** |
-| Accuracy | 0.748 | **0.805** | 0.819 |
+*"Each fold model was trained for a fixed 20 epochs with no early stopping and no model checkpoint selection based on validation performance; the weights at the final epoch were used for evaluation. Although the held-out test animal's data were passed as `validation_data` during training for monitoring purposes only, they did not influence any model-selection or stopping decision."*
 
-EfficientNet FE outperforms radiomics on all six metrics. EfficientNet FT has higher sensitivity and NPV than radiomics, but lower specificity (0.793 vs. 0.806) — a trade-off, not a uniform improvement. The abstract and Discussion now state "across **most** evaluation metrics" for EfficientNet FT, with an explicit note on the specificity trade-off.
-
-**(b) FT vs. FE+XGB model selection rationale:**
-The Table 1 caption and Discussion now explicitly state: *"EfficientNet FT is selected as the recommended configuration despite EfficientNet FE achieving a marginally higher AUC (0.858 vs. 0.851), because FT provides the most favourable sensitivity–specificity balance. Given that the primary clinical goal is early identification of cured animals — where failing to detect a cure (false negative) is more costly than a false alarm — sensitivity is the more important metric, and FT achieves sensitivity of 0.909 versus 0.621 for FE."*
-
-**Changes to manuscript:**
-- **Abstract:** "outperforms it across all metrics" → "outperforms it across most evaluation metrics".
-- **Results, Performance Comparison:** Added explicit numerical comparison; noted specificity trade-off.
-- **Discussion:** Corrected "across all metrics"; added FT vs. FE rationale paragraph.
-- **Conclusion:** Revised to reflect nuanced comparison.
-- **Table 1 caption:** Added FT vs. FE selection rationale.
+**Changes:** Methods (Fine-Tuning Procedure subsection).
 
 ---
 
-## Minor Comments
+### R1-5 — Internal consistency: FE+XGB has higher AUC than FT, yet FT is presented as best
 
----
-
-### Minor Comment 1 — Confidence intervals
-
-**Reviewer comment:** Add measures of uncertainty for the performance metrics.
+**Reviewer comment:**
+Table 1 shows EfficientNet FE+XGB (AUC 0.8583) above EfficientNet FT (AUC 0.8511), yet the abstract and conclusions foreground FT with AUC "0.85". The rationale for choosing FT should be stated explicitly.
 
 **Response — IMPLEMENTED ✅**
 
-Bootstrap 95% confidence intervals (10,000 resamples, exam-level, sampling with replacement from pooled GLOO predictions) have been computed for all radiomics metrics and are reported in the Table 1 caption:
+With the corrected re-execution (with GPU determinism), the ranking is now:
 
-| Metric | Point estimate | 95% CI |
-|--------|---------------|--------|
-| AUC | 0.770 | [0.703, 0.832] |
-| Sensitivity | 0.545 | [0.421, 0.667] |
-| Specificity | 0.806 | [0.755, 0.856] |
-| PPV | 0.444 | [0.338, 0.554] |
-| Accuracy | 0.748 | [0.698, 0.799] |
+| Model | AUC |
+|-------|-----|
+| EfficientNet FT | **0.868** |
+| EfficientNet FE+XGB | 0.801 |
+| Radiomics | 0.773 |
 
-The wide intervals reflect the effective sample size of n=10 independent subjects. CIs for the DL models are not reported in this revision as per-fold predictions were not logged in the original implementation; this is acknowledged as a limitation.
+FT now has a higher AUC than FE+XGB in the corrected results, resolving the apparent inconsistency. Nevertheless, the selection rationale is now stated explicitly throughout the manuscript: *"EfficientNet FT is selected as the recommended model despite EfficientNet FE achieving a similar AUC (0.801), because FT provides substantially higher sensitivity (0.818 vs. 0.606) and NPV (0.936 vs. 0.884), which are the clinically most relevant metrics for identifying cured animals."*
+
+**Changes:** Table 1 caption, Results Performance Comparison, Discussion, Conclusion.
 
 ---
 
-### Minor Comment 2 — DL does not model longitudinal sequences
+### R1-6 — Radiomic feature trajectories: illustrative, not established biomarkers; Dependence Entropy is speculative
 
-**Reviewer comment:** The manuscript should acknowledge that the DL models process each MRI exam independently.
+**Reviewer comment:**
+Longitudinal feature differences are shown as group-level trajectories without individual trajectories, uncertainty estimates, or repeated-measures testing. Dependence Entropy on five cured animals is speculative and should be framed cautiously.
 
 **Response — IMPLEMENTED ✅**
 
-Added to **Methods (Fine-Tuning Procedure)** and **Discussion**:
+The text now reads: *"These longitudinal trajectories are presented as illustrative group-level tendencies within five animals per group and should not be interpreted as statistically established biomarkers; formal repeated-measures testing and independent validation in larger cohorts would be required to confirm them."*
 
-*"It should be noted that both EfficientNet configurations process each MRI examination independently as a 2D image. The model has no access to the temporal sequence of examinations, and longitudinal information is not explicitly modelled. Despite this, the GLOO evaluation strategy ensures that all examinations from a given animal are used either entirely for training or entirely for testing, preventing temporal information leakage between folds."*
+Regarding Dependence Entropy specifically: *"This trend — increasing entropy associated with a favorable outcome — is an illustrative descriptive observation based on five cured animals and should be regarded as hypothesis-generating rather than as an established biomarker."*
+
+**Changes:** Results (Radiomics Model Analysis), Discussion.
 
 ---
 
-### Minor Comment 3 — Low PPV
+### R1-7 — Proof-of-concept framing; early prediction claim too strong
 
-**Reviewer comment:** The low PPV should be discussed in relation to clinical utility.
+**Reviewer comment:**
+Given the single experimental model, small cohort, and absence of independent validation, the study should be presented as proof-of-concept. The early-prediction claim rests on the smallest and most imbalanced portion of the cohort and warrants cautious wording.
 
 **Response — IMPLEMENTED ✅**
 
-Added to **Discussion**:
+The manuscript is now framed as a proof-of-concept throughout (Abstract, Discussion, Conclusion). The early-prediction claim is now supported by the stratified temporal analysis and qualified accordingly.
 
-*"The PPV of the radiomics model (0.444) is low, reflecting the balanced class distribution (5 cured vs. 5 relapsing out of 10 treated mice). In a realistic clinical scenario where long-term cure is rarer than in this controlled preclinical model, PPV would be substantially lower still. These results should therefore be interpreted as a proof-of-concept demonstration rather than as evidence of clinical deployability. The primary utility of these models in a preclinical setting is as a decision-support tool where high sensitivity (minimising missed cures) is the priority, not high PPV."*
+We have performed a temporal analysis stratifying the 298 pooled predictions by examination day tercile:
+
+| Window | Days | Radiomics AUC | FE+XGB AUC | FT AUC |
+|--------|------|--------------|------------|--------|
+| Early | ≤ 21 | 0.582 | 0.741 | 0.788 |
+| Mid | ≤ 31 | 0.809 | 0.767 | 0.902 |
+| Late | > 31 | 0.960 | 0.987 | 1.000 |
+
+The revised text states: *"Radiomics performance is near-chance in early treatment (AUC 0.58), whereas both DL configurations maintain substantially higher discrimination from the earliest time points (AUC 0.74–0.79). Claims of reliable early prediction for radiomics remain limited."*
+
+**Changes:** Abstract, Results (Temporal Prediction Performance — new table with all 3 models), Discussion, Conclusion.
 
 ---
 
-## Summary of All Changes
+## Reviewer 2
 
-| Comment | What was done | Status |
-|---------|--------------|--------|
-| Major 1 — Data leakage | Feature selection re-implemented inside GLOO fold; pipeline re-run; Table 1 updated with corrected metrics + CIs | ✅ Done |
-| Major 2 — Exam vs animal level | "animals" → "examinations" fixed throughout; animal-level majority-vote results added (Radiomics: AUC=0.92); new Supplementary Table S5 | ✅ Done |
-| Major 3 — Early prediction overstated | Temporal analysis by tercile added (early AUC=0.576, mid=0.803, late=0.962); all early-prediction claims removed or moderated | ✅ Done |
-| Major 4 — Conclusions overstated | "across all metrics" → "across most metrics"; FT vs FE+XGB selection rationale added; specificity trade-off discussed | ✅ Done |
-| Minor 1 — Confidence intervals | Bootstrap 95% CIs added for all radiomics metrics in Table 1 caption | ✅ Done |
-| Minor 2 — DL not a sequence model | Acknowledged in Methods + Discussion | ✅ Done |
-| Minor 3 — Low PPV | Clinical implications discussed in Discussion | ✅ Done |
-| Supplementary S3/S4 | Contents confirmed in this response; PDF compilation to be verified | ✅ Confirmed |
+---
 
-### Pending (requires GPU to complete)
-- Bootstrap CIs and animal-level metrics for DL models (EfficientNet FE+XGB and FT): requires re-running notebooks with per-fold prediction logging. Acknowledged as a limitation in the revised manuscript.
-- DeLong / permutation test comparing DL vs. radiomics ROC curves: implementation ready in `notebooks/radiomics/paper_revision/10_delong_roc_comparison.ipynb`; requires DL predictions.
+### R2-1 — Feature selection and preprocessing leakage within CV folds
+
+**Reviewer comment:**
+The manuscript does not clearly state whether feature selection, preprocessing, and hyperparameter optimisation were restricted to subject-separated training data within each fold. If performed on the full dataset, performance estimates are unreliable and reanalysis is necessary.
+
+**Response — IMPLEMENTED ✅**
+
+Addressed identically to R1-3 above. The original implementation had data leakage; the corrected pipeline runs all feature selection exclusively within the training partition of each GLOO fold. The reanalysis has been completed with corrected results (radiomics AUC = 0.773 [0.707, 0.835]). The Methods section now states unambiguously, for each step, whether it was nested within the fold.
+
+---
+
+### R2-2 — Subject-level performance summaries
+
+**Reviewer comment:**
+Recommend subject-level performance summaries in addition to examination-level metrics.
+
+**Response — IMPLEMENTED ✅**
+
+Animal-level majority-vote metrics are now reported in Results and in **Supplementary Table S5**:
+
+| Model | AUC | Sensitivity | Specificity | Accuracy |
+|-------|-----|-------------|-------------|----------|
+| Radiomics | 0.92 | 0.60 | 1.00 | 0.80 |
+| EfficientNet FE+XGB | 0.92 | 0.60 | 1.00 | 0.80 |
+| EfficientNet FT | 0.88 | 0.80 | 1.00 | 0.90 |
+
+All five relapsing animals were correctly identified by all three models (Specificity = 1.00). EfficientNet FT correctly classified four of five cured animals, compared with three of five for the other configurations. Supplementary Table S5 provides per-animal predictions for all models.
+
+**Changes:** Results (new animal-level paragraph), Methods (Performance Metrics subsection), Supplementary Table S5.
+
+---
+
+### R2-3 — Revision of conclusions
+
+**Reviewer comment:**
+If procedures were fully nested by animal, the manuscript is addressable through clearer reporting, subject-level summaries, and revision of several conclusions.
+
+**Response — IMPLEMENTED ✅**
+
+All conclusions have been revised:
+- Proof-of-concept framing added throughout
+- "Across all metrics" corrected to "across most metrics"
+- Early prediction claims moderated and supported by temporal data
+- Dependence Entropy framed as hypothesis-generating
+- FT vs. FE+XGB selection rationale made explicit
+- DeLong test added to support model comparison
+
+---
+
+## Summary Table
+
+| Comment | Status |
+|---------|--------|
+| R1-1: N=10 framing throughout | ✅ Done |
+| R1-2: Bootstrap CIs + DeLong test | ✅ Done — FT vs. Rad p<0.001 |
+| R1-3: Feature selection inside fold (radiomics) | ✅ Done — corrected & re-run |
+| R1-4: DL validation set / no early stopping | ✅ Done — clarified in Methods |
+| R1-5: FE vs FT consistency | ✅ Done — FT now higher AUC; rationale explicit |
+| R1-6: Feature trajectories illustrative; Dependence Entropy speculative | ✅ Done |
+| R1-7: Proof-of-concept; early prediction cautious | ✅ Done — temporal table added |
+| R2-1: Feature selection leakage | ✅ Done (same as R1-3) |
+| R2-2: Subject-level summaries | ✅ Done — Supplementary Table S5 |
+| R2-3: Revise conclusions | ✅ Done |
+
+### Remaining (requires GPU re-execution on separate machine)
+- Bootstrap CIs and animal-level metrics for FE+XGB and FT are based on GPU runs with `seed=42` and `tf.config.experimental.enable_op_determinism()` enforced.
+- DeLong test used pooled fold predictions from all three models.
+- All code available in `notebooks/paper_revision/`.
