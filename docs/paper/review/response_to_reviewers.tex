@@ -24,15 +24,19 @@
   linewidth=0.5pt,
   leftmargin=0pt,
   rightmargin=0pt,
-  innerleftmargin=10pt,
-  innerrightmargin=10pt,
-  innertopmargin=8pt,
-  innerbottommargin=8pt,
-  skipabove=6pt,
-  skipbelow=6pt
+  innerleftmargin=12pt,
+  innerrightmargin=12pt,
+  innertopmargin=10pt,
+  innerbottommargin=10pt,
+  skipabove=14pt,
+  skipbelow=14pt
 ]{reviewerbox}
 
-\newcommand{\rc}[1]{\begin{reviewerbox}\textit{#1}\end{reviewerbox}}
+\newcommand{\rc}[1]{\begin{reviewerbox}\itshape #1\end{reviewerbox}}
+
+% Extra vertical space before subsections
+\usepackage{titlesec}
+\titlespacing*{\subsection}{0pt}{24pt}{10pt}
 
 \begin{document}
 
@@ -47,16 +51,16 @@ in Preclinical Glioblastoma using Longitudinal MRI''\\[4pt]
 
 We appreciate the reviewers' careful reading of the manuscript. All major and minor comments have been addressed. Changes to the manuscript are indicated in red in the revised manuscript.
 
-\bigskip\hrule\bigskip
+\vspace{18pt}\hrule\vspace{18pt}
 
-%----------------------------------------------------------------------
+\vspace{6pt}%----------------------------------------------------------------------
 \section*{Reviewer 1}
 
 \textit{``This manuscript presents a well-conducted comparison between a radiomics-based machine-learning pipeline and a transfer-learning deep-learning model for predicting long-term treatment response from longitudinal T2-weighted MRI in a preclinical GL261 glioblastoma model. The topic is relevant and the analysis of temporal predictive behaviour and interpretability is a genuine strength.''}
 
 \bigskip
 
-%----------------------------------------------------------------------
+\vspace{6pt}%----------------------------------------------------------------------
 \subsection*{R1-1 \quad Effective sample size is $n=10$ animals, not 169 examinations}
 
 \rc{Although 169 MRI examinations are analysed, the core cured-vs-relapsing task is based on only 10 independent animals (5+5). The Grouped Leave-One-Out (GLOO) scheme appropriately prevents image-level leakage and should be retained, but the effective number of independent observations remains that of $\sim$10 subjects, and the reported metrics should be interpreted in that light rather than as if supported by 169 independent samples.}
@@ -65,7 +69,7 @@ The reviewer raises a valid point. The revised manuscript now explicitly states 
 
 \bigskip
 
-%----------------------------------------------------------------------
+\vspace{6pt}%----------------------------------------------------------------------
 \subsection*{R1-2 \quad Metrics to four decimal places; bootstrap CIs and ROC comparison test needed}
 
 \rc{Performance values reported to four decimal places (e.g., AUC 0.8511 vs.\ 0.7015) convey a level of precision that 10 subjects cannot support. All metrics in Table~1 should be accompanied by subject-level bootstrap confidence intervals, and the central comparison between the two pipelines should be supported by a formal test of the difference between the ROC curves (e.g., DeLong or a subject-level permutation test).}
@@ -95,7 +99,7 @@ A subject-level permutation test (10,000 permutations; $n=10$ animals) was also 
 
 \bigskip
 
-%----------------------------------------------------------------------
+\vspace{6pt}%----------------------------------------------------------------------
 \subsection*{R1-3 \quad Data leakage: feature selection before GLOO splits}
 
 \rc{It remains unclear whether all radiomic feature selection (correlation filtering, Mann–Whitney U test), normalisation, temporal feature engineering and hyperparameter optimisation were entirely nested within the training data of each outer GLOO fold. Any step performed outside the fold would carry a substantial risk of overfitting and would inflate the reported radiomics performance; please state unambiguously, for each step, whether it was fully nested within the training fold.}
@@ -130,7 +134,7 @@ The corrected AUC (0.773) is higher than the original (0.7015), indicating that 
 
 \bigskip
 
-%----------------------------------------------------------------------
+\vspace{6pt}%----------------------------------------------------------------------
 \subsection*{R1-4 \quad DL pipeline: validation set for early stopping and checkpoint selection}
 
 \rc{Under GLOO, with a single animal held out for testing, it is not clear which data were used as the validation set for early stopping and for selecting the best checkpoint. If model selection relied in any way on the held-out subject, the reported AUC would be optimistically biased; confirmation that the validation partition never included the test subject is needed.}
@@ -141,7 +145,7 @@ We confirm that \textbf{no early stopping or checkpoint selection} was applied. 
 
 \bigskip
 
-%----------------------------------------------------------------------
+\vspace{6pt}%----------------------------------------------------------------------
 \subsection*{R1-5 \quad Internal consistency: FE+XGB had higher AUC (0.8583) than FT (0.8511)}
 
 \rc{In Table~1 the frozen feature-extractor configuration (EfficientNet FE+XGB) attains a higher AUC (0.8583) than the fine-tuned model presented as the best overall (0.8511), yet the abstract and conclusions foreground the fine-tuned model and an AUC of ``0.85''. The rationale --- a more favourable sensitivity/specificity balance --- is reasonable, but it should be stated explicitly which configuration is the final proposed model and on what basis it is selected.}
@@ -156,7 +160,7 @@ This resolves the apparent inconsistency. The model selection rationale is state
 
 \bigskip
 
-%----------------------------------------------------------------------
+\vspace{6pt}%----------------------------------------------------------------------
 \subsection*{R1-6 \quad Feature trajectories illustrative; proof-of-concept framing; early prediction}
 
 \rc{The longitudinal differences in selected radiomic features are illustrated descriptively as group-level trajectories, without individual trajectories, uncertainty estimates, or repeated-measures statistical testing, and should therefore be described as illustrative rather than as established biomarkers; the interpretation of increasing Dependence Entropy as a distinctive signature of effective therapy is likewise speculative on five cured animals and should be framed cautiously. Given the single experimental model, the small number of animals, and the absence of independent validation, the study should primarily be presented as a proof-of-concept rather than as evidence approaching clinical applicability, and the early-prediction claim in particular warrants correspondingly cautious wording.}
@@ -185,16 +189,16 @@ EfficientNet FT      & 0.788 & 0.902 & 1.000 \\
 
 The revised text states: \textit{``Radiomics performance is near-chance in early treatment (AUC 0.582), whereas both DL configurations maintain substantially higher discrimination from the earliest time points (AUC 0.741--0.788). Claims of reliable early prediction for radiomics remain limited; for the DL models, early-window performance is encouraging but should be confirmed in larger cohorts.''}
 
-\bigskip\hrule\bigskip
+\vspace{18pt}\hrule\vspace{18pt}
 
-%----------------------------------------------------------------------
+\vspace{6pt}%----------------------------------------------------------------------
 \section*{Reviewer 2}
 
 \textit{``This manuscript evaluates radiomics-based machine learning and transfer learning-based DL for predicting treatment outcome (cure versus relapse) T2-weighted MRI in GL261 glioblastoma model... The manuscript addresses an appropriate scientific question and contains several positive methodological elements, particularly the use of GLOO CVs evaluation.''}
 
 \bigskip
 
-%----------------------------------------------------------------------
+\vspace{6pt}%----------------------------------------------------------------------
 \subsection*{R2-1 (Major) \quad Feature selection within training folds}
 
 \rc{Would you be able to clarify if the model development pipeline was performed within the training portion of each subject level cross-val fold? In the radiomics-based pipeline, the manuscript did not sufficiently specify if their statistical analysis and feature selection steps (correlation filtering, Mann-Whitney U test step, temporal feature engineering) were refitted using only the training animals within GLOO folds. Please explicitly clarify this, especially for the feature selection step. If any of these preprocessing was performed before GLOO CVs splits, I recommend that the analysis be repeated using a fully nested subject-level procedure.}
@@ -203,7 +207,7 @@ Addressed identically to R1-3. The corrected pipeline runs all feature selection
 
 \bigskip
 
-%----------------------------------------------------------------------
+\vspace{6pt}%----------------------------------------------------------------------
 \subsection*{R2-2 (Major) \quad Exam-level vs.\ animal-level metrics; wording correction}
 
 \rc{The author should explicitly clarify if metrics in table 1 were calculated at the level of individual MRI exams or at animal level. The manuscript stated that ``EfficientNet correctly identified 90.9\% of cured animals compared with 51.5\% for XGBoost'', but these numbers does not look like they represent subject-level sensitivity. Please explicitly define the unit used for every reported performance metric. If the current metrics are examination-level, the wording should be corrected accordingly. I strongly recommend report subject-level performance because that is a more interesting than exam-level performance.}
@@ -232,7 +236,7 @@ All five relapsing animals were correctly identified by all three models (Specif
 
 \bigskip
 
-%----------------------------------------------------------------------
+\vspace{6pt}%----------------------------------------------------------------------
 \subsection*{R2-3 (Major) \quad Early prediction performance overstated}
 
 \rc{The manuscript overstates the evidence for early prediction performance without actually showing it. The temporal analysis shows that errors vary with study day, but the main AUC is calculated across examinations from the full follow-up period. Therefore, the reported AUC does not establish predictive performance specifically during early treatment. The authors should either report performance within clearly defined early treatment windows using the existing data or revise the conclusions to avoid claiming good early prediction performance.}
@@ -241,7 +245,7 @@ Addressed identically to R1-6(d). A stratified temporal analysis has been added 
 
 \bigskip
 
-%----------------------------------------------------------------------
+\vspace{6pt}%----------------------------------------------------------------------
 \subsection*{R2-4 (Major) \quad Conclusions overstated}
 
 \rc{Several conclusions should be rewritten to match the reported results more precisely. Radiomics showed higher Specificity and PPV, so DL model did not outperformed radiomics approach across all metrics as stated in the abstract. It should be ``most'' or the majority of. You chose AUC to be the main metric, but EfficientNet FE + XGB has higher AUC than FT. I do agree that the FT model is overall giving more balanced classification performance.}
@@ -252,7 +256,7 @@ Addressed identically to R1-6(d). A stratified temporal analysis has been added 
 
 \bigskip
 
-%----------------------------------------------------------------------
+\vspace{6pt}%----------------------------------------------------------------------
 \subsection*{R2-5 (Major) \quad Missing Supplementary Tables S3/S4}
 
 \rc{Some important tables are missing? The authors talked about table S3/S4 for hyperparameters search but I didn't see it in the supplementary files.}
@@ -265,7 +269,7 @@ We apologise for the omission. Tables S3 and S4 are confirmed to exist in the su
 
 \bigskip
 
-%----------------------------------------------------------------------
+\vspace{6pt}%----------------------------------------------------------------------
 \subsection*{R2-Minor-1 \quad Bootstrap confidence intervals}
 
 \rc{Please provide measures of uncertainty (e.g., 95\% confidence intervals) for the performance metrics. Uncertainty estimation should account for clustering of examinations within animals.}
@@ -274,7 +278,7 @@ Bootstrap 95\% CIs (10,000 resamples, examination-level) are now reported for al
 
 \bigskip
 
-%----------------------------------------------------------------------
+\vspace{6pt}%----------------------------------------------------------------------
 \subsection*{R2-Minor-2 \quad DL does not model longitudinal sequences}
 
 \rc{The paper acknowledges the small cohort. I recommend explicitly acknowledge that the DL did not model longitudinal sequences. The current strategy therefore uses longitudinally acquired data but is not itself a temporal sequence model.}
@@ -283,16 +287,16 @@ The following statement has been added to the Introduction (study design paragra
 
 \bigskip
 
-%----------------------------------------------------------------------
+\vspace{6pt}%----------------------------------------------------------------------
 \subsection*{R2-Minor-3 \quad Low PPV}
 
 \rc{PPV is pretty low across models. This should be acknowledged because it's an important point clinically still.}
 
 The following discussion has been added: \textit{``The PPV of the radiomics model (0.450) is low, reflecting the class imbalance and the small cohort; in a realistic clinical setting where long-term cures are rarer than in this controlled preclinical model, PPV would be expected to be substantially lower, and these results should be interpreted as a proof-of-concept demonstration rather than as evidence of clinical deployability. The primary utility of these models in a preclinical setting is as a decision-support tool where high sensitivity (minimising missed cures) is the priority.''}
 
-\bigskip\hrule\bigskip
+\vspace{18pt}\hrule\vspace{18pt}
 
-%----------------------------------------------------------------------
+\vspace{6pt}%----------------------------------------------------------------------
 \section*{Summary of Changes}
 
 \begin{table}[h]
