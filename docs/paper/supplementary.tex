@@ -24,7 +24,7 @@
 \affil[*]{javier.gonzalez.bejar@estudiantat.upc.edu}
 
 \begin{abstract}
-This document provides supplementary methods, tables, and figures supporting the main manuscript. Supplementary items are referenced in the main text as Supplementary Methods, Supplementary Tables S1--S4, and Supplementary Figures S1--S5.
+This document provides supplementary methods, tables, and figures supporting the main manuscript. Supplementary items are referenced in the main text as Supplementary Methods, Supplementary Tables S1--S5, and Supplementary Figures S1--S5.
 \end{abstract}
 
 \begin{document}
@@ -328,6 +328,40 @@ Validation & Grouped Leave-One-Out (GLOO) \\
 \caption{Temporal evolution of additional selected radiomic features across cured and relapsing groups, complementing the Elongation and Dependence Entropy trajectories shown in the main text.}
 \label{fig:sfig_extra_features}
 \end{figure}
+
+\section*{Supplementary Table S5 --- Animal-Level Majority-Vote Results}
+
+Table~\ref{tab:animal_level} reports subject-level predictions obtained by majority vote across all MRI examinations for each treated animal. For each animal, the predicted class is the most frequent exam-level prediction; the mean predicted probability is averaged across all examinations of that animal. All three pipelines correctly identified all five relapsing animals (Specificity~=~1.00). The two cured animals consistently misclassified across all pipelines (C1285 and C1382) suggest that their imaging signatures overlap more with the relapsing group throughout the follow-up.
+
+\begin{table}[H]
+\centering
+\caption{Animal-level classification results (majority vote across examinations) for all three pipelines. True outcome: 0 = relapsing, 1 = cured. Predicted: 0 = relapsing, 1 = cured. Mean prob. = mean predicted probability of cure averaged across all examinations of that animal. Correct predictions are marked with \checkmark; errors with $\times$.}
+\label{tab:animal_level}
+\begin{tabular}{lcccccccc}
+\hline
+ & & & \multicolumn{2}{c}{Radiomics} & \multicolumn{2}{c}{Eff.\ FE+XGB} & \multicolumn{2}{c}{Eff.\ FT} \\
+\cmidrule(lr){4-5}\cmidrule(lr){6-7}\cmidrule(lr){8-9}
+Animal & Outcome & N exams & Pred & Mean prob. & Pred & Mean prob. & Pred & Mean prob. \\
+\hline
+C1263 & Relapsing & 56 & 0\ \checkmark & 0.419 & 0\ \checkmark & 0.390 & 0\ \checkmark & 0.401 \\
+C1264 & Relapsing & 43 & 0\ \checkmark & 0.367 & 0\ \checkmark & 0.316 & 0\ \checkmark & 0.413 \\
+C1270 & Relapsing & 43 & 0\ \checkmark & 0.295 & 0\ \checkmark & 0.315 & 0\ \checkmark & 0.282 \\
+C1380 & Relapsing & 47 & 0\ \checkmark & 0.306 & 0\ \checkmark & 0.295 & 0\ \checkmark & 0.147 \\
+C1383 & Relapsing & 43 & 0\ \checkmark & 0.400 & 0\ \checkmark & 0.404 & 0\ \checkmark & 0.483 \\
+\hline
+C1276 & Cured & 21 & 1\ \checkmark & 0.534 & 1\ \checkmark & 0.604 & 1\ \checkmark & 0.904 \\
+C1281 & Cured & 12 & 1\ \checkmark & 0.638 & 1\ \checkmark & 0.594 & 1\ \checkmark & 0.979 \\
+C1284 & Cured &  8 & 1\ \checkmark & 0.657 & 1\ \checkmark & 0.624 & 1\ \checkmark & 0.949 \\
+C1285 & Cured & 17 & 0\ $\times$ & 0.417 & 0\ $\times$ & 0.476 & 1\ \checkmark & 0.632 \\
+C1382 & Cured &  8 & 0\ $\times$ & 0.415 & 0\ $\times$ & 0.347 & 0\ $\times$ & 0.399 \\
+\hline
+\multicolumn{3}{l}{AUC (animal-level)} & \multicolumn{2}{c}{0.92} & \multicolumn{2}{c}{0.92} & \multicolumn{2}{c}{0.88} \\
+\multicolumn{3}{l}{Sensitivity} & \multicolumn{2}{c}{0.60} & \multicolumn{2}{c}{0.60} & \multicolumn{2}{c}{0.80} \\
+\multicolumn{3}{l}{Specificity} & \multicolumn{2}{c}{1.00} & \multicolumn{2}{c}{1.00} & \multicolumn{2}{c}{1.00} \\
+\multicolumn{3}{l}{Accuracy} & \multicolumn{2}{c}{0.80} & \multicolumn{2}{c}{0.80} & \multicolumn{2}{c}{0.90} \\
+\hline
+\end{tabular}
+\end{table}
 
 \bibliography{refs}
 
