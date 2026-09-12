@@ -48,9 +48,11 @@ OUTPUTS_GLOO = os.path.join(BASE_OUTPUT_DIR, "radiomics", "gloo")
 OUTPUTS_ORIGINAL_GLOO = os.path.join(OUTPUTS_GLOO, "original_experiments")
 OUTPUT_EXP_09_LEAKY   = os.path.join(OUTPUTS_ORIGINAL_GLOO, "09_final_pipeline")
 
-# Paper revision (corrected, no leakage) — notebooks/radiomics/paper_revision/
+# Paper revision (corrected, no leakage) — notebooks/paper_revision/
 OUTPUTS_REVISION_GLOO = os.path.join(OUTPUTS_GLOO, "paper_revision")
 OUTPUT_EXP_09         = os.path.join(OUTPUTS_REVISION_GLOO, "09_final_pipeline_PAPER")
+OUTPUT_EXP_DL_FE      = os.path.join(OUTPUTS_REVISION_GLOO, "01_efficientnet_FE_XGB")
+OUTPUT_EXP_DL_FT      = os.path.join(OUTPUTS_REVISION_GLOO, "02_efficientnet_FT")
 
 # Deep learning (Grad-CAM figures stay in original location)
 OUTPUTS_GRADCAM       = os.path.join(BASE_OUTPUT_DIR, "deep_learning", "gradcam")

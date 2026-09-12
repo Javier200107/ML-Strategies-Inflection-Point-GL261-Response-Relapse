@@ -1,7 +1,11 @@
 .vscode
 /old
 /output
+/outputs
 __pycache__
 *.pkl
 *.dcm
 logs
+.venv/
+*.tfrecord
+input/
