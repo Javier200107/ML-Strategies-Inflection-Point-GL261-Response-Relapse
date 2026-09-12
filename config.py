@@ -31,34 +31,42 @@ RADIOMICS_CONFIG_FILE = os.path.join(BASE_INPUT_DIR, "pyradiomics_settings.yaml"
 # ---------------------------------------------------------------------------
 # Output paths  (organised under outputs/)
 #
-#   outputs/radiomics/gloo/
-#   ├── original_experiments/   ← historical pipelines (notebooks 01–09, with data leakage)
-#   │   ├── 01_baseline_all_features/
-#   │   ├── ...
-#   │   └── 09_final_pipeline/  ← original leaky submission results
-#   └── paper_revision/         ← corrected pipelines (notebooks/radiomics/paper_revision/)
-#       └── 09_final_pipeline_PAPER/  ← A1-A4 corrected results
+#   outputs/
+#   ├── paper_revision/              ← VERSIONED in git (syncs between PCs)
+#   │   ├── radiomics/
+#   │   │   └── 09_final_pipeline/  ← corrected radiomics (A1-A4)
+#   │   └── deep_learning/
+#   │       ├── 01_efficientnet_FE_XGB/
+#   │       └── 02_efficientnet_FT/
+#   └── radiomics/gloo/             ← LOCAL only (historical experiments, untracked)
+#       └── original_experiments/
 # ---------------------------------------------------------------------------
 BASE_OUTPUT_DIR = "outputs"
 
-# Radiomics GLOO — base
-OUTPUTS_GLOO = os.path.join(BASE_OUTPUT_DIR, "radiomics", "gloo")
+# ---------------------------------------------------------------------------
+# Paper revision outputs (versioned, synced via git)
+# ---------------------------------------------------------------------------
+OUTPUTS_REVISION         = os.path.join(BASE_OUTPUT_DIR, "paper_revision")
 
-# Original experiments (historical, with data leakage) — notebooks 01–09
-OUTPUTS_ORIGINAL_GLOO = os.path.join(OUTPUTS_GLOO, "original_experiments")
-OUTPUT_EXP_09_LEAKY   = os.path.join(OUTPUTS_ORIGINAL_GLOO, "09_final_pipeline")
+# Radiomics corrected pipeline
+OUTPUTS_REVISION_RAD     = os.path.join(OUTPUTS_REVISION, "radiomics")
+OUTPUT_EXP_09            = os.path.join(OUTPUTS_REVISION_RAD, "09_final_pipeline")
 
-# Paper revision (corrected, no leakage) — notebooks/paper_revision/
-OUTPUTS_REVISION_GLOO = os.path.join(OUTPUTS_GLOO, "paper_revision")
-OUTPUT_EXP_09         = os.path.join(OUTPUTS_REVISION_GLOO, "09_final_pipeline_PAPER")
-OUTPUT_EXP_DL_FE      = os.path.join(OUTPUTS_REVISION_GLOO, "01_efficientnet_FE_XGB")
-OUTPUT_EXP_DL_FT      = os.path.join(OUTPUTS_REVISION_GLOO, "02_efficientnet_FT")
+# Deep learning pipelines
+OUTPUTS_REVISION_DL      = os.path.join(OUTPUTS_REVISION, "deep_learning")
+OUTPUT_EXP_DL_FE         = os.path.join(OUTPUTS_REVISION_DL, "01_efficientnet_FE_XGB")
+OUTPUT_EXP_DL_FT         = os.path.join(OUTPUTS_REVISION_DL, "02_efficientnet_FT")
 
-# Deep learning (Grad-CAM figures stay in original location)
-OUTPUTS_GRADCAM       = os.path.join(BASE_OUTPUT_DIR, "deep_learning", "gradcam")
+# ---------------------------------------------------------------------------
+# Historical / local-only outputs (untracked, not synced via git)
+# ---------------------------------------------------------------------------
+OUTPUTS_GLOO             = os.path.join(BASE_OUTPUT_DIR, "radiomics", "gloo")
+OUTPUTS_ORIGINAL_GLOO    = os.path.join(OUTPUTS_GLOO, "original_experiments")
+OUTPUT_EXP_09_LEAKY      = os.path.join(OUTPUTS_ORIGINAL_GLOO, "09_final_pipeline")
 
-# Figures
-OUTPUTS_FIGURES       = os.path.join(BASE_OUTPUT_DIR, "figures")
+# Grad-CAM figures (original location, local)
+OUTPUTS_GRADCAM          = os.path.join(BASE_OUTPUT_DIR, "deep_learning", "gradcam")
+OUTPUTS_FIGURES          = os.path.join(BASE_OUTPUT_DIR, "figures")
 
 RADIOMICS_FEATURES_NO_FILTERS = {
     'group_name', 'm_id', 'day_of_study',
