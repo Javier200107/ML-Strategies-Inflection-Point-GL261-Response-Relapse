@@ -1,0 +1,16 @@
+feature,importance
+rolling_mean_3_square_glrlm_ShortRunHighGrayLevelEmphasis,0.031992413
+shape2D_Elongation,0.02801
+rolling_mean_3_exponential_gldm_DependenceEntropy,0.026597902
+rolling_mean_3_log-sigma-2-0-mm-3D_glrlm_HighGrayLevelRunEmphasis,0.025812645
+square_glrlm_ShortRunHighGrayLevelEmphasis_lag_1,0.020878427
+square_glrlm_ShortRunHighGrayLevelEmphasis,0.019264296
+shape2D_Elongation_lag_1,0.018513989
+rolling_mean_3_logarithm_glszm_GrayLevelVariance,0.016512275
+rolling_mean_3_log-sigma-1-0-mm-3D_gldm_DependenceEntropy,0.015851978
+rolling_mean_3_logarithm_glszm_HighGrayLevelZoneEmphasis,0.0154629145
+rolling_mean_3_glrlm_LongRunHighGrayLevelEmphasis,0.013788998
+rolling_mean_3_log-sigma-2-0-mm-3D_glcm_JointEntropy,0.012611249
+rolling_mean_3_wavelet-LL_glrlm_RunEntropy,0.012302819
+rolling_mean_3_wavelet-HL_gldm_LargeDependenceHighGrayLevelEmphasis,0.012272097
+log-sigma-2-0-mm-3D_glcm_JointEntropy,0.011753768

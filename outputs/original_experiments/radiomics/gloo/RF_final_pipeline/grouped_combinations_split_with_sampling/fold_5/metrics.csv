@@ -1,0 +1,3 @@
+accuracy,f1_macro,f1_micro,f1_weighted,precision,recall,roc_auc,true_positives,false_negatives,false_positives,true_negatives,days_of_study_in_train,days_of_study_in_test,percentage_of_data_in_train,percentage_of_data_in_test
+0.7142857142857143,0.4166666666666667,0.7142857142857143,0.8333333333333334,0.0,1.0,1,0,0,16,40,"[11 15 17 19 23 25 27 29 31 33 35 37 39 41 45 10 13 21  9 18 20 22 43 47
+ 49]",[11 14 17 19 21 23 25 27 29 31 33 35 37 39 41 43 45 47],81.20805369127517,18.79194630872483
