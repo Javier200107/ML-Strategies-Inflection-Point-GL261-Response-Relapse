@@ -1,7 +1,8 @@
 .vscode
 /old
 /output
-/outputs
+/outputs/*
+!/outputs/paper_revision
 __pycache__
 *.pkl
 *.dcm
