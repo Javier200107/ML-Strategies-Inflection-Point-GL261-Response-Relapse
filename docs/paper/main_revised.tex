@@ -91,7 +91,7 @@ This study aims to systematically compare these two approaches for the early pre
 
 By doing so, we seek to determine which of the studied strategies offers a more robust and scalable solution for developing non-invasive tools to improve glioblastoma therapy assessment.
 
-In this context, the term \textit{longitudinal} refers to the acquisition of multiple MRI examinations from the same animal at different time points throughout tumor evolution and treatment, rather than to a single cross-sectional acquisition. This design provides information about the temporal dynamics of tumor response. It is important to note, however, that although the data are longitudinal, they were not modeled as a multivariate time series in the sense of jointly classifying complete temporal sequences \cite{Prinzi2024}. Instead, each imaging time point was treated as an individual observation, and temporal information was incorporated in the radiomics pipeline through engineered temporal descriptors (see Methods), while preserving the subject-level structure of the data during validation.
+In this context, the term \textit{longitudinal} refers to the acquisition of multiple MRI examinations from the same animal at different time points throughout tumor evolution and treatment, rather than to a single cross-sectional acquisition. This design provides information about the temporal dynamics of tumor response. It is important to note, however, that although the data are longitudinal, they were not modeled as a multivariate time series in the sense of jointly classifying complete temporal sequences \cite{Prinzi2024}. Instead, each imaging time point was treated as an individual observation, and temporal context was captured through the multi-time-point structure of the GLOO cross-validation scheme, while preserving the subject-level structure of the data during validation.
 
 \subsection*{Related Work}
 ML and DL approaches have become increasingly important in neuro-oncology, particularly for the analysis of MRI data \cite{Pitarch24}. Traditional radiomics pipelines transform medical images into quantitative descriptors of tumor morphology, intensity, and texture, enabling predictive modeling using machine learning algorithms \cite{kumar2012radiomics,pyradiomics}. Recent evidence continues to support the prognostic value of MRI-derived radiomic biomarkers in glioblastoma, although challenges related to reproducibility, feature stability, and external validation remain important barriers to clinical translation \cite{PMID:38668068}. Despite the rapid adoption of DL methods, radiomics remains attractive because handcrafted features offer greater interpretability and can provide biologically meaningful descriptors of tumor morphology and heterogeneity. Consequently, direct comparisons between radiomics-based and DL-based frameworks remain important for understanding the trade-off between predictive performance and model interpretability.
@@ -169,7 +169,7 @@ The baseline configuration, trained on the full feature set, achieved high speci
 
 \textcolor{red}{At the animal level, majority-vote aggregation across all examinations per subject produced AUC values of 0.92, 0.92 and 0.88 for radiomics, EfficientNet FE+XGB and EfficientNet FT, respectively, with specificity of 1.00 across all three pipelines (no relapsing animal misclassified). EfficientNet FT correctly identified four of five cured animals, compared with three of five for the other two configurations. The two cured animals consistently misclassified across all pipelines (C1285 and C1382) showed mean predicted cure probabilities below 0.50 throughout the follow-up, suggesting that their imaging signatures overlap substantially with those of relapsing animals. Detailed per-animal predictions for all three models are provided in Supplementary Table~S5.}
 
-Feature importance analysis consistently identified a small subset of descriptors as dominant contributors to classification decisions, including Elongation, Dependence Entropy, Run Entropy, Short Run High Gray Level Emphasis, and High Gray Level Run Emphasis. These features collectively describe tumor morphology, structural organization, and texture heterogeneity.
+Feature importance analysis consistently identified a small subset of descriptors as dominant contributors to classification decisions across folds. The top-ranked features were Elongation, Dependence Non-Uniformity Normalized, Long Run High Gray Level Emphasis, and Run Entropy. These features collectively describe tumor morphology (Elongation, Major Axis Length), spatial heterogeneity of gray-level dependencies (Dependence Non-Uniformity Normalized), intensity-run texture patterns (Long Run High Gray Level Emphasis), and complexity of gray-level sequences (Run Entropy). The temporal evolution of Elongation and Dependence Entropy — a closely related GLDM descriptor reflecting spatial complexity — across the follow-up is illustrated in Figures~\ref{fig:elongation} and~\ref{fig:dependenceentropy} as representative examples of features that differentiate the two groups.
 
 Longitudinal analysis revealed distinct temporal trajectories between cured and relapsing tumors. In cured animals, Elongation (Figure \ref{fig:elongation}) progressively decreased following treatment administration, whereas relapsing tumors maintained more irregular growth patterns throughout follow-up.
 
@@ -220,7 +220,7 @@ EfficientNet FT      & 0.788 & 0.902 & 1.000 \\
 \label{tab:temporal}
 \end{table}
 
-\textcolor{red}{These results indicate that radiomics performance is near-chance in early treatment (AUC~0.58), whereas both DL configurations maintain substantially higher discrimination from the earliest time points (AUC~0.74--0.79). Claims of reliable early prediction for the radiomics model should be interpreted cautiously; the DL models, particularly EfficientNet FT (early AUC 0.790), show a more consistent temporal profile. All three models approach or reach excellent discrimination at late time points (AUC~0.96--1.00).}
+\textcolor{red}{These results indicate that radiomics performance is near-chance in early treatment (AUC~0.58), whereas both DL configurations maintain substantially higher discrimination from the earliest time points (AUC~0.74--0.79). Claims of reliable early prediction for the radiomics model should be interpreted cautiously; the DL models, particularly EfficientNet FT (early AUC 0.788), show a more consistent temporal profile. All three models approach or reach excellent discrimination at late time points (AUC~0.96--1.00).}
 
 \textcolor{red}{For the radiomics pipeline, misclassifications were concentrated in the earliest study days (approximately days 9--21), especially for cured animals, whose imaging signatures became distinctive only as therapeutic effects accumulated.} The per-day distribution of classification accuracy and misclassified examinations is reported in Supplementary Figure S3.
 
@@ -258,7 +258,7 @@ Analysis of misclassified examinations revealed a different pattern: model atten
 
 
 \section{Discussion}
-This study investigated whether longitudinal T2-weighted MRI contains imaging signatures capable of predicting long-term therapeutic outcome in a preclinical GL261 glioblastoma model, \textcolor{red}{within the framework of a proof-of-concept study based on a small but well-characterized cohort of 10 treated animals.} Two complementary strategies were evaluated: a radiomics-based ML pipeline using handcrafted quantitative descriptors and an image-based deep learning framework built upon transfer learning. Although both approaches demonstrated predictive capability, the DL model achieved superior performance across \textcolor{red}{most} evaluation metrics, suggesting that image-derived representations capture relevant information that is not fully represented by conventional radiomic features. \textcolor{red}{The effective number of independent observations in this study is 10 subjects, and all reported metrics should be interpreted in this light; the wide bootstrap confidence intervals (e.g., AUC 95\% CI 0.703--0.832 for radiomics) reflect this inherent statistical limitation.}
+This study investigated whether longitudinal T2-weighted MRI contains imaging signatures capable of predicting long-term therapeutic outcome in a preclinical GL261 glioblastoma model, \textcolor{red}{within the framework of a proof-of-concept study based on a small but well-characterized cohort of 10 treated animals.} Two complementary strategies were evaluated: a radiomics-based ML pipeline using handcrafted quantitative descriptors and an image-based deep learning framework built upon transfer learning. Although both approaches demonstrated predictive capability, the DL model achieved superior performance across \textcolor{red}{most} evaluation metrics, suggesting that image-derived representations capture relevant information that is not fully represented by conventional radiomic features. \textcolor{red}{The effective number of independent observations in this study is 10 subjects, and all reported metrics should be interpreted in this light; the wide bootstrap confidence intervals (e.g., AUC 95\% CI 0.707--0.835 for radiomics) reflect this inherent statistical limitation.}
 
 The radiomics approach successfully identified several interpretable imaging biomarkers whose temporal behavior differed between cured and relapsing tumors \textcolor{red}{in the studied cohort}. Elongation reflects the geometric anisotropy of the lesion, and its progressive reduction in cured animals is consistent with the development of a more compact and structurally homogeneous tumor following successful therapy; in contrast, the persistently irregular morphology observed in relapsing tumors may indicate ongoing infiltrative growth. Texture-based descriptors such as Run Entropy and Dependence Entropy quantify the complexity and heterogeneity of spatial intensity distributions, where elevated values generally reflect greater local variability and structural disorder. The increase in Dependence Entropy observed in cured animals during later treatment stages may reflect tissue-remodeling processes, inflammatory responses, or treatment-induced structural reorganization occurring after tumor regression. This trend---increasing entropy associated with a favorable outcome---is an illustrative descriptive observation based on five cured animals and should be regarded as hypothesis-generating rather than as an established biomarker; independent confirmation in larger cohorts would be required before any translational conclusion can be drawn. These observations are consistent with previous radiomics studies demonstrating that texture heterogeneity carries prognostic information beyond conventional anatomical measurements, and they suggest that therapeutic response is accompanied by progressive microstructural changes detectable before substantial anatomical differences become apparent.
 
@@ -280,7 +280,7 @@ Finally, only T2-weighted MRI was analyzed. The incorporation of additional imag
 
 \textcolor{red}{We have demonstrated, as a proof-of-concept in a well-characterized preclinical cohort of 10 treated animals, that both radiomics and DL have the potential to become viable strategies for predicting therapy outcomes in preclinical glioblastoma from longitudinal T2-weighted MRI. A DL approach based on fine-tuning a pre-trained EfficientNetB0 outperforms the classical radiomics pipeline across most evaluation metrics, achieving the highest AUC (0.868, 95\% CI 0.812--0.918), sensitivity (0.818 exam-level; 0.800 animal-level) and NPV (0.936). The difference in AUC over radiomics is statistically significant (DeLong $Z=-4.68$, $p<0.001$). The fine-tuned model was selected as the recommended configuration over the frozen feature extractor (AUC 0.801) because it provides substantially higher sensitivity (0.818 vs.\ 0.606) and NPV (0.936 vs.\ 0.884), better supporting the primary clinical goal of identifying cured animals. The DL model's discriminative ability, combined with interpretable Grad-CAM attention maps, makes it a promising candidate for non-invasive biomarker development. Temporal analysis reveals that predictive performance improves substantially over the follow-up period, with the most reliable signal available after approximately three weeks; early-window predictions should therefore be treated with appropriate caution. This work provides a solid foundation, fostering future research aimed at creating more reliable and personalized methods for monitoring glioblastoma treatment, once confirmed in larger cohorts representing biological variability.}
 
-Future work should focus on external validation, multimodal integration, and longitudinal modeling. In particular, combining conventional MRI with spectroscopic, metabolic, molecular, or histopathological information may provide a more comprehensive representation of tumor evolution. Furthermore, temporal DL architectures capable of explicitly modeling sequential imaging examinations could better exploit the longitudinal nature of therapeutic response. Such developments may ultimately \textcolor{red}{pave the way to the future development of} clinically deployable systems for early treatment adaptation and personalized glioblastoma management.
+Future work should focus on external validation, multimodal integration, and longitudinal modeling. In particular, combining conventional MRI with spectroscopic, metabolic, molecular, or histopathological information may provide a more comprehensive representation of tumor evolution. Furthermore, temporal DL architectures capable of explicitly modeling sequential imaging examinations could better exploit the longitudinal nature of therapeutic response. Such developments may ultimately pave the way for clinically deployable systems for early treatment adaptation and personalized glioblastoma management.
 
 \section{Materials and Methods}
 
@@ -303,9 +303,8 @@ An overview of the two analytical pipelines evaluated in this study is presented
 \node[pre, below=6mm of input] (pre) {\textbf{Shared preprocessing}\\ intensity normalization, resampling to isotropic resolution, tumor cropping and padding};
 
 \node[rad, below=22mm of pre, xshift=-34mm] (r1) {Radiomic feature extraction\\ (PyRadiomics, 1{,}218 features)};
-\node[rad, below=5mm of r1] (r2) {Feature selection\\ variance, correlation, Mann--Whitney $U$};
-\node[rad, below=5mm of r2] (r3) {Temporal feature engineering\\ lags, rolling statistics, slopes};
-\node[rad, below=5mm of r3] (r4) {XGBoost classifier};
+\node[rad, below=5mm of r1] (r2) {Feature selection (within fold)\\ variance, Spearman, Mann--Whitney $U$,\\ heuristic (original features only)};
+\node[rad, below=5mm of r2] (r4) {XGBoost classifier};
 
 \node[dnn, below=22mm of pre, xshift=34mm] (d1) {Image preparation\\ and data augmentation};
 \node[dnn, below=5mm of d1] (d2) {EfficientNetB0 backbone\\ pre-trained on ImageNet};
@@ -323,8 +322,7 @@ An overview of the two analytical pipelines evaluated in this study is presented
 \draw[ar] (rt) -- (r1);
 \draw[ar] (dt) -- (d1);
 \draw[ar] (r1) -- (r2);
-\draw[ar] (r2) -- (r3);
-\draw[ar] (r3) -- (r4);
+\draw[ar] (r2) -- (r4);
 \draw[ar] (d1) -- (d2);
 \draw[ar] (d2) -- (d3);
 \draw[ar] (d3) -- (d4);
@@ -442,7 +440,7 @@ Total & 18 & 169 & -- \\
 
 \subsection{Study Design and Longitudinal Data Handling}
 
-Although the dataset is longitudinal, complete temporal sequences were not modeled jointly as a multivariate time series \cite{Prinzi2024}. Instead, each imaging time point was treated as an individual labeled observation. Temporal information was incorporated in two complementary ways: (i) in the radiomics pipeline, through engineered temporal descriptors computed across consecutive examinations of the same animal (see below); and (ii) in the evaluation, through a subject-aware cross-validation scheme and a temporal analysis of predictive performance. This design reflects the heterogeneous and irregular sampling of the cohort, in which the number and timing of examinations vary substantially across subjects.
+Although the dataset is longitudinal, complete temporal sequences were not modeled jointly as a multivariate time series \cite{Prinzi2024}. Instead, each imaging time point was treated as an individual labeled observation. Temporal context is preserved through the subject-aware cross-validation scheme (GLOO), which ensures that all examinations from a given animal are withheld together during evaluation, and through a post-hoc temporal analysis of predictive performance stratified by day of study. This design reflects the heterogeneous and irregular sampling of the cohort, in which the number and timing of examinations vary substantially across subjects.
 
 \subsection{Radiomics-Based Pipeline}
 
@@ -459,10 +457,6 @@ Radiomic features were extracted using the PyRadiomics framework from manually s
 \subsubsection{Feature Selection and Dimensionality Reduction}
 
 \textcolor{red}{Given the extremely high dimensionality of the radiomic feature space relative to the number of available subjects, a rigorous multi-stage feature selection strategy was implemented entirely within the training partition of each GLOO fold, so that no information from the held-out test animal was used at any selection step. First, missing values were imputed using mean-value substitution. Then, features exhibiting near-zero variance (variance $<0.01$) were removed. Redundancy was then reduced through correlation filtering using Spearman rank correlation coefficients computed on training data only: when two features exhibited a correlation magnitude greater than 0.95, one of them was discarded. Subsequently, statistical filtering was performed using the Mann-Whitney U test on training labels only, retaining features with $p < 0.05$; this non-parametric test was selected because most radiomic variables deviated substantially from normality. Finally, a heuristic filter was applied to retain only features derived from the original (unfiltered) MRI images, excluding those computed from transformed representations (wavelets, Laplacian-of-Gaussian, and intensity transformations), to reduce filter-induced feature redundancy. The resulting feature subset was then applied to the test partition, and all subsequent steps (z-score normalization via a StandardScaler, SMOTE oversampling, and XGBoost training) were fitted exclusively on training data within each fold.}
-
-\subsubsection{Temporal Feature Engineering}
-
-Because tumor evolution is inherently dynamic, static radiomic measurements may fail to capture biologically meaningful treatment trajectories. To incorporate longitudinal information into the predictive framework, temporal descriptors were generated from the most relevant radiomic features. For each selected feature, lag-based variables were computed to characterize temporal evolution across consecutive imaging sessions of the same animal, including first-order temporal differences, rolling means, rolling standard deviations, local temporal slopes, and relative percentage changes. Such descriptors capture not only the current tumor phenotype but also the direction and rate of change of imaging biomarkers throughout treatment. Importantly, this strategy encodes temporal context without treating the data as a jointly modeled multivariate time series.
 
 \subsubsection{Classification Using XGBoost}
 
@@ -517,9 +511,9 @@ The dataset analyzed during the current study was sourced from previously publis
 The authors thank the joint preclinical MRI facility of the Universitat Autònoma de Barcelona and the Centro de Investigación Biomédica en Red-Bioingeniería, Biomateriales y Nanomedicina (CIBER-BBN), where all MRI experiments were carried out, as part of Unit 25 of NANBIOSIS (Cerdanyola del Vallès, Spain).
 
 \section*{Author contributions}
-J.G.: \textcolor{red}{conceptualization,} methodology, software, formal analysis, investigation, data curation, visualization, and writing of the original draft.\newline
-A.P.C.: conceptualization, data acquisition, supervision, funding acquisition, and manuscript review and editing.\newline
-A.V.: conceptualization, methodology, supervision, funding acquisition, and manuscript review and editing.
+J.G.: conceptualization, methodology, software, formal analysis, investigation, data curation, visualization, and writing of the original draft.\newline
+A.P.C.: conceptualization, data acquisition, supervision, funding acquisition, manuscript review and editing.\newline
+A.V.: conceptualization, methodology, supervision, funding acquisition, manuscript review and editing.
 
 \section*{Funding}
 This work was funded by MICIU/AEI/10.13039/501100011033/ (grants PID2023-147750NB-I00 to A.P.C. and PID2022-143299OB-I00 to A.V.), Generalitat de Catalunya (2021 SGR 0135), and Instituto de Salud Carlos III (CIBER-BBN group CB06-01-0010).
@@ -528,7 +522,7 @@ This work was funded by MICIU/AEI/10.13039/501100011033/ (grants PID2023-147750N
 The authors declare no competing interests.
 
 \section*{Additional information}
-\textbf{Supplementary information} accompanies this manuscript, comprising Supplementary Methods, Supplementary Tables S1--S4, and Supplementary Figures S1--S5.
+\textbf{Supplementary information} accompanies this manuscript, comprising Supplementary Methods, Supplementary Tables S1--S5, and Supplementary Figures S1--S5.
 
 % --- BIBLIOGRAFÍA ---
 \bibliographystyle{unsrt}
