@@ -69,7 +69,7 @@
 
 % --- ABSTRACT ---
 \begin{abstract}
-Glioblastoma (GB) is the most aggressive primary brain tumor, characterized by a poor prognosis, limited response to therapy, and high rates of recurrence. Early therapeutic response assessment is challenging due to phenomena such as pseudoresponse and pseudoprogression. This study explores the potential of advanced machine learning (ML) strategies to predict long-term therapy outcomes using longitudinal T2-weighted Magnetic Resonance Imaging (MRI) data from a preclinical GL261 glioblastoma mouse model, acquired prior and during treatment. We compare two distinct approaches: a classical pipeline based on radiomic features coupled with an XGBoost classifier, and a deep learning (DL) pipeline using a fine-tuned EfficientNetB0 model. Our results demonstrate that while the radiomics approach identifies interpretable imaging biomarkers and achieves good predictive performance \textcolor{red}{(AUC $\approx$ 0.77, 95\% CI 0.70--0.83)}, the DL-based model outperforms it across \textcolor{red}{most} evaluation metrics, reaching an AUC of 0.85 and a sensitivity of 0.91. The DL model shows better generalization across individual subjects, and \textcolor{red}{discriminative performance improves progressively throughout the follow-up period for both approaches}. Interpretability analysis via Grad-CAM confirms that the DL model's predictions are driven by anatomically relevant features. These findings \textcolor{red}{suggest that DL, enhanced by transfer learning, has the potential to serve as a powerful non-invasive tool} for the early prediction of treatment efficacy in glioblastoma, paving the way for more robust and personalized therapy monitoring.
+Glioblastoma (GB) is the most aggressive primary brain tumor, characterized by a poor prognosis, limited response to therapy, and high rates of recurrence. Early therapeutic response assessment is challenging due to phenomena such as pseudoresponse and pseudoprogression. This study explores the potential of advanced machine learning (ML) strategies to predict long-term therapy outcomes using longitudinal T2-weighted Magnetic Resonance Imaging (MRI) data from a preclinical GL261 glioblastoma mouse model, acquired prior and during treatment. We compare two distinct approaches: a classical pipeline based on radiomic features coupled with an XGBoost classifier, and a deep learning (DL) pipeline using a fine-tuned EfficientNetB0 model. Our results demonstrate that while the radiomics approach identifies interpretable imaging biomarkers and achieves good predictive performance \textcolor{red}{(AUC $\approx$ 0.77, 95\% CI 0.70--0.83)}, the DL-based model outperforms it across \textcolor{red}{most} evaluation metrics, reaching an AUC of \textcolor{red}{0.873 (95\% CI 0.819--0.921)} and a sensitivity of \textcolor{red}{0.818}. The DL model shows better generalization across individual subjects, and \textcolor{red}{discriminative performance improves progressively throughout the follow-up period for both approaches}. Interpretability analysis via Grad-CAM confirms that the DL model's predictions are driven by anatomically relevant features. These findings \textcolor{red}{suggest that DL, enhanced by transfer learning, has the potential to serve as a powerful non-invasive tool} for the early prediction of treatment efficacy in glioblastoma, paving the way for more robust and personalized therapy monitoring.
 \end{abstract}
 
 % --- CUERPO DEL ARTÍCULO ---
@@ -110,9 +110,9 @@ Although these studies have demonstrated the feasibility of imaging-based respon
 
 Table \ref{tab:all_models} summarizes the performance of the best-performing radiomics and DL models under the Grouped Leave-One-Out (GLOO) evaluation framework.
 
-The DL approach achieved the highest overall performance, obtaining an AUC of 0.8511 compared with \textcolor{red}{0.770 (95\% CI 0.703--0.832)} for the radiomics pipeline. Improvements were observed across \textcolor{red}{most} evaluation metrics, particularly sensitivity: in the fine-tuned EfficientNet configuration, \textcolor{red}{90.9\% of cured \textbf{examinations}} were correctly identified, compared with \textcolor{red}{54.6\%} for XGBoost. \textcolor{red}{All metrics reported in Table~\ref{tab:all_models} are computed at the level of individual MRI examinations (exam-level); subject-level (animal-level) metrics are discussed below.}
+The fine-tuned EfficientNetB0 achieved the highest overall performance, with an AUC of \textcolor{red}{0.873 (95\% CI 0.819--0.921)}, compared with \textcolor{red}{0.801 (95\% CI 0.733--0.866)} for the frozen feature-extraction configuration (EfficientNet FE+XGB) and \textcolor{red}{0.773 (95\% CI 0.707--0.835)} for the radiomics pipeline. Improvements were observed across \textcolor{red}{most} evaluation metrics, particularly sensitivity: in the fine-tuned EfficientNet configuration, \textcolor{red}{81.8\% of cured \textbf{examinations}} were correctly identified, compared with \textcolor{red}{60.6\%} for FE+XGB and \textcolor{red}{54.5\%} for XGBoost. \textcolor{red}{All metrics reported in Table~\ref{tab:all_models} are computed at the level of individual MRI examinations (exam-level); subject-level (animal-level) metrics are discussed below. A DeLong test confirmed that the AUC superiority of EfficientNet FT over radiomics is statistically significant (Z\,=\,$-$4.97, $p < 0.001$), whereas the difference between EfficientNet FE+XGB and radiomics did not reach significance (Z\,=\,$-$1.31, $p = 0.19$).}
 
-\textcolor{red}{The radiomics model achieved higher specificity (0.806) and a higher positive predictive value than the fine-tuned DL model (PPV: 0.444 versus 0.556 for EfficientNet FT), reflecting a tendency of the radiomics approach to predict relapse more conservatively. In contrast, the fine-tuned DL model maintained a more favorable sensitivity-specificity trade-off, with the highest sensitivity (0.909) and NPV (0.968) across all configurations.}
+\textcolor{red}{The radiomics model achieved higher specificity (0.810 vs.\ 0.754 for FT) and higher PPV (0.450 vs.\ 0.486), reflecting a more conservative prediction tendency, while the fine-tuned DL model achieved substantially higher sensitivity (0.818 vs.\ 0.545) and NPV (0.936 vs.\ 0.862). The frozen feature-extraction configuration occupied an intermediate position, with specificity (0.853) comparable to radiomics but sensitivity (0.606) lower than FT.}
 
 % --- EJEMPLO DE TABLA ---
 \begin{table*}[ht]
@@ -132,39 +132,41 @@ F1m \\
 
 \rowcolor{red!20}
 Radiomics + XGBoost &
-0.748 &
-0.770 &
+0.752 &
+0.773 &
 0.545 &
-\textbf{0.806} &
-0.444 &
+\textbf{0.810} &
+0.450 &
 0.862 &
 -- &
 -- \\
 
+\rowcolor{red!20}
 EfficientNet FE + XGB &
-0.8054 &
-\textbf{0.8583} &
-0.6212 &
-0.8578 &
-0.5541 &
-0.8884 &
-0.8092 &
-0.7293 \\
+0.799 &
+0.801 &
+0.606 &
+0.853 &
+0.541 &
+0.884 &
+-- &
+-- \\
 
+\rowcolor{red!20}
 EfficientNet FT &
-\textbf{0.8188} &
-0.8511 &
-\textbf{0.9091} &
-0.7931 &
-0.5556 &
-\textbf{0.9684} &
-\textbf{0.8316} &
-\textbf{0.7808}
+0.768 &
+\textbf{0.873} &
+\textbf{0.818} &
+0.754 &
+0.486 &
+\textbf{0.936} &
+-- &
+--
 \\
 
 \hline
 \end{tabular}
-\caption{\textcolor{red}{Exam-level} performance comparison under GLOO cross-validation \textcolor{red}{(N=298 examinations, 10 animals)}. FE: frozen feature extractor; FT: fine-tuned. PPV and NPV denote the positive and negative predictive values. \textcolor{red}{Radiomics 95\% bootstrap CIs (10\,000 resamples): AUC [0.703, 0.832], Sensitivity [0.421, 0.667], Specificity [0.755, 0.856], PPV [0.338, 0.554], Accuracy [0.698, 0.799]. The selected model for clinical interpretation is EfficientNet FT, which achieves the best sensitivity-specificity balance despite EfficientNet FE obtaining a marginally higher AUC (0.858 vs.\ 0.851).}}
+\caption{\textcolor{red}{Exam-level} performance comparison under GLOO cross-validation \textcolor{red}{(N=298 examinations, 10 animals)}. FE: frozen feature extractor; FT: fine-tuned. F1w/F1m not reported (not used as selection criteria). \textcolor{red}{Bootstrap 95\% CIs (10\,000 resamples): Radiomics AUC [0.707, 0.835]; FE+XGB AUC [0.733, 0.866]; FT AUC [0.819, 0.921]. DeLong test: FT vs.\ Radiomics $Z=-4.97$, $p<0.001$; FE+XGB vs.\ Radiomics $Z=-1.31$, $p=0.19$. EfficientNet FT is selected as the recommended model: despite EfficientNet FE achieving a similar AUC, FT provides the highest sensitivity (0.818) and NPV (0.936), which are the clinically most relevant metrics for identifying cured animals.}}
 \label{tab:all_models}
 \end{table*}
 
@@ -198,17 +200,36 @@ The repeated identification of these descriptors across the different feature-se
 
 \subsection{Deep Learning Model Analysis}
 
-Among all evaluated architectures and training configurations, the fine-tuned EfficientNetB0 model trained exclusively on grayscale MRI images achieved the best overall performance, with an AUC of 0.8511, an accuracy of 81.9\%, and a sensitivity exceeding 90\%.
+Among all evaluated architectures and training configurations, the fine-tuned EfficientNetB0 model trained exclusively on grayscale MRI images achieved the best overall performance, with \textcolor{red}{an AUC of 0.873 (95\% CI 0.819--0.921), an accuracy of 76.8\%, and a sensitivity of 81.8\%}.
 
-Performance improved consistently along the transfer-learning axis. Training from scratch without mask information performed worst (AUC 0.5331); adding binary tumor masks raised discrimination substantially (AUC 0.7699); initializing from ImageNet weights provided a further boost, with the strongest frozen feature-extraction configuration reaching an AUC of 0.8583; and end-to-end fine-tuning produced the most balanced classifier (sensitivity 0.9091, NPV 0.9684). This ordering indicates that both pre-trained representations and full fine-tuning were the main drivers of performance.
+\textcolor{red}{Performance improved consistently along the transfer-learning axis. Training from scratch without mask information performed worst (AUC 0.5331); adding binary tumor masks raised discrimination substantially (AUC 0.7699); initializing from ImageNet weights provided a further boost, with the strongest frozen feature-extraction configuration reaching an AUC of 0.801 (95\% CI 0.733--0.866); and end-to-end fine-tuning produced the most balanced classifier (AUC 0.873, sensitivity 0.818, NPV 0.936). This ordering indicates that both pre-trained representations and full fine-tuning were the main drivers of performance.}
 
 The inclusion of tumor masks as additional input channels did not improve the fine-tuned model and occasionally reduced predictive accuracy. This result indicates that, given sufficient training capacity, the network was able to identify relevant regions directly from the MRI data without explicit localization guidance.
 
 \subsection{Temporal Prediction Performance}
 
-\textcolor{red}{Predictive accuracy varied throughout tumor evolution. Stratified analysis by examination time point (early: day $\leq$21, mid: day 22--31, late: day $>$31) revealed a clear improvement of discriminative performance over time for the radiomics pipeline: AUC 0.576 (early), 0.803 (mid), and 0.962 (late). These results indicate that while the radiomics model achieves good discrimination at later time points, its performance during early treatment is modest, and claims of reliable early prediction should be interpreted cautiously in light of this finding.}
+\textcolor{red}{Predictive accuracy improved progressively throughout tumor evolution for all three pipelines. Stratified analysis by examination time point (early: day $\leq$21, mid: day 22--31, late: day $>$31) yielded the following exam-level AUC values:}
 
-\textcolor{red}{For the radiomics pipeline, misclassifications were concentrated in the earliest study days (approximately days 9--21), especially for cured animals, whose imaging signatures became distinctive only as therapeutic effects accumulated at later time points. Relapsing cases were classified more accurately and more uniformly across the timeline. The DL model similarly showed improving performance over time, though its temporal profile could not be fully stratified in this analysis as per-fold temporal predictions were not saved for the DL pipeline.} The per-day distribution of classification accuracy and misclassified examinations is reported in Supplementary Figure S3.
+\begin{table}[H]
+\centering
+\textcolor{red}{
+\begin{tabular}{lccc}
+\hline
+Model & Early ($\leq$21\,d) & Mid (22--31\,d) & Late ($>$31\,d) \\
+\hline
+Radiomics + XGBoost & 0.582 & 0.809 & 0.960 \\
+EfficientNet FE+XGB & 0.741 & 0.767 & 0.987 \\
+EfficientNet FT      & 0.790 & 0.913 & 1.000 \\
+\hline
+\end{tabular}
+}
+\caption{\textcolor{red}{Temporal stratification of AUC by tercile of day of study (N=101 early, 100 mid, 97 late examinations).}}
+\label{tab:temporal}
+\end{table}
+
+\textcolor{red}{These results indicate that radiomics performance is near-chance in early treatment (AUC~0.58), whereas both DL configurations maintain substantially higher discrimination from the earliest time points (AUC~0.74--0.79). Claims of reliable early prediction for the radiomics model should be interpreted cautiously; the DL models, particularly EfficientNet FT (early AUC 0.790), show a more consistent temporal profile. All three models approach or reach excellent discrimination at late time points (AUC~0.96--1.00).}
+
+\textcolor{red}{For the radiomics pipeline, misclassifications were concentrated in the earliest study days (approximately days 9--21), especially for cured animals, whose imaging signatures became distinctive only as therapeutic effects accumulated.} The per-day distribution of classification accuracy and misclassified examinations is reported in Supplementary Figure S3.
 
 \subsection{Interpretability and Error Analysis}
 
@@ -248,11 +269,11 @@ This study investigated whether longitudinal T2-weighted MRI contains imaging si
 
 The radiomics approach successfully identified several interpretable imaging biomarkers whose temporal behavior differed between cured and relapsing tumors \textcolor{red}{in the studied cohort}. Elongation reflects the geometric anisotropy of the lesion, and its progressive reduction in cured animals is consistent with the development of a more compact and structurally homogeneous tumor following successful therapy; in contrast, the persistently irregular morphology observed in relapsing tumors may indicate ongoing infiltrative growth. Texture-based descriptors such as Run Entropy and Dependence Entropy quantify the complexity and heterogeneity of spatial intensity distributions, where elevated values generally reflect greater local variability and structural disorder. The increase in Dependence Entropy observed in cured animals during later treatment stages may reflect tissue-remodeling processes, inflammatory responses, or treatment-induced structural reorganization occurring after tumor regression. This trend---increasing entropy associated with a favorable outcome---is an illustrative descriptive observation based on five cured animals and should be regarded as hypothesis-generating rather than as an established biomarker; independent confirmation in larger cohorts would be required before any translational conclusion can be drawn. These observations are consistent with previous radiomics studies demonstrating that texture heterogeneity carries prognostic information beyond conventional anatomical measurements, and they suggest that therapeutic response is accompanied by progressive microstructural changes detectable before substantial anatomical differences become apparent.
 
-The superior sensitivity of the DL model \textcolor{red}{(0.91 exam-level; 0.60 animal-level)} suggests that convolutional networks can capture more complex and subtle spatial patterns than handcrafted radiomic features\textcolor{red}{, although this finding merits investigation in a larger cohort, more representative of biological variability}. \textcolor{red}{It should be noted, however, that both pipelines process each MRI examination independently without explicitly modeling the longitudinal sequence; temporal context is encoded in the radiomics pipeline through engineered descriptors, but neither approach constitutes a sequence model in the strict sense.} \textcolor{red}{The PPV of the radiomics model (0.444) is low, reflecting the class imbalance and the small cohort; in a realistic clinical setting where long-term cures are rarer than in this controlled preclinical model, PPV would be expected to be substantially lower, and these results should be interpreted as a proof-of-concept demonstration rather than as evidence of clinical deployability.} The success of transfer learning from a model pre-trained on natural images (ImageNet) underscores its value in overcoming data scarcity, a pervasive challenge in preclinical medical imaging: general-purpose low-level filters were effectively adapted to the specific task of identifying predictive patterns in T2-weighted MRI scans. Notably, the finding that explicit tumor masks did not improve performance, and could even degrade it, indicates that treatment-response signatures are likely distributed across both tumor and peritumoral tissue, rather than confined to the manually segmented lesion \textcolor{red}{in the studied cases}. This is coherent with the Grad-CAM analysis, in which attention frequently extended into peritumoral regions.
+The superior sensitivity of the fine-tuned DL model \textcolor{red}{(0.818 exam-level; 0.800 animal-level)} suggests that convolutional networks can capture more complex and subtle spatial patterns than handcrafted radiomic features\textcolor{red}{, although this finding merits investigation in a larger cohort, more representative of biological variability. A DeLong test confirmed that the AUC advantage of EfficientNet FT over radiomics is statistically significant at the examination level ($Z=-4.97$, $p<0.001$); the difference between EfficientNet FE+XGB and radiomics was not significant ($p=0.19$), indicating that fine-tuning is the key driver of improved discrimination.} \textcolor{red}{It should be noted, however, that both pipelines process each MRI examination independently without explicitly modeling the longitudinal sequence; temporal context is encoded in the radiomics pipeline through engineered descriptors, but neither approach constitutes a sequence model in the strict sense.} \textcolor{red}{The PPV of the radiomics model (0.450) is low, reflecting the class imbalance and the small cohort; in a realistic clinical setting where long-term cures are rarer than in this controlled preclinical model, PPV would be expected to be substantially lower, and these results should be interpreted as a proof-of-concept demonstration rather than as evidence of clinical deployability.} The success of transfer learning from a model pre-trained on natural images (ImageNet) underscores its value in overcoming data scarcity, a pervasive challenge in preclinical medical imaging: general-purpose low-level filters were effectively adapted to the specific task of identifying predictive patterns in T2-weighted MRI scans. Notably, the finding that explicit tumor masks did not improve performance, and could even degrade it, indicates that treatment-response signatures are likely distributed across both tumor and peritumoral tissue, rather than confined to the manually segmented lesion \textcolor{red}{in the studied cases}. This is coherent with the Grad-CAM analysis, in which attention frequently extended into peritumoral regions.
 
 These results are aligned with, and extend, previous work on preclinical glioblastoma. Núñez et al. \cite{interpretingLuisMiguel} and Ortega-Martorell et al. \cite{Ortega-Martorell2023} demonstrated the value of radiomics and one-dimensional convolutional networks applied to multimodal MRI/MRSI data, while Zhao et al. \cite{Zhao2023} linked MR-based metabolomic signatures to immune-related mechanisms of relapse. Our findings \textcolor{red}{suggest} that a substantial fraction of the response-related information can already be recovered from standard T2-weighted MRI alone, without spectroscopic or multimodal acquisitions. In contrast to approaches that model radiomic dynamics as a jointly classified multivariate time series \cite{Prinzi2024}, we treated each time point as an individual observation while encoding temporal context through engineered descriptors and subject-aware validation; this design is better suited to the irregular and heterogeneous sampling of our cohort.
 
-Although DL models are frequently criticized as ``black boxes'', the Grad-CAM analysis demonstrates that their decisions can be interpreted and that correct predictions are consistently associated with anatomically relevant attention. Conversely, misclassifications were associated with diffuse or anatomically irrelevant attention, suggesting that errors stem primarily from uncertainty in lesion localization rather than from a failure to learn discriminative features. \textcolor{red}{The temporal stratification of the radiomics pipeline shows that discriminative performance is substantially lower during early follow-up (AUC 0.576 for days $\leq$21) than at mid (0.803) or late (0.962) time points. This limits claims of reliable early prediction; the finding should instead be framed as evidence that useful predictive information accumulates progressively, with the most reliable signal available after approximately three weeks of follow-up. A comparable temporal analysis of the DL pipeline is planned as future work once per-fold predictions are saved for all configurations.}
+Although DL models are frequently criticized as ``black boxes'', the Grad-CAM analysis demonstrates that their decisions can be interpreted and that correct predictions are consistently associated with anatomically relevant attention. Conversely, misclassifications were associated with diffuse or anatomically irrelevant attention, suggesting that errors stem primarily from uncertainty in lesion localization rather than from a failure to learn discriminative features. \textcolor{red}{The temporal stratification (Table~\ref{tab:temporal}) reveals a consistent pattern across all three pipelines: discriminative performance is lowest in the early treatment window and improves markedly at later time points. Radiomics shows the steepest improvement (AUC 0.582 early to 0.960 late), while the DL pipelines achieve substantially higher early-window AUCs (EfficientNet FE+XGB: 0.741; EfficientNet FT: 0.790). This indicates that DL models, benefiting from richer image representations, can extract meaningful predictive signals even before treatment effects have fully accumulated, although performance remains highest at later time points for all models. Claims of reliable early prediction for radiomics remain limited; for the DL models, particularly EfficientNet FT, early-window performance is encouraging but should be confirmed in larger cohorts.}
 
 Several limitations should be considered when interpreting these results. First, the study was conducted using a relatively small cohort of 18 animals, which restricts statistical power and may limit generalizability. \textcolor{red}{Accordingly, these results should be interpreted with caution, as a preliminary proof-of-concept, pending confirmation in future studies with larger and more biologically diverse cohorts.} Although Grouped Leave-One-Out validation was employed to minimize information leakage and provide a realistic estimate of model performance, larger independent cohorts will be necessary to confirm the robustness of the identified biomarkers.
 
@@ -264,7 +285,7 @@ Finally, only T2-weighted MRI was analyzed. The incorporation of additional imag
 
 \section{Conclusion}
 
-\textcolor{red}{We have demonstrated, as a proof-of-concept in a well-characterized preclinical cohort of 10 treated animals, that both radiomics and DL \textcolor{red}{have the potential to become viable strategies} for predicting therapy outcomes in preclinical glioblastoma from longitudinal T2-weighted MRI. A DL approach based on fine-tuning a pre-trained EfficientNetB0 outperforms the classical radiomics pipeline across most evaluation metrics, achieving the highest sensitivity (0.91 exam-level) and NPV (0.97). The fine-tuned model was selected as the recommended configuration over the frozen feature extractor (which yields a marginally higher AUC of 0.858) because it provides a more balanced sensitivity-specificity profile that better supports the primary clinical goal of identifying cured animals. The DL model's discriminative ability, combined with interpretable Grad-CAM attention maps, makes it a promising candidate for non-invasive biomarker development. Temporal analysis reveals that predictive performance improves substantially over the follow-up period, with the most reliable signal available after approximately three weeks; early-window predictions should therefore be treated with appropriate caution. This work provides a \textcolor{red}{solid foundation, fostering} future research \textcolor{red}{aimed at creating more reliable and personalized methods for monitoring glioblastoma treatment, once confirmed in larger cohorts representing biological variability}.}
+\textcolor{red}{We have demonstrated, as a proof-of-concept in a well-characterized preclinical cohort of 10 treated animals, that both radiomics and DL \textcolor{red}{have the potential to become viable strategies} for predicting therapy outcomes in preclinical glioblastoma from longitudinal T2-weighted MRI. A DL approach based on fine-tuning a pre-trained EfficientNetB0 outperforms the classical radiomics pipeline across most evaluation metrics, achieving the highest AUC (0.873, 95\% CI 0.819--0.921), sensitivity (0.818 exam-level; 0.800 animal-level) and NPV (0.936). The difference in AUC over radiomics is statistically significant (DeLong $p<0.001$). The fine-tuned model was selected as the recommended configuration over the frozen feature extractor (AUC 0.801) because it provides a substantially more favorable sensitivity profile that better supports the primary clinical goal of identifying cured animals. The DL model's discriminative ability, combined with interpretable Grad-CAM attention maps, makes it a promising candidate for non-invasive biomarker development. Temporal analysis reveals that predictive performance improves substantially over the follow-up period, with the most reliable signal available after approximately three weeks; early-window predictions should therefore be treated with appropriate caution. This work provides a \textcolor{red}{solid foundation, fostering} future research \textcolor{red}{aimed at creating more reliable and personalized methods for monitoring glioblastoma treatment, once confirmed in larger cohorts representing biological variability}.}
 
 Future work should focus on external validation, multimodal integration, and longitudinal modeling. In particular, combining conventional MRI with spectroscopic, metabolic, molecular, or histopathological information may provide a more comprehensive representation of tumor evolution. Furthermore, temporal DL architectures capable of explicitly modeling sequential imaging examinations could better exploit the longitudinal nature of therapeutic response. Such developments may ultimately \textcolor{red}{pave the way to the future development of} clinically deployable systems for early treatment adaptation and personalized glioblastoma management.
 
