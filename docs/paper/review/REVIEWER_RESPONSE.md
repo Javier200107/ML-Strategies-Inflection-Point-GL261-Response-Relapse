@@ -4,7 +4,7 @@
 **Journal:** Scientific Reports  
 **Decision:** Major Revision
 
-We thank both reviewers for their thorough and constructive evaluation. All major and minor comments have been fully addressed. Changes to the manuscript are indicated in **red** in the revised manuscript (`main_revised.tex`). The corrected analysis code is available in `notebooks/paper_revision/`.
+We appreciate the reviewers' careful reading of the manuscript. All major and minor comments have been addressed. Changes to the manuscript are indicated in **red** in the revised manuscript (`main_revised.tex`). The corrected analysis code is available in `notebooks/paper_revision/`.
 
 ---
 
@@ -21,7 +21,7 @@ Although 169 MRI examinations are analysed, the core task is based on only 10 in
 
 **Response — IMPLEMENTED ✅**
 
-We fully agree. The revised manuscript now explicitly states throughout (Abstract, Results, Discussion, Conclusion) that the effective number of independent observations is 10 animals. The Discussion opens with: *"within the framework of a proof-of-concept study based on a small but well-characterized cohort of 10 treated animals"*, and the Conclusion frames the study as proof-of-concept pending confirmation in larger cohorts. The Statement *"the effective number of independent observations in this study is 10 subjects, and all reported metrics should be interpreted in this light"* has been added to the Discussion opening.
+The reviewer raises a valid point. The revised manuscript now explicitly states throughout (Abstract, Results, Discussion, Conclusion) that the effective number of independent observations is 10 animals. The Discussion opens with: *"within the framework of a proof-of-concept study based on a small but well-characterized cohort of 10 treated animals"*, and the Conclusion frames the study as proof-of-concept pending confirmation in larger cohorts. The Statement *"the effective number of independent observations in this study is 10 subjects, and all reported metrics should be interpreted in this light"* has been added to the Discussion opening.
 
 **Changes:** Abstract, Results (Performance Comparison), Discussion (opening paragraph), Conclusion.
 
